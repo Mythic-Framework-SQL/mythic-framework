@@ -27,6 +27,17 @@ COMPONENTS.Utils = {
             COMPONENTS.Logger:Error("Utils", "^1Error Printing Request - The Passed through variable seems to be nil^7", { console = true })
         end
     end,
+    DeepClone = function(self, table)
+        local copy = {}
+        for k, v in pairs(table) do
+          if type(v) == "table" then
+            copy[k] = self:CloneDeep(v)
+          else
+            copy[k] = v
+          end
+        end
+        return copy
+      end,
     GetTableLength = function(self, t)
         local count = 0
         for _ in pairs(t) do
