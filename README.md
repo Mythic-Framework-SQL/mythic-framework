@@ -7,9 +7,6 @@
 
 - Custom written framework 
 
-- Partnered With FiveForge Studios
-## https://discord.gg/qFeUfUCCbW
-
 ## SQL Mythic Discord
 - [Discord Link](https://discord.gg/MC7a3ZaKyY) - Offical Discord for Mythic Framework community-driven support forum!
 
