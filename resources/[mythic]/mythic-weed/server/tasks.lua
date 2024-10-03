@@ -2,32 +2,40 @@ local _run = false
 
 
 AddEventHandler("Core:Server:ForceSave", function()
-	local docs = {}
-	for k, v in pairs(_plants) do
-		if v and v.plant then
-			table.insert(docs, v.plant)
-		end
-	end
-	if #docs > 0 then
-		Logger:Info("Weed", string.format("Saving ^2%s^7 Plants", #docs))
-		Database.Game:delete({
-			collection = "weed",
-		}, function(success)
-			Database.Game:insert({
-				collection = "weed",
-				documents = docs,
-			})
-		end)
-	end
+    local docs = {}
+    for k, v in pairs(_plants) do
+        if v and v.plant then
+            table.insert(docs, v.plant)
+        end
+    end
+    if #docs > 0 then
+        Logger:Info("Weed", string.format("Saving ^2%s^7 Plants", #docs))
+        
+        MySQL.Sync.execute("DELETE FROM weed")
+
+        for _, doc in ipairs(docs) do
+            MySQL.Sync.execute("INSERT INTO weed (isMale, location, growth, output, material, planted, water) VALUES (@isMale, @location, @growth, @output, @material, @planted, @water)", {
+                ['@isMale'] = doc.isMale,
+                ['@location'] = json.encode(doc.location),
+                ['@growth'] = doc.growth,
+                ['@output'] = doc.output,
+                ['@material'] = doc.material,
+                ['@planted'] = doc.planted,
+                ['@water'] = doc.water,
+            })
+        end
+    end
 end)
+
+
 
 function RegisterTasks()
 	if _run then return end
 	_run = true
 	
-	CreateThread(function()
+	Citizen.CreateThread(function()
 		while true do
-			Wait((1000 * 60) * 10)
+			Citizen.Wait((1000 * 60) * 10)
 			local docs = {}
 			for k, v in pairs(_plants) do
 				if v and v.plant then
@@ -36,22 +44,31 @@ function RegisterTasks()
 			end
 			if #docs > 0 then
 				Logger:Info("Weed", string.format("Saving ^2%s^7 Plants", #docs))
-				Database.Game:delete({
-					collection = "weed",
-				}, function(success)
-					Database.Game:insert({
-						collection = "weed",
-						documents = docs,
+				
+				MySQL.Sync.execute("DELETE FROM weed")
+	
+				for _, doc in ipairs(docs) do
+					MySQL.Sync.execute("INSERT INTO weed (isMale, location, growth, output, material, planted, water) VALUES (@isMale, @location, @growth, @output, @material, @planted, @water)", {
+						['@isMale'] = doc.isMale,
+						['@location'] = json.encode(doc.location),
+						['@growth'] = doc.growth,
+						['@output'] = doc.output,
+						['@material'] = doc.material,
+						['@planted'] = doc.planted,
+						['@water'] = doc.water,
 					})
-				end)
+				end
 			end
 		end
 	end)
 	
-	CreateThread(function()
+	
+	Citizen.CreateThread(function()
 		while true do
-			Wait((1000 * 60) * 10)
+			Citizen.Wait((1000 * 60) * 10)
 			Logger:Trace("Weed", "Growing Plants")
+			local updatingStuff = {}
+
 			for k, v in pairs(_plants) do
 				if (os.time() - v.plant.planted) >= Config.Lifetime then
 					Logger:Trace("Weed", "Deleting Weed Plant Because Some Dumb Cunt Didn't Harvest It")
@@ -68,7 +85,10 @@ function RegisterTasks()
 								end
 								v.plant.growth = v.plant.growth + (1 + phosphorus)
 								if v.stage ~= getStageByPct(v.plant.growth) then
-									Weed.Planting:Set(k, true)
+									local res = Weed.Planting:Set(k, true, true)
+									if res then
+										table.insert(updatingStuff, res)
+									end
 								end
 							else
 								Weed.Planting:Delete(k)
@@ -79,12 +99,16 @@ function RegisterTasks()
 					end
 				end
 			end
+
+			if #updatingStuff > 0 then
+				TriggerLatentClientEvent("Weed:Client:Objects:UpdateMany", -1, 30000, updatingStuff)
+			end
 		end
 	end)
 	
-	CreateThread(function()
+	Citizen.CreateThread(function()
 		while true do
-			Wait((1000 * 60) * 20)
+			Citizen.Wait((1000 * 60) * 20)
 			Logger:Trace("Weed", "Increasing Plant Outputs")
 			for k, v in pairs(_plants) do
 				if v.plant.growth < 100 then
@@ -104,9 +128,9 @@ function RegisterTasks()
 		end
 	end)
 	
-	CreateThread(function()
+	Citizen.CreateThread(function()
 		while true do
-			Wait((1000 * 60) * 10)
+			Citizen.Wait((1000 * 60) * 10)
 			Logger:Trace("Weed", "Degrading Water")
 			for k, v in pairs(_plants) do
 				if v.plant.water > -25 then
@@ -134,9 +158,9 @@ function RegisterTasks()
 		end
 	end)
 	
-	CreateThread(function()
+	Citizen.CreateThread(function()
 		while true do
-			Wait((1000 * 60) * 1)
+			Citizen.Wait((1000 * 60) * 1)
 			Logger:Trace("Weed", "Ticking Down Fertilizer")
 			for k, v in pairs(_plants) do
 				if v.plant.fertilizer ~= nil then

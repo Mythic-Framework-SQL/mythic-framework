@@ -18,7 +18,7 @@ RegisterNetEvent("Weed:Client:Login", function(l)
 		-- 	},
 		-- },
 		{
-			icon = "9",
+			icon = "clock-nine",
 			text = "Sign In",
 			event = "WeedRun:Client:Enable",
             data = {},
@@ -27,7 +27,7 @@ RegisterNetEvent("Weed:Client:Login", function(l)
             end,
 		},
 		{
-			icon = "9",
+			icon = "clock-nine",
 			text = "Sign In",
 			event = "WeedRun:Client:Disabled",
             data = {},

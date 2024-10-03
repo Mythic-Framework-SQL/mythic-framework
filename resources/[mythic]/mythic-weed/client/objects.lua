@@ -2,7 +2,8 @@ _activePlants, _nearbyPlants, _spawnedPlants = {}, {}, {}
 
 RegisterNetEvent('Weed:Client:Objects:Init', function(plants)
     if plants and type(plants) == 'table' then
-        for k,v in pairs(plants) do
+        for k, v in pairs(plants) do
+            v.plant.location = json.decode(v.plant.location)
             _activePlants[k] = v
         end
 
@@ -10,17 +11,18 @@ RegisterNetEvent('Weed:Client:Objects:Init', function(plants)
         _nearbyPlants = {}
 
         while not LocalPlayer.state.loggedIn do
-            Wait(100)
+            Citizen.Wait(100)
         end
 
-        CreateThread(function()
+        Citizen.CreateThread(function()
             while LocalPlayer.state.loggedIn do
-                Wait(3000)
+                Citizen.Wait(3000)
 
                 if _activePlants then
                     local pedCoords = GetEntityCoords(LocalPlayer.state.ped)
-                    for k,v in pairs(_activePlants) do
-                        if #(pedCoords - vector3(v.plant.location.x, v.plant.location.y, v.plant.location.z)) <= 500.0 then
+                    for k, v in pairs(_activePlants) do
+                        local plantLocation = vector3(v.plant.location.x, v.plant.location.y, v.plant.location.z)
+                        if #(pedCoords - plantLocation) <= 500.0 then
                             if not _nearbyPlants[k] then
                                 _nearbyPlants[k] = true
                             end
@@ -30,7 +32,7 @@ RegisterNetEvent('Weed:Client:Objects:Init', function(plants)
                             if _spawnedPlants[k] and DoesEntityExist(_spawnedPlants[k]) then
                                 DeleteEntity(_spawnedPlants[k])
                                 _spawnedPlants[k] = nil
-                                Wait(5)
+                                Citizen.Wait(5)
                             end
                         end
                     end
@@ -38,26 +40,27 @@ RegisterNetEvent('Weed:Client:Objects:Init', function(plants)
             end
         end)
 
-        CreateThread(function()
+        Citizen.CreateThread(function()
             while LocalPlayer.state.loggedIn do
-                Wait(350)
+                Citizen.Wait(350)
                 if _activePlants and _nearbyPlants then
                     local pedCoords = GetEntityCoords(LocalPlayer.state.ped)
-                    for k,v in pairs(_nearbyPlants) do
+                    for k, v in pairs(_nearbyPlants) do
                         local weed = _activePlants[k]
-                        if #(pedCoords - vector3(weed.plant.location.x, weed.plant.location.y, weed.plant.location.z)) <= 50.0 then
+                        local weedLocation = vector3(weed.plant.location.x, weed.plant.location.y, weed.plant.location.z)
+                        if #(pedCoords - weedLocation) <= 50.0 then
                             if not _spawnedPlants[k] then
                                 _spawnedPlants[k] = CreateWeedPlant(k, weed)
-                                Wait(5)
+                                Citizen.Wait(5)
                             end
                         elseif _spawnedPlants[k] and DoesEntityExist(_spawnedPlants[k]) then
                             DeleteEntity(_spawnedPlants[k])
                             _spawnedPlants[k] = nil
-                            Wait(5)
+                            Citizen.Wait(5)
                         end
                     end
                 else
-                    Wait(1500)
+                    Citizen.Wait(1500)
                 end
             end
         end)
