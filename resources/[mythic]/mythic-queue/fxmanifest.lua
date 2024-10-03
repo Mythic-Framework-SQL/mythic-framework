@@ -7,6 +7,9 @@ client_script "@mythic-pwnzor/client/check.lua"
 server_only 'yes'
 
 server_scripts {
-	'config.lua',
-    'server/*.lua',
+  '@oxmysql/lib/MySQL.lua',
+  'config.lua',
+  'server/*.lua',
 }
+
+dependency 'oxmysql'
