@@ -10,7 +10,10 @@
 - Partnered With FiveForge Studios
 ## https://discord.gg/qFeUfUCCbW
 
-## Official Discord
+## SQL Mythic Discord
+- [Discord Link](https://discord.gg/MC7a3ZaKyY) - Offical Discord for Mythic Framework community-driven support forum!
+
+## MongoDB Mythic Discord
 - [Discord Link](https://discord.gg/N2JARAe8Rp) - Offical Discord for Mythic Framework community-driven support forum!
 
 ## Get Started
@@ -21,6 +24,10 @@
 - Yarn - Maintainer & Community Owner
 - Tyh - Maintainer & Community Owner
 - Van Man (DrBooly) - Maintainer
+
+## SQL Project Maintainers
+
+- SicklyAbility - Maintainer & Community Owner Of The SQL Partition
 
 
 ## Credits
