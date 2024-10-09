@@ -3,7 +3,7 @@ function loadModel(model)
 	if IsModelInCdimage(model) then
 		while not HasModelLoaded(model) do
 			RequestModel(model)
-			Wait(5)
+			Citizen.Wait(5)
 		end
 	end
 end
@@ -11,6 +11,6 @@ end
 function loadAnim(dict)
     while not HasAnimDictLoaded(dict) do
         RequestAnimDict(dict)
-        Wait(10)
+        Citizen.Wait(10)
     end
 end

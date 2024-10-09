@@ -17,6 +17,7 @@ function RetrieveComponents()
     Weapons = exports["mythic-base"]:FetchComponent("Weapons")
     Progress = exports["mythic-base"]:FetchComponent("Progress")
     Vehicles = exports["mythic-base"]:FetchComponent("Vehicles")
+    Targeting = exports["mythic-base"]:FetchComponent("Targeting")
     ListMenu = exports["mythic-base"]:FetchComponent("ListMenu")
     Action = exports["mythic-base"]:FetchComponent("Action")
     Sounds = exports["mythic-base"]:FetchComponent("Sounds")
@@ -107,7 +108,7 @@ AddEventHandler("Casino:Client:Startup", function()
     }
 
     for k, v in ipairs(casinoDesks) do
-        Targeting.Zones:AddBox("casino-employee-" .. k, "circle-dollar-to-slot", v.center, v.length, v.width, v.options, {
+        Targeting.Zones:AddBox("casino-employee-" .. k, "slot-machine", v.center, v.length, v.width, v.options, {
             {
                 icon = "clipboard-check",
                 text = "Clock In",
@@ -133,7 +134,7 @@ AddEventHandler("Casino:Client:Startup", function()
                 },
             },
             {
-                icon = "circle-dollar-to-slot",
+                icon = "slot-machine",
                 text = "Close Casino",
                 event = "Casino:Client:OpenClose",
                 data = { state = false },
@@ -148,7 +149,7 @@ AddEventHandler("Casino:Client:Startup", function()
                 end,
             },
             {
-                icon = "circle-dollar-to-slot",
+                icon = "slot-machine",
                 text = "Open Casino",
                 event = "Casino:Client:OpenClose",
                 data = { state = true },
@@ -165,8 +166,8 @@ AddEventHandler("Casino:Client:Startup", function()
         }, 3.0, true)
     end
 
-    PedInteraction:Add("CasinoStaff1", `u_f_m_casinoshop_01`, vector3(965.357, 48.067, 70.701), 146.416, 25.0, false, "question", "WORLD_HUMAN_STAND_IMPATIENT")
-    PedInteraction:Add("CasinoStaff2", `s_m_y_casino_01`, vector3(951.773, 21.896, 70.904), 346.697, 25.0, false, "question", "WORLD_HUMAN_GUARD_STAND")
+    PedInteraction:Add("CasinoStaff1", `u_f_m_casinoshop_01`, vector3(965.357, 48.067, 70.701), 146.416, 25.0, false, "seal-question", "WORLD_HUMAN_STAND_IMPATIENT")
+    PedInteraction:Add("CasinoStaff2", `s_m_y_casino_01`, vector3(951.773, 21.896, 70.904), 346.697, 25.0, false, "seal-question", "WORLD_HUMAN_GUARD_STAND")
 
     Polyzone.Create:Box('casino_inside', vector3(1004.77, 38.26, 77.91), 129.2, 90.0, {
         heading = 305,
@@ -210,16 +211,16 @@ AddEventHandler("Casino:Client:Startup", function()
         maxZ = 74.785
 	})
 
-    PedInteraction:Add("CasinoCashier", `s_m_y_casino_01`, vector3(990.372, 31.271, 70.466), 56.249, 25.0, {}, "question")
+    PedInteraction:Add("CasinoCashier", `s_m_y_casino_01`, vector3(990.372, 31.271, 70.466), 56.249, 25.0, {}, "seal-question")
 
-    Targeting.Zones:AddBox("casino-cashier", "credit-card", vector3(990.35, 31.18, 71.47), 5.4, 2, {
+    Targeting.Zones:AddBox("casino-cashier", "cards", vector3(990.35, 31.18, 71.47), 5.4, 2, {
         heading = 330,
         --debugPoly=true,
         minZ = 70.47,
         maxZ = 73.27
     }, {
         {
-            icon = "inbox",
+            icon = "inbox-out",
             text = "Cash Out Chips",
             event = "Casino:Client:StartChipSell",
             isEnabled = function()
@@ -227,12 +228,12 @@ AddEventHandler("Casino:Client:Startup", function()
             end
         },
         {
-            icon = "inbox",
+            icon = "inbox-in",
             text = "Purchase Chips",
             event = "Casino:Client:StartChipPurchase",
         },
         {
-            icon = "address-card",
+            icon = "gift-card",
             text = "Purchase VIP Card ($10,000, 1 Week)",
             event = "Casino:Client:PurchaseVIP",
         },

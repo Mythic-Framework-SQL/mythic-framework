@@ -1,84 +1,68 @@
 function UpdateCharacterCasinoStats(source, statType, isWin, amount)
-    local plyr = Fetch:Source(source)
-    if plyr then
-        local char = plyr:GetData("Character")
-        if char then
-            local p = promise.new()
+    local char = Fetch:Source(source)
+    if char then
+        local char = char:GetData("Character")
+        local winColumn = string.format("AmountWon_%s", statType)
+        local lossColumn = string.format("AmountLost_%s", statType)
 
-            local update = {
-                ["$push"] = {
-                    [statType] = {
-                        Win = isWin,
-                        Amount = amount,
-                    },
-                },
-            }
+        local query
+        if isWin then
+            query = string.format([[
+                INSERT INTO casino_statistics (SID, TotalAmountWon, %s)
+                VALUES (@sid, @amount, @amount)
+                ON DUPLICATE KEY UPDATE
+                TotalAmountWon = TotalAmountWon + @amount,
+                %s = %s + @amount
+            ]], winColumn, winColumn, winColumn)
+        else
+            query = string.format([[
+                INSERT INTO casino_statistics (SID, TotalAmountLost, %s)
+                VALUES (@sid, @amount, @amount)
+                ON DUPLICATE KEY UPDATE
+                TotalAmountLost = TotalAmountLost + @amount,
+                %s = %s + @amount
+            ]], lossColumn, lossColumn, lossColumn)
+        end
 
-            if isWin then
-                update["$inc"] = {
-                    TotalAmountWon = amount,
-                    [string.format("AmountWon.%s", statType)] = amount,
-                }
-            else
-                update["$inc"] = {
-                    TotalAmountLost = amount,
-                    [string.format("AmountLost.%s", statType)] = amount,
-                }
-            end
+        local params = {
+            ['@sid'] = sid,
+            ['@amount'] = amount
+        }
 
-            Database.Game:findOneAndUpdate({
-                collection = "casino_statistics",
-                query = {
-                    SID = char:GetData("SID"),
-                },
-                update = update,
-                options = {
-                    returnDocument = "after",
-                    upsert = true,
-                }
-            }, function(success, results)
-                if success and results then
-                    p:resolve(results)
-                else
-                    p:resolve(false)
-                end
-            end)
+        local affectedRows = MySQL.insert.await(query, params)
 
-            local res = Citizen.Await(p)
-            return res
+        if affectedRows > 0 then
+            return true
+        else
+            return false
         end
     end
     return false
 end
 
+
 function SaveCasinoBigWin(source, machine, prize, data)
-    local plyr = Fetch:Source(source)
-    if plyr then
-        local char = plyr:GetData("Character")
-        if char then
-            local p = promise.new()
+    local char = Fetch:Source(source)
+    if char then
+        local char = char:GetData("Character")
+        local query = [[
+            INSERT INTO casino_bigwins (Type, Time, SID, First, Last, ID, Prize, MetaData)
+            VALUES (@type, @time, @sid, @first, @last, @id, @prize, @metadata)
+        ]]
 
-            Database.Game:insertOne({
-                collection = 'casino_bigwins',
-                document = {
-                    Type = machine,
-                    Time = os.time(),
-                    Winner = {
-                        SID = char:GetData("SID"),
-                        First = char:GetData("First"),
-                        Last = char:GetData("Last"),
-                        ID = char:GetData("ID"),
-                    },
-                    Prize = prize,
-                    MetaData = data,
-                }
-            }, function(success, result)
-                p:resolve(success)
-            end)
+        local params = {
+            ['@type'] = machine,
+            ['@time'] = os.time(),
+            ['@sid'] = char:GetData("SID"),
+            ['@first'] = char:GetData("First"),
+            ['@last'] = char:GetData("Last"),
+            ['@id'] = char:GetData("ID"),
+            ['@prize'] = prize,
+            ['@metadata'] = json.encode(data)  
+        }
 
-            local res = Citizen.Await(p)
-            return res
-        end
+        local affectedRows = MySQL.insert.await(query, params)
+        return affectedRows > 0
     end
     return false
 end

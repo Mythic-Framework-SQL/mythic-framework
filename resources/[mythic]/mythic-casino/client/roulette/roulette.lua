@@ -30,9 +30,9 @@ AddEventHandler("Casino:Client:Startup", function()
 
     for k,v in pairs(_rouletteTables) do
         local maxBet = formatNumberToCurrency(math.floor(_rouletteTablesConfig[k].maxBet))
-        Targeting.Zones:AddBox("casino-roulette-" .. k, "circle-dollar-to-slot", v.polyzone.center, v.polyzone.length, v.polyzone.width, v.polyzone.options, {
+        Targeting.Zones:AddBox("casino-roulette-" .. k, "cards", v.polyzone.center, v.polyzone.length, v.polyzone.width, v.polyzone.options, {
             {
-                icon = "circle-dollar-to-slot",
+                icon = "cards",
                 text = _rouletteTablesConfig[k].isVIP and string.format("Join VIP Game ($%s Max Bet)", maxBet) or string.format("Join Game ($%s Max Bet)", maxBet),
                 event = "Casino:Client:JoinRoulette",
                 data = { table = k },
@@ -41,14 +41,14 @@ AddEventHandler("Casino:Client:Startup", function()
                 end,
             },
             {
-                icon = "circle-dollar-to-slot",
+                icon = "cards",
                 text = "Game Full",
                 isEnabled = function()
                     return not CanJoinRouletteTable(k) and not _rouletteAtTable
                 end,
             },
             {
-                icon = "circle-dollar-to-slot",
+                icon = "cards",
                 text = "Leave Game",
                 event = "Casino:Client:LeaveRoulette",
                 data = { table = k },
@@ -79,10 +79,10 @@ AddEventHandler("Casino:Client:Enter", function()
     loadAnim("anim_casino_b@amb@casino@games@roulette@dealer")
 
     while not _rouletteTablesConfig do
-        Wait(100)
+        Citizen.Wait(100)
     end
 
-    Wait(500)
+    Citizen.Wait(500)
 
     for k, v in pairs(_rouletteTables) do
         local serverData = _rouletteTablesConfig[k]
@@ -118,7 +118,7 @@ AddEventHandler("Casino:Client:Enter", function()
 
         local table = GetClosestObjectOfType(v.table.coords.x, v.table.coords.y, v.table.coords.z, 1.0, v.table.prop, 0, 0, 0)
         while table == 0 do
-            Wait(250)
+            Citizen.Wait(250)
             table = GetClosestObjectOfType(v.table.coords.x, v.table.coords.y, v.table.coords.z, 1.0, v.table.prop, 0, 0, 0)
         end
 
@@ -192,12 +192,12 @@ AddEventHandler("Casino:Client:JoinRoulette", function(_, data)
                     ShowRouletteGameStateUI(GlobalState[string.format("Casino:Roulette:%s", _rouletteAtTable)])
                 end
 
-                CreateThread(function()
+                Citizen.CreateThread(function()
                     while _rouletteAtTable do
                         if _rouletteForceIdle then
                             TaskPlayAnim(LocalPlayer.state.ped, "anim_casino_b@amb@casino@games@shared@player@", "idle_cardgames", 1.0, 1.0, -1, 0)
                         end
-                        Wait(5)
+                        Citizen.Wait(5)
                     end
 
                     if _rouletteStatebagHandler then
@@ -238,7 +238,7 @@ function LeaveRoulette(skipAnim)
             InfoOverlay:Close()
 
             if not skipAnim then
-                Wait(3000)
+                Citizen.Wait(3000)
             end
 
             NetworkStopSynchronisedScene(ROULETTE_SITTING_SCENE)
@@ -265,16 +265,16 @@ RegisterNetEvent("Casino:Client:RouletteGameStarting", function(tableId)
             RouletteHoverNumbers(tableId, {})
             _rouletteHasChipsPlaced = false
 
-            CreateThread(function()
+            Citizen.CreateThread(function()
                 while _insideCasino and _rouletteAtTable do
                     if _rouletteTableData[_rouletteAtTable] and _rouletteTableData[_rouletteAtTable].startTime then
                         ShowRouletteGameStateUI(GlobalState[string.format("Casino:Roulette:%s", _rouletteAtTable)])
                     else
-                        Wait(500)
+                        Citizen.Wait(500)
                         ShowRouletteGameStateUI(GlobalState[string.format("Casino:Roulette:%s", _rouletteAtTable)])
                         break
                     end
-                    Wait(1000)
+                    Citizen.Wait(1000)
                 end
             end)
         end

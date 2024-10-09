@@ -34,7 +34,7 @@ function StartRouletteGame(tableId)
 
         print(string.format("Roulette Game Table: %s Num: %s", tableId, winningBetIndex))
 
-        SetTimeout(30000, function()
+        Citizen.SetTimeout(30000, function()
             _roulette[tableId].Started = true
 
             UpdateRouletteGameState(tableId)
@@ -49,11 +49,11 @@ function StartRouletteGame(tableId)
                 _roulette[tableId].WinningBet = winningBetIndex
 
                 TriggerClientEvent("Casino:Client:RouletteGameSpinning", -1, tableId, randomSpinNumber, winningBetIndex)
-                Wait(17500)
+                Citizen.Wait(17500)
 
                 CheckRouletteWinners(tableId, _roulette[tableId].Bets, _roulette[tableId].WinningBet)
 
-                Wait(1000)
+                Citizen.Wait(1000)
 
                 TriggerClientEvent("Casino:Client:RouletteUpdateBets", -1, tableId, {})
 
@@ -61,7 +61,7 @@ function StartRouletteGame(tableId)
                 _roulette[tableId].Starting = false
                 _roulette[tableId].Bets = {}
 
-                Wait(2000)
+                Citizen.Wait(2000)
 
                 if GetRouletteTableCount(tableId) > 0 then
                     StartRouletteGame(tableId)
@@ -187,7 +187,7 @@ function GenerateRandomRDealerVariation()
 
     while var == 7 or usedVariations[var] do
         var = math.random(0, 13)
-        Wait(10)
+        Citizen.Wait(10)
     end
 
     usedVariations[var] = true
@@ -245,7 +245,7 @@ AddEventHandler("Casino:Server:Startup", function()
             GlobalState[string.format("Casino:Roulette:%s", tableId)] = _roulette[tableId]
             cb(true, tableId, localChairId)
 
-            Wait(5000)
+            Citizen.Wait(5000)
             StartRouletteGame(tableId)
         else
             cb(false)
