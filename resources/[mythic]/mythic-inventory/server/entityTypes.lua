@@ -4,13 +4,8 @@ end)
 
 ENTITYTYPES = {
     Get = function(self, cb)
-        Database.Game:find({
-            collection = 'entitytypes',
-            query = {
-            
-            }
-        }, function(success, results)
-            if not success then return; end
+        MySQL.query('SELECT * FROM entitytypes', {}, function(results)
+            if not results then return end
             cb(results)
         end)
     end,

@@ -84,8 +84,6 @@ WEAPONS = {
 		})
 	end,
 	Purchase = function(self, sid, item, isScratched, isCompanyOwned)
-		local p = promise.new()
-
 		if not isCompanyOwned then
 			local plyr = Fetch:SID(sid)
 			if plyr ~= nil then
@@ -102,26 +100,15 @@ WEAPONS = {
 						isScratched = false
 					end
 	
-					Database.Game:insertOne({
-						collection = "firearms",
-						document = {
-							Serial = sn,
-							Item = item.name,
-							Model = model,
-							Owner = {
-								Char = char:GetData("ID"),
-								SID = char:GetData("SID"),
-								First = char:GetData("First"),
-								Last = char:GetData("Last"),
-							},
-							PurchaseTime = (os.time() * 1000),
-							Scratched = isScratched,
-						},
-					}, function(success)
-						p:resolve(true)
-					end)
+					MySQL.insert('INSERT INTO firearms (serial, scratched, model, item, owner_sid, owner_name) VALUES(?, ?, ?, ?, ?, ?)', {
+						sn,
+						isScratched,
+						model,
+						item.name,
+						sid,
+						string.format("%s %s", char:GetData("First"), char:GetData("Last"))
+					})
 	
-					Citizen.Await(p)
 					return sn
 				end
 			end
@@ -148,23 +135,14 @@ WEAPONS = {
 				}
 			end
 
-			Database.Game:insertOne({
-				collection = "firearms",
-				document = {
-					Serial = sn,
-					Item = item.name,
-					Model = model,
-					Owner = {
-						Company = isCompanyOwned.name,
-					},
-					PurchaseTime = (os.time() * 1000),
-					Scratched = isScratched,
-				},
-			}, function(success)
-				p:resolve(true)
-			end)
-
-			Citizen.Await(p)
+			MySQL.insert('INSERT INTO firearms (serial, scratched, model, item, owner_name) VALUES(?, ?, ?, ?, ?)', {
+				sn,
+				isScratched,
+				model,
+				item.name,
+				isCompanyOwned.name
+			})
+			
 			return sn
 		end
 	end,
@@ -249,7 +227,7 @@ WEAPONS = {
 													comps
 												)
 	
-												Wait(400)
+												Citizen.Wait(400)
 	
 												TriggerClientEvent("Weapons:Client:UpdateAttachments", source, comps)
 	

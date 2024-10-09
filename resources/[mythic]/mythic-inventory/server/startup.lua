@@ -12,24 +12,23 @@ itemsLoaded = false
 _started = false
 
 function LoadSchematics()
-	Database.Game:find({
-		collection = "schematics",
-		query = {},
-	}, function(success, schems)
-		if success then
-			for k, v in ipairs(schems) do
-				_knownRecipes[v.bench] = _knownRecipes[v.bench] or {}
-				table.insert(_knownRecipes[v.bench], _schematics[v.item])
-				if _types[v.bench] ~= nil then
-					local f = table.copy(_schematics[v.item] or {})
-					f.schematic = v.item
-					Crafting:AddRecipeToBench(v.bench, v.item, f)
-				end
-			end
-			_knownRecipes = schems
-		end
-	end)
+    local query = "SELECT * FROM bench_schematics"
+    exports.oxmysql:execute(query, {}, function(schems)
+        if schems then
+            for k, v in ipairs(schems) do
+                _knownRecipes[v.bench] = _knownRecipes[v.bench] or {}
+                table.insert(_knownRecipes[v.bench], _schematics[v.item])
+                if _types[v.bench] ~= nil then
+                    local f = table.copy(_schematics[v.item] or {})
+                    f.schematic = v.item
+                    Crafting:AddRecipeToBench(v.bench, v.item, f)
+                end
+            end
+            _knownRecipes = schems
+        end
+    end)
 end
+
 
 local tmpItems = { '"paleto_access_codes"' }
 function ClearDropZones()
@@ -69,7 +68,7 @@ function ClearBrokenItems()
 	-- Logger:Warn("Inventory", "^1DELETING EXPIRED ITEMS, THIS WILL LIKELY TAKE A MINUTE^7")
 	-- local total = countTable(itemsDatabase)
 	-- local checked = 0
-	-- CreateThread(function()
+	-- Citizen.CreateThread(function()
 	-- 	for k, v in pairs(itemsDatabase) do
 	-- 		if v.durability ~= nil and v.isDestroyed then
 	-- 			MySQL.single("SELECT COUNT(*) as Count FROM inventory WHERE item_id = ? and expiryDate = -1", {
@@ -112,17 +111,17 @@ function ClearBrokenItems()
 	-- end)
 
 	-- while checked < total do
-	-- 	Wait(100)
+	-- 	Citizen.Wait(100)
 	-- end
 
 	-- Logger:Warn("Inventory", "^1FINISHED DELETING EXPIRED ITEMS^7")
 
-	CreateThread(function()
+	Citizen.CreateThread(function()
 		while _started do
 			MySQL.query("DELETE FROM inventory WHERE expiryDate < ? AND expiryDate != -1", { os.time() }, function(d)
 				Logger:Info("Inventory", string.format("Cleaned Up ^2%s^7 Degraded Items", d.affectedRows))
 			end)
-			Wait((1000 * 60) * 30)
+			Citizen.Wait((1000 * 60) * 30)
 		end
 	end)
 end
@@ -241,11 +240,11 @@ function LoadItems()
 					if v.gangChain ~= nil then
 						if v.gangChain ~= char:GetData("GangChain") then
 							TriggerClientEvent("Ped:Client:ChainAnim", source)
-							Wait(3000)
+							Citizen.Wait(3000)
 							char:SetData("GangChain", v.gangChain)
 						else
 							TriggerClientEvent("Ped:Client:ChainAnim", source)
-							Wait(3000)
+							Citizen.Wait(3000)
 							char:SetData("GangChain", "NONE")
 						end
 					end
@@ -295,62 +294,51 @@ shopLocations = {}
 storeBankAccounts = {}
 pendingShopDeposits = {}
 function LoadShops()
-	CreateThread(function()
-		Wait(10000)
+    Citizen.CreateThread(function()
+        Citizen.Wait(10000)
 
-		local f = Banking.Accounts:GetOrganization("dgang")
+        local f = Banking.Accounts:GetOrganization("dgang")
 
-		for k, v in ipairs(_shops) do
-			local id = k
-			if v.id ~= nil then
-				id = v.id
-			else
-				v.id = k
-			end
+        for k, v in ipairs(_shops) do
+            local id = k
+            if v.id ~= nil then
+                id = v.id
+            else
+                v.id = k
+            end
 
-			v.restriction = LoadedEntitys[v.entityId].restriction
-			shopLocations[string.format("shop:%s", id)] = v
-		end
+            v.restriction = LoadedEntitys[v.entityId].restriction
+            shopLocations[string.format("shop:%s", id)] = v
+        end
 
-		for k, v in pairs(_entityTypes) do
-			storeBankAccounts[v.id] = f.Account
-		end
+        for k, v in pairs(_entityTypes) do
+            storeBankAccounts[v.id] = f.Account
+        end
 
-		Database.Game:find({
-			collection = "store_bank_accounts",
-		}, function(success, results)
-			if success and #results > 0 then
-				for k, v in ipairs(results) do
-					storeBankAccounts[v.Shop] = v.Account
-				end
-			end
-		end)
+        local results = MySQL.Sync.fetchAll('SELECT * FROM store_bank_accounts', {})
 
-		Logger:Trace("Inventory", string.format("Loaded ^2%s^7 Shop Locations", #_shops))
-	end)
+        if #results > 0 then
+            for k, v in ipairs(results) do
+                storeBankAccounts[v.Shop] = v.Account
+            end
+        end
+
+        Logger:Trace("Inventory", string.format("Loaded ^2%s^7 Shop Locations", #_shops))
+    end)
 end
+
 
 function RegisterCommands()
 	Chat:RegisterAdminCommand("storebank", function(source, args, rawCommand)
-		Database.Game:updateOne({
-			collection = "store_bank_accounts",
-			update = {
-				["$set"] = {
-					Shop = tonumber(args[1]),
-					Account = tonumber(args[2]),
-				},
-			},
-			query = {
-				Shop = tonumber(args[1]),
-			},
-			options = {
-				upsert = true,
-			},
-		}, function(success, result)
-			if success then
-				storeBankAccounts[string.format("shop:%s", tonumber(args[1]))] = tonumber(args[2])
-			end
-		end)
+		local shopId = tonumber(args[1])
+		local accountNumber = tonumber(args[2])
+	
+		MySQL.Sync.execute('INSERT INTO store_bank_accounts (Shop, Account) VALUES (@shop, @account) ON DUPLICATE KEY UPDATE Account = @account', {
+			['@shop'] = shopId,
+			['@account'] = accountNumber
+		})
+	
+		storeBankAccounts[string.format("shop:%s", shopId)] = accountNumber
 	end, {
 		help = "Link Bank Account To Shop",
 		params = {
@@ -364,6 +352,7 @@ function RegisterCommands()
 			},
 		},
 	}, 2)
+	
 
 	Chat:RegisterAdminCommand("closeinv", function(source, args, rawCommand)
 		Logger:Info("Inventory", "Closing all inventories")
@@ -395,7 +384,7 @@ function RegisterCommands()
 			return
 		end
 		local char = player:GetData("Character")
-		MySQL.query.await("DELETE FROM inventory WHERE name = ?", { string.format("%s-%s", char:GetData("SID"), 1) })
+		MySQL.query.await("DELETE * FROM inventory WHERE Owner = ?", { string.format("%s:%s", char:GetData("SID"), 1) })
 		Execute:Client(
 			char:GetData("Source"),
 			"Notification",
