@@ -1,18 +1,18 @@
 COMPONENTS = {}
 
 AddEventHandler('onResourceStart', function(resource)
-    if resource == GetCurrentResourceName() then
-        CreateThread(function()
-            local ver
-            repeat Wait(0) until COMPONENTS.Convar.MFW_VERSION ~= nil
+  if resource == GetCurrentResourceName() then
+    Citizen.CreateThread(function()
+      local ver
+      repeat Wait(0) until COMPONENTS.Convar.MFW_VERSION ~= nil
 
-            if COMPONENTS.Convar.MFW_VERSION.value == "UNKNOWN" then
-                ver = "^1Version Unknown"
-            else
-                ver = "^2v"..COMPONENTS.Convar.MFW_VERSION.value
-            end
+      if COMPONENTS.Convar.MFW_VERSION.value == "UNKNOWN" then
+        ver = "^1Version Unknown"
+      else
+        ver = "^2v" .. COMPONENTS.Convar.MFW_VERSION.value
+      end
 
-            print([[
+      print([[
 
 
 ^2=================================================================================================^7
@@ -36,17 +36,18 @@ AddEventHandler('onResourceStart', function(resource)
 ^1$$ |   $$ |     \$$$$$$$ |$$ | $$ | $$ |\$$$$$$$\ \$$$$$\$$$$  |\$$$$$$  |$$ |      $$ | \$$\ 
 ^1\__|   \__|      \_______|\__| \__| \__| \_______| \_____\____/  \______/ \__|      \__|  \__|
 ^7]])
-            print('^1Mythic Framework '..ver..'^7 By ^6Alzar^7 & ^6Dr Nick')
-            print('^3Asset Developers^7: ^6Panda_builds^7')
+      print('^1Mythic Framework originally created by ^6Alzar ^7& ^6Dr Nick')
+      print('^1Mythic Framework adapted to SQL ^2SicklyAbility^7')
+       print('^3Asset Developers^7: ^6Panda_builds^7')
 
-            print([[
+      print([[
 ^2=================================================================================================^7
 
 
 
 ]])
 
-            TriggerEvent('Core:Shared:Watermark')
-        end)
-    end
+      TriggerEvent('Core:Shared:Watermark')
+    end)
+  end
 end)

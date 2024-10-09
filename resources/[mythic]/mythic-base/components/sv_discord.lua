@@ -30,7 +30,7 @@ COMPONENTS.Discord = {
 		)
 
 		while data == nil do
-			Wait(0)
+			Citizen.Wait(0)
 		end
 
 		return data
@@ -41,9 +41,9 @@ COMPONENTS.Discord = {
     end
 }
 
-CreateThread(function()
+Citizen.CreateThread(function()
 	while true do
 		GlobalState["PlayerCount"] = COMPONENTS.Fetch:Count()
-		Wait(30000)
+		Citizen.Wait(30000)
 	end
 end)

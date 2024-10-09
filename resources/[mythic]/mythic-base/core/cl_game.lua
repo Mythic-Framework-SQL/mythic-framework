@@ -18,16 +18,17 @@ COMPONENTS.Game = {
 
 			return players
 		end,
-		GetClosestPlayer = function(self, _coords)
+		GetClosestPlayer = function(self, coords)
 			local players = self:GetPlayerPeds()
 			local closestDistance = -1
 			local closestPlayer = -1
-			local coords = _coords
+			local coords = coords
 			local usePlayerPed = false
-			local playerId = LocalPlayer.state.clientID
+			local playerPed = PlayerPedId()
+			local playerId = PlayerId()
 			if coords == nil then
 				usePlayerPed = true
-				coords = LocalPlayer.state.position
+				coords = GetEntityCoords(playerPed)
 			end
 
 			for i = 1, #players, 1 do
@@ -59,15 +60,15 @@ COMPONENTS.Game = {
 			local objects = {}
 			for obj in EnumerateObjects() do
 				local objectCoords = GetEntityCoords(obj)
-				if #(objectCoords - vector3(coords.x, coords.y, coords.z)) <= radius then
+				if GetDistanceBetweenCoords(objectCoords, coords) <= radius then
 					table.insert(objects, obj)
 				end
 			end
 			return objects
 		end,
 		Spawn = function(self, coords, modelName, heading, cb)
-			local model = (type(modelName) == "number" and modelName or joaat(modelName))
-			CreateThread(function()
+			local model = (type(modelName) == "number" and modelName or GetHashKey(modelName))
+			Citizen.CreateThread(function()
 				COMPONENTS.Stream.RequestModel(model)
 				local obj = CreateObject(model, coords.x, coords.y, coords.z, true, false, true)
 				SetEntityHeading(obj, heading)
@@ -77,8 +78,8 @@ COMPONENTS.Game = {
 			end)
 		end,
 		SpawnLocal = function(self, coords, modelName, heading, cb)
-			local model = (type(modelName) == "number" and modelName or joaat(modelName))
-			CreateThread(function()
+			local model = (type(modelName) == "number" and modelName or GetHashKey(modelName))
+			Citizen.CreateThread(function()
 				COMPONENTS.Stream.RequestModel(model)
 
 				local obj = CreateObject(model, coords.x, coords.y, coords.z, false, false, true)
@@ -89,8 +90,8 @@ COMPONENTS.Game = {
 			end)
 		end,
 		SpawnLocalNoOffset = function(self, coords, modelName, heading, cb)
-			local model = (type(modelName) == "number" and modelName or joaat(modelName))
-			CreateThread(function()
+			local model = (type(modelName) == "number" and modelName or GetHashKey(modelName))
+			Citizen.CreateThread(function()
 				COMPONENTS.Stream.RequestModel(model)
 
 				local obj = CreateObjectNoOffset(model, coords.x, coords.y, coords.z, false, false, true)
@@ -108,7 +109,7 @@ COMPONENTS.Game = {
 	Vehicles = {
 		Spawn = function(self, coords, modelName, heading, cb)
 			local model = (type(modelName) == "number" and modelName or GetHashKey(modelName))
-			CreateThread(function()
+			Citizen.CreateThread(function()
 				COMPONENTS.Stream.RequestModel(model)
 
 				if HasModelLoaded((type(model) == "number" and model or GetHashKey(model))) then
@@ -116,7 +117,7 @@ COMPONENTS.Game = {
 
 					local t = 0
 					while not DoesEntityExist(vehicle) and t <= 10000 do
-						Wait(1)
+						Citizen.Wait(1)
 						t += 1
 					end
 
@@ -141,7 +142,7 @@ COMPONENTS.Game = {
 					SetModelAsNoLongerNeeded(model)
 					while not HasCollisionLoadedAroundEntity(vehicle) do
 						RequestCollisionAtCoord(coords.x, coords.y, coords.z)
-						Wait(0)
+						Citizen.Wait(0)
 					end
 
 					if cb then
@@ -158,7 +159,7 @@ COMPONENTS.Game = {
 		end,
 		SpawnLocal = function(self, coords, modelName, heading, cb)
 			local model = (type(modelName) == "number" and modelName or GetHashKey(modelName))
-			CreateThread(function()
+			Citizen.CreateThread(function()
 				COMPONENTS.Stream.RequestModel(model)
 				local vehicle = CreateVehicle(model, coords.x, coords.y, coords.z, heading, false, false)
 				SetEntityAsMissionEntity(vehicle, true, false)
@@ -168,7 +169,7 @@ COMPONENTS.Game = {
 				RequestCollisionAtCoord(coords.x, coords.y, coords.z)
 				while not HasCollisionLoadedAroundEntity(vehicle) do
 					RequestCollisionAtCoord(coords.x, coords.y, coords.z)
-					Wait(0)
+					Citizen.Wait(0)
 				end
 				SetVehRadioStation(vehicle, "OFF")
 				if cb then

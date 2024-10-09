@@ -1,8 +1,15 @@
 local _tasks = {}
 local started = false
 
-local function taskTick()
-	for _, v in pairs(_tasks) do
+AddEventHandler("Proxy:Shared:RegisterReady", function()
+	if not started then
+		started = true
+		TaskTick()
+	end
+end)
+
+function TaskTick()
+	for k, v in pairs(_tasks) do
 		if v.pause or v.skip then
 			if v.skip then
 				v.skip = false
@@ -17,15 +24,8 @@ local function taskTick()
 		end
 	end
 
-	SetTimeout(60000, taskTick)
+	Citizen.SetTimeout(60000, TaskTick)
 end
-
-AddEventHandler("Proxy:Shared:RegisterReady", function()
-	if not started then
-		started = true
-		taskTick()
-	end
-end)
 
 COMPONENTS.Tasks = {
 	Register = function(self, id, timer, cb, data, firstTick)

@@ -74,14 +74,14 @@ function CreateQueue(id)
 	local time = os.time()
 	if _queues[id] ~= nil then
 		_queues[id].started = time
-		CreateThread(function()
+		Citizen.CreateThread(function()
 			while _queues[id].started == time and _queues[id] ~= nil do
 				if not _queues[id].paused and #_queues[id].queue > 0 then
 					if _queues[id].type == "time" then
 						if type(_queues[id].options.delay) == "function" then
-							Wait(_queues[id].options.delay())
+							Citizen.Wait(_queues[id].options.delay())
 						else
-							Wait(_queues[id].options.delay)
+							Citizen.Wait(_queues[id].options.delay)
 						end
 						TriggerEvent(_queues[id].options.event, _queues[id].queue[1].source, _queues[id].queue[1].data)
 						COMPONENTS.WaitList.Interact:Active(id, _queues[id].queue[1].source)
@@ -95,7 +95,7 @@ function CreateQueue(id)
 							end
 						end
 					elseif _queues[id].type == "random" then
-						Wait(
+						Citizen.Wait(
 							math.random((_queues[id].options.max - _queues[id].options.min)) + _queues[id].options.min
 						)
 						if _queues[id].queue[1] ~= nil then
@@ -117,9 +117,9 @@ function CreateQueue(id)
 							end
 						end
 					end
-					Wait(1000)
+					Citizen.Wait(1000)
 				else
-					Wait(20000)
+					Citizen.Wait(20000)
 				end
 			end
 		end)
@@ -178,13 +178,13 @@ COMPONENTS.WaitList = {
 	Pause = function(self, id)
 		if _queues[id] ~= nil then
 			COMPONENTS.Logger:Info("WaitList", string.format("^2%s^7 WaitList Process Paused", id))
-			_queues[id].paused = true
+			queues[id].paused = true
 		end
 	end,
 	Unpause = function(self, id)
 		if _queues[id] ~= nil then
 			COMPONENTS.Logger:Info("WaitList", string.format("^2%s^7 WaitList Process Unpaused", id))
-			_queues[id].paused = false
+			queues[id].paused = false
 		end
 	end,
 	Interact = {

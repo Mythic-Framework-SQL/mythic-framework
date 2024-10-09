@@ -118,13 +118,6 @@ COMPONENTS.NetSync = {
 			RequestNetSync("NetworkExplodeVehicle", vehicle, isAudible, isInvisible, 0)
 		end
 	end,
-	BreakOffVehicleWheel = function(self, vehicle, wheelIndex, leaveDebrisTrail, deleteWheel, unknownFlag, putOnFire)
-		if NetworkHasControlOfEntity(vehicle) then
-			BreakOffVehicleWheel(vehicle, wheelIndex, leaveDebrisTrail, deleteWheel, unknownFlag, putOnFire)
-		else
-			RequestNetSync("BreakOffVehicleWheel", vehicle, wheelIndex, leaveDebrisTrail, deleteWheel, unknownFlag, putOnFire)
-		end
-	end,
 	TaskWanderInArea = function(self, ped, x, y, z, radius, minimalLength, timeBetweenWalks)
 		if NetworkHasControlOfEntity(ped) then
 			ClearPedTasksImmediately(ped)
@@ -161,6 +154,14 @@ COMPONENTS.NetSync = {
 			SetPedKeepTask(ped, state)
 		else
 			RequestNetSync("SetPedKeepTask", ped, state)
+		end
+	end,
+
+	BreakOffVehicleWheel = function(self, vehicle, wheelIndex, leaveDebrisTrail, deleteWheel, unknownFlag, putOnFire)
+		if NetworkHasControlOfEntity(vehicle) then
+			BreakOffVehicleWheel(vehicle, wheelIndex, leaveDebrisTrail, deleteWheel, unknownFlag, putOnFire)
+		else
+			RequestNetSync("BreakOffVehicleWheel", vehicle, wheelIndex, leaveDebrisTrail, deleteWheel, unknownFlag, putOnFire)
 		end
 	end,
 }
