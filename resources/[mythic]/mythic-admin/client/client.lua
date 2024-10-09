@@ -145,19 +145,18 @@ end)
 
 RegisterNetEvent('Admin:Client:ChangePed', function(model)
     local hash = GetHashKey(model)
-    if IsModelValid(hash) then
-        if not HasModelLoaded(hash) then
-            RequestModel(hash)
-            while not HasModelLoaded(hash) do
-                Wait(100)
-            end
-        end
+	if IsModelValid(hash) then
+		if not HasModelLoaded(hash) then
+			RequestModel(hash)
+			while not HasModelLoaded(hash) do
+				Citizen.Wait(100)
+			end
+		end
 
-        SetPlayerModel(PlayerId(), hash)
-        SetPedDefaultComponentVariation(PlayerPedId())
-        SetModelAsNoLongerNeeded(hash)
-        TriggerEvent('Ped:Client:ChangedPed', model)
-    end
+		SetPlayerModel(PlayerId(), hash)
+		SetPedDefaultComponentVariation(PlayerPedId())
+		SetModelAsNoLongerNeeded(hash)
+	end
 end)
 
 function DoAdminVehicleAction(action)

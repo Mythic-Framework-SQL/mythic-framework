@@ -4,9 +4,9 @@ function StartDashboardThread()
     if _dThread then return; end
     _dThread = true
 
-    CreateThread(function()
+    Citizen.CreateThread(function()
         GlobalState.AdminPlayerHistory = {}
-        Wait(5000)
+        Citizen.Wait(5000)
         while true do
             local t = GlobalState.AdminPlayerHistory or {}
             if #t >= 12 then
@@ -20,7 +20,7 @@ function StartDashboardThread()
 
             GlobalState.AdminPlayerHistory = t
 
-            Wait((1000 * 60) * 30)
+            Citizen.Wait((1000 * 60) * 30)
         end
     end)
 end

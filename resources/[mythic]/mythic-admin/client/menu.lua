@@ -22,7 +22,7 @@
 --                 _menuOpen = true
 --             end, function()
 --                 _menuOpen = false
---                 Wait(100)
+--                 Citizen.Wait(100)
 --                 adminSubMenus = nil
 --                 adminMenu = nil 
 --                 collectgarbage()
@@ -218,7 +218,7 @@
 --                         adminSubMenus[playerMenuId].Add:SubMenuBack('Go Back', {})
 --                         adminSubMenus['activePlayers'].Add:SubMenu(playerString, adminSubMenus[playerMenuId], {})
 
---                         Wait(10)
+--                         Citizen.Wait(10)
 --                     end
 --                 else
 --                     adminSubMenus['activePlayers'].Add:Button("No Active Players", { disabled = true }, function() end)
@@ -372,9 +372,9 @@
 --                 else
 --                     _drawingCoords = true
 --                     local playerPed = PlayerPedId()
---                     CreateThread(function()
+--                     Citizen.CreateThread(function()
 --                         while _drawingCoords do
---                             Wait(5)
+--                             Citizen.Wait(5)
 --                             local playerCoords = GetEntityCoords(playerPed)
 --                             local playerHeading = GetEntityHeading(playerPed)
 --                             DrawShittyText(string.format('~r~X:~w~ %.3f ~r~Y:~w~ %.3f ~r~Z:~w~ %.3f ~b~H:~w~ %.3f', playerCoords.x, playerCoords.y, playerCoords.z, playerHeading))
