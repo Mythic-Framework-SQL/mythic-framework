@@ -1,11 +1,18 @@
 function RegisterMiddleware()
 	Middleware:Add("Characters:Creating", function(source, cData)
 		return {
-			{
-				Jailed = false,
+		  {
+			Jailed = {
+			  Jailed = false,
+			  Time = nil,
+			  Duration = nil
 			},
+			ICU = {
+			  Released = true
+			}
+		  },
 		}
-	end)
+	  end)
 
 	Middleware:Add("Characters:Spawning", function(source)
 		local _src = source
