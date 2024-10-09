@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@mui/styles';
 import {
 	List,
 	ListItem,
@@ -7,7 +7,7 @@ import {
 	ListItemAvatar,
 	Avatar,
 	Grid,
-} from '@material-ui/core';
+} from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Moment from 'react-moment';
 
@@ -109,7 +109,7 @@ export default ({ transaction }) => {
 							primary="Date"
 							secondary={
 								<Moment
-									date={transaction.Timestamp * 1000}
+									date={transaction.Timestamp}
 									format="LLLL"
 								/>
 							}
@@ -167,7 +167,7 @@ export default ({ transaction }) => {
 							primary="Transaction Date"
 							secondary={
 								<Moment
-									date={transaction.Timestamp * 1000}
+									date={transaction.Timestamp}
 									format="LLLL"
 								/>
 							}

@@ -3,11 +3,16 @@ AddEventHandler('Finance:Server:Startup', function()
         local player = Fetch:SID(tonumber(args[1]))
         if player ~= nil then
             local targetSource, fineAmount = table.unpack(args)
-            local success = Billing:Fine(src, player:GetData("Source"), tonumber(fineAmount))
-            if success then
-                Chat.Send.System:Single(src, string.format("You Successfully Fined State ID %s For $%s. You earned $%s.", args[1], success.amount, success.cut))
+            local fine = tonumber(fineAmount)
+            if fine and fine > 0 and fine <= 100000 then
+                local success = Billing:Fine(src, player:GetData("Source"), fine)
+                if success then
+                    Chat.Send.System:Single(src, string.format("You Successfully Fined State ID %s For $%s. You earned $%s.", args[1], success.amount, success.cut))
+                else
+                    Chat.Send.System:Single(src, "Fine Failed")
+                end
             else
-                Chat.Send.System:Single(src, "Fine Failed")
+                Chat.Send.System:Single(src, "Fine Amount Too High!")
             end
         else
             Chat.Send.System:Single(src, "Invalid Target")

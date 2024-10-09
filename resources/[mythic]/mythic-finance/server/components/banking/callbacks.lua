@@ -1,312 +1,440 @@
-local AccountsOccupied = {}
+local _actionCooldowns = {}
 
 function RegisterBankingCallbacks()
-	Callbacks:RegisterServerCallback("Finance:Paycheck", function(source, data, cb)
-		local pState = Player(source).state
-		pState.gettingPaycheck = true
-		local char = Fetch:Source(source):GetData("Character")
+  Callbacks:RegisterServerCallback("Finance:Paycheck", function(source, data, cb)
+    local pState = Player(source).state
+    pState.gettingPaycheck = true
+    local char = Fetch:Source(source):GetData("Character")
 
-		local salary = char:GetData("Salary") or {}
-		local amt = 0
-		local mts = 0
-		for k, v in pairs(salary) do
-			amt = amt + v.total
-			mts = mts + v.minutes
-		end
+    local salary = char:GetData("Salary") or {}
+    local amt = 0
+    local mts = 0
+    for k, v in pairs(salary) do
+      amt = amt + v.total
+      mts = mts + v.minutes
+    end
 
-		if amt > 0 then
-			char:SetData("Salary", false)
-			Banking.Balance:Deposit(Banking.Accounts:GetPersonal(char:GetData("SID")).Account, amt, {
-				type = 'paycheck',
-				title = "Paycheck",
-				description = string.format('Paycheck For %s Minutes Worked', mts),
-				data = salary
-			})
-		end
+    if amt > 0 then
+      char:SetData("Salary", false)
+      Banking.Balance:Deposit(Banking.Accounts:GetPersonal(char:GetData("SID")).Account, amt, {
+        type = 'paycheck',
+        title = "Paycheck",
+        description = string.format('Paycheck For %s Minutes Worked', mts),
+        data = salary
+      })
+    end
 
-		cb({
-			total = amt,
-			minutes = mts,
-		})
-		pState.gettingPaycheck = false
-	end)
+    cb({
+      total = amt,
+      minutes = mts,
+    })
+    pState.gettingPaycheck = false
+  end)
 
-	Callbacks:RegisterServerCallback("Banking:RegisterAccount", function(source, data, cb)
-		local char = Fetch:Source(source):GetData("Character")
+  Callbacks:RegisterServerCallback("Banking:RegisterAccount", function(source, data, cb)
+    local char = Fetch:Source(source):GetData("Character")
 
-		if char ~= nil then
-			if data.type == "personal_savings" then
-				local acc = Banking.Accounts:CreatePersonalSavings(char:GetData("SID"), {})
-				acc.Permissions = {
-					MANAGE = true,
-					BALANCE = true,
-					WITHDRAW = true,
-					DEPOSIT = true,
-					TRANSACTIONS = true,
-				}
-				cb(acc)
-			else
-				cb(false)
-			end
-		else
-			cb(false)
-		end
-	end)
+    if char ~= nil then
+      if data.type == "personal_savings" then
+        local acc = Banking.Accounts:CreatePersonalSavings(char:GetData("SID"))
+        acc.Permissions = {
+          MANAGE = true,
+          BALANCE = true,
+          WITHDRAW = true,
+          DEPOSIT = true,
+          TRANSACTIONS = true,
+        }
+        cb(acc)
+      else
+        cb(false)
+      end
+    else
+      cb(false)
+    end
+  end)
 
-	Callbacks:RegisterServerCallback("Banking:RenameAccount", function(source, data, cb)
-		cb(false)
-	end)
+  Callbacks:RegisterServerCallback("Banking:RenameAccount", function(source, data, cb)
+    cb(false)
+  end)
 
-	Callbacks:RegisterServerCallback("Banking:AddJoint", function(source, data, cb)
-		local char = Fetch:Source(source):GetData("Character")
-		if char and data?.target > 0 then
-			cb(Banking.Accounts:AddPersonalSavingsJointOwner(data.account, data.target))
-		else
-			cb(false)
-		end
-	end)
+  Callbacks:RegisterServerCallback("Banking:AddJoint", function(source, data, cb)
+    local char = Fetch:Source(source):GetData("Character")
+    if char and data?.target > 0 then
+      local p = promise.new()
+      local findChar = MySQL.single.await("SELECT `User` FROM characters WHERE `SID` = ?", { data.target })
+      if not findChar then --! How dafuq you gonna try to add a joint owner that doesn't exist?, retards.
+        return cb(false)
+      end
 
-	Callbacks:RegisterServerCallback("Banking:RemoveJoint", function(source, data, cb)
-		local char = Fetch:Source(source):GetData("Character")
-		if char then
-			cb(Banking.Accounts:RemovePersonalSavingsJointOwner(data.account, data.target))
-		else
-			cb(false)
-		end
-	end)
+      if findChar.User == char:GetData("User") then
+        Logger:Info("Billing",
+          string.format(
+            "%s %s (%s) [%s] Tried Adding Their Other Character (SID: %s) To a Joint Bank Account (Account: %s).",
+            char:GetData("First"), char:GetData("Last"), char:GetData("SID"), char:GetData("User"), data.target,
+            data.account), {
+            console = true,
+            file = true,
+            database = true,
+            discord = {
+              embed = true,
+              type = 'info',
+              webhook = GetConvar('discord_log_webhook', ''),
+            }
+          })
+        return cb(false)
+      else
+        return cb(Banking.Accounts:AddPersonalSavingsJointOwner(data.account, data.target))
+      end
+    end
+  end)
 
-	Callbacks:RegisterServerCallback("Banking:GetAccounts", function(source, data, cb)
-		local char = Fetch:Source(source):GetData("Character")
-		if char then
-			local SID = char:GetData("SID")
+  Callbacks:RegisterServerCallback("Banking:RemoveJoint", function(source, data, cb)
+    local char = Fetch:Source(source):GetData("Character")
+    if char then
+      cb(Banking.Accounts:RemovePersonalSavingsJointOwner(data.account, data.target))
+    else
+      cb(false)
+    end
+  end)
 
-			local jobQueryList = {}
-			local workplaceQueryList = { false }
-			local charJobs = char:GetData("Jobs") or {}
+  Callbacks:RegisterServerCallback("Banking:GetAccounts", function(source, data, cb)
+    local char = Fetch:Source(source):GetData("Character")
+    if char then
+      local SID = char:GetData("SID")
 
-			for k, v in ipairs(charJobs) do
-				table.insert(jobQueryList, v.Id)
+      local eQry =
+      "SELECT account, type, job, workplace, jobPermissions FROM bank_accounts_permissions WHERE (type = ? AND jointOwner = ?)"
 
-				if v.Workplace then
-					table.insert(workplaceQueryList, v.Workplace.Id)
-				end
-			end
+      local params = {
+        1,
+        tostring(SID)
+      }
 
-			local availableAccountsData = {}
-			local accountTransactionData = {}
-			local availableAccountTransactions = {}
-			local availableAccounts = FindBankAccounts({
-				["$or"] = {
-					{
-						Owner = SID,
-					},
-					{
-						JointOwners = SID,
-					},
-					{
-						Type = "organization",
-						JobAccess = {
-							["$elemMatch"] = {
-								Job = {
-									["$in"] = jobQueryList,
-								},
-								Workplace = {
-									["$in"] = workplaceQueryList,
-								},
-							},
-						},
-					},
-				},
-			})
+      local charJobs = char:GetData("Jobs") or {}
+      for k, v in ipairs(charJobs) do
+        if v.Workplace and v.Workplace.Id then
+          eQry = eQry .. " OR (type = ? AND job = ? AND workplace = ?)"
+          table.insert(params, 0)
+          table.insert(params, v.Id)
+          table.insert(params, v.Workplace.Id)
+        end
 
-			for _, account in ipairs(availableAccounts) do
-				if account.Type == "personal" then
-					account.Permissions = {
-						MANAGE = true,
-						BALANCE = true,
-						WITHDRAW = true,
-						DEPOSIT = true,
-						TRANSACTIONS = true,
-					}
-					table.insert(availableAccountsData, account)
-				elseif account.Type == "personal_savings" then
-					account.Permissions = {
-						MANAGE = true,
-						BALANCE = true,
-						WITHDRAW = true,
-						DEPOSIT = true,
-						TRANSACTIONS = true,
-					}
-					table.insert(availableAccountsData, account)
-				elseif account.Type == "organization" then
-					if account.JobAccess then
-						for _, job in ipairs(account.JobAccess) do
-							local jobPermissions = Jobs.Permissions:GetPermissionsFromJob(
-								source,
-								job.Job,
-								job.Workplace
-							)
-							if jobPermissions then
-								account.Permissions = {}
-								for perm, jobPerm in pairs(job.Permissions) do
-									if jobPermissions[jobPerm] then
-										account.Permissions[perm] = true
-									else
-										account.Permissions[perm] = false
-									end
-								end
+        eQry = eQry .. " OR (type = ? AND job = ? AND workplace = ?)"
+        table.insert(params, 0)
+        table.insert(params, v.Id)
+        table.insert(params, "")
+      end
 
-								table.insert(availableAccountsData, account)
-								break
-							end
-						end
-					end
-				end
-			end
+      local pData = MySQL.query.await(eQry, params)
 
-			for k, v in ipairs(availableAccountsData) do
-				if v.Permissions and v.Permissions.TRANSACTIONS then
-					table.insert(availableAccountTransactions, v.Account)
-				end
-			end
+      local jobBankAccounts = {}
+      local jobBankPerms = {}
 
-			-- local accountTransactions = FindBankAccountTransactions({
-			-- 	Account = {
-			-- 		["$in"] = availableAccountTransactions,
-			-- 	},
-			-- })
+      for k, v in ipairs(pData) do
+        if v.type == 0 and v.job then
+          if not jobBankPerms[v.account] then
+            jobBankPerms[v.account] = { v }
+          else
+            table.insert(jobBankPerms[v.account], v)
+          end
 
-			for k, v in ipairs(availableAccountTransactions) do
-				local accountTransactions = FindBankAccountTransactions({
-					Account = v,
-				})
+          table.insert(jobBankAccounts, v.account)
+        elseif v.type == 1 then
+          table.insert(jobBankAccounts, v.account)
+        end
+      end
 
-				accountTransactionData[tostring(v)] = accountTransactions
-			end
+      local qry =
+      "SELECT account as Account, balance as Balance, type as Type, owner as Owner, name as Name FROM bank_accounts WHERE (type = ? AND owner = ?) OR (type = ? AND owner = ?)"
+      if jobBankAccounts and #jobBankAccounts > 0 then
+        qry = string.format(
+          "SELECT account as Account, balance as Balance, type as Type, owner as Owner, name as Name FROM bank_accounts WHERE account IN (%s) OR (type = ? AND owner = ?) OR (type = ? AND owner = ?)",
+          table.concat(jobBankAccounts, ","))
+      end
 
-			-- if accountTransactions then
-			-- 	for k, v in ipairs(accountTransactions) do
-			-- 		if v.Account and v.Amount then
-			-- 			if not accountTransactionData[tostring(v.Account)] then
-			-- 				accountTransactionData[tostring(v.Account)] = {}
-			-- 			end
-			-- 			table.insert(accountTransactionData[tostring(v.Account)], v)
-			-- 		end
-			-- 	end
-			-- end
-			cb(availableAccountsData, accountTransactionData, PENDING_BILLS[SID])
-		else
-			cb(false)
-		end
-	end)
+      local availableAccounts = MySQL.query.await(qry, {
+        "personal",
+        tostring(SID),
+        "personal_savings",
+        tostring(SID)
+      })
 
-	Callbacks:RegisterServerCallback("Banking:DoAccountAction", function(source, data, cb)
-		local char = Fetch:Source(source):GetData("Character")
-		local SID = char:GetData("SID")
-		local account, action = data.account, data.action
-		local accountData = Banking.Accounts:Get(account)
-		if AccountsOccupied[accountData.Account] then return cb(false) end
-		AccountsOccupied[accountData.Account] = true
-		if accountData then
-			if action == "WITHDRAW" then
-				local withdrawAmount = tonumber(data.amount)
-				if
-					withdrawAmount
-					and withdrawAmount > 0
-					and accountData.Balance >= withdrawAmount
-					and HasBankAccountPermission(source, accountData, action, SID)
-				then
-					local balance = Banking.Balance:Charge(accountData.Account, withdrawAmount, {
-						type = "withdraw",
-						title = "Cash Withdrawal",
-						description = data.description or "No Description",
-						transactionAccount = false,
-						data = {
-							character = SID,
-						},
-					})
+      local jointOwnerStuff = {}
 
-					if balance then
-						Wallet:Modify(source, withdrawAmount, true)
-						AccountsOccupied[account] = nil
-						cb(true, balance)
-						return
-					end
-				end
-			elseif action == "DEPOSIT" then
-				local depositAmount = tonumber(data.amount)
-				if
-					depositAmount
-					and depositAmount > 0
-					and HasBankAccountPermission(source, accountData, action, SID)
-				then
-					if Wallet:Modify(source, -depositAmount, true) then
-						local balance = Banking.Balance:Deposit(accountData.Account, depositAmount, {
-							type = "deposit",
-							title = "Cash Deposit",
-							description = data.description or "No Description",
-							transactionAccount = false,
-							data = {
-								character = SID,
-							},
-						})
+      for k, v in ipairs(availableAccounts) do
+        if v.Type == "personal_savings" and v.Owner == tostring(SID) then
+          table.insert(jointOwnerStuff, v.Account)
+        end
+      end
 
-						if balance then
-							AccountsOccupied[account] = nil
-							cb(true, balance)
-							return
-						end
-					end
-				end
-			elseif action == "TRANSFER" then
-				local transferAmount = tonumber(data.amount)
-				local targetAccount = false
-				if data.targetType then
-					targetAccount = Banking.Accounts:GetPersonal(tonumber(data.target))
-				else
-					targetAccount = Banking.Accounts:Get(tonumber(data.target))
-				end
-				if transferAmount and transferAmount > 0 and targetAccount then
-					if
-						accountData.Balance >= transferAmount
-						and HasBankAccountPermission(source, accountData, "WITHDRAW", SID)
-					then
-						local success = Banking.Balance:Withdraw(accountData.Account, transferAmount, {
-							type = "transfer",
-							title = "Outgoing Bank Transfer",
-							description = string.format(
-								"Transfer to Account: %s.%s",
-								targetAccount.Account,
-								(data.description and (" Description: " .. data.description) or "")
-							),
-							data = {
-								character = SID,
-							},
-						})
+      local jointOwnerData = {}
+      if #jointOwnerStuff > 0 then
+        local jO = MySQL.query.await(
+          string.format("SELECT account, jointOwner FROM bank_accounts_permissions WHERE account IN (%s) AND type = ?",
+            table.concat(jointOwnerStuff, ",")), {
+            1
+          })
 
-						if success then
-							local success2 = Banking.Balance:Deposit(targetAccount.Account, transferAmount, {
-								type = "transfer",
-								title = "Incoming Bank Transfer",
-								description = string.format(
-									"Transfer from Account: %s.%s",
-									accountData.Account,
-									(data.description and (" Description: " .. data.description) or "")
-								),
-								transactionAccount = accountData.Account,
-								data = {
-									character = SID,
-								},
-							})
-							AccountsOccupied[account] = nil
-							cb(success2)
-							return
-						end
-					end
-				end
-			end
-			AccountsOccupied[account] = nil
-		end
-		cb(false)
-	end)
+        for k, v in ipairs(jO) do
+          if not jointOwnerData[v.account] then
+            jointOwnerData[v.account] = { v.jointOwner }
+          else
+            table.insert(jointOwnerData[v.account], v.jointOwner)
+          end
+        end
+      end
+
+      local availableAccountsData = {}
+      local accountTransactionData = {}
+
+      for _, account in ipairs(availableAccounts) do
+        if account.Type == "personal" then
+          account.Permissions = {
+            MANAGE = true,
+            BALANCE = true,
+            WITHDRAW = true,
+            DEPOSIT = true,
+            TRANSACTIONS = true,
+          }
+          table.insert(availableAccountsData, account)
+        elseif account.Type == "personal_savings" then
+          account.Permissions = {
+            MANAGE = account.Owner == tostring(SID),
+            BALANCE = true,
+            WITHDRAW = true,
+            DEPOSIT = true,
+            TRANSACTIONS = true,
+          }
+          account.JointOwners = jointOwnerData[account.Account] or {}
+
+          table.insert(availableAccountsData, account)
+        elseif account.Type == "organization" then
+          local jPData = jobBankPerms[account.Account]
+          if jPData then
+            for _, job in ipairs(jPData) do
+              local fuckingWorkplace = false
+              if job.workplace and job.workplace ~= "" and #job.workplace > 0 then
+                fuckingWorkplace = job.workplace
+              end
+              local jobPermissions = Jobs.Permissions:GetPermissionsFromJob(
+                source,
+                job.job,
+                fuckingWorkplace
+              )
+
+              if jobPermissions then
+                account.Permissions = {}
+                local permList = json.decode(job.jobPermissions or "{}")
+                for perm, jobPerm in pairs(permList) do
+                  if jobPermissions[jobPerm] then
+                    account.Permissions[perm] = true
+                  else
+                    account.Permissions[perm] = false
+                  end
+                end
+
+                table.insert(availableAccountsData, account)
+                break
+              end
+            end
+          end
+        end
+      end
+
+      cb(availableAccountsData, PENDING_BILLS[SID])
+    else
+      cb(false)
+    end
+  end)
+
+  Callbacks:RegisterServerCallback("Banking:GetAccountsTransactions", function(source, data, cb)
+    local char = Fetch:Source(source):GetData("Character")
+    if char and data?.account and data?.perPage then
+      local offset = data?.offset
+      if data?.page then
+        offset = data.perPage * (data.page - 1)
+      end
+
+      local transactions = MySQL.query.await(
+        "SELECT type as Type, account as Account, title as Title, timestamp as Timestamp, amount as Amount, description as Description FROM bank_accounts_transactions WHERE account = ? ORDER BY timestamp DESC LIMIT ? OFFSET ?",
+        {
+          data.account,
+          data.perPage + 1,
+          offset
+        })
+
+      local pages = data.page or 1
+      local isMore = false
+      if #transactions > data.perPage then
+        table.remove(transactions)
+
+        pages += 1
+        isMore = true
+      end
+
+      cb({
+        data = transactions,
+        pages = pages,
+        more = isMore,
+      })
+    else
+      cb(false)
+    end
+  end)
+
+  Callbacks:RegisterServerCallback("Banking:DoAccountAction", function(source, data, cb)
+    local char = Fetch:Source(source):GetData("Character")
+    local SID = char:GetData("SID")
+    local account, action = data.account, data.action
+    local accountData = Banking.Accounts:Get(account)
+    if accountData then
+      if _actionCooldowns[source] and _actionCooldowns[source] > GetGameTimer() then
+        Logger:Warn("Pwnzor",
+          string.format("%s %s (%s) Triggered 2 Bank Account Actions in 2 Seconds They Are Probably Cheating (%s)",
+            char:GetData("First"), char:GetData("Last"), char:GetData("SID"), json.encode(data)), {
+            console = true,
+            file = false,
+            database = true,
+            discord = {
+              embed = true,
+              type = 'error',
+              webhook = GetConvar('discord_pwnzor_webhook', ''),
+            }
+          }, {
+            data = data
+          })
+        Pwnzor:Screenshot(char:GetData("SID"), "Bank Account Actions Cooldown Exceeded")
+
+        cb(false)
+        return
+      end
+
+      _actionCooldowns[source] = GetGameTimer() + 2000
+
+      if action == "WITHDRAW" then
+        local withdrawAmount = tonumber(data.amount)
+        if
+            withdrawAmount
+            and withdrawAmount > 0
+            and accountData.Balance >= withdrawAmount
+            and HasBankAccountPermission(source, accountData, action, SID)
+        then
+          local wSucc = Banking.Balance:Withdraw(accountData.Account, withdrawAmount, {
+            type = "withdraw",
+            title = "Cash Withdrawal",
+            description = data.description or "No Description",
+            transactionAccount = false,
+            data = {
+              character = SID,
+            },
+          })
+
+          if wSucc then
+            Wallet:Modify(source, withdrawAmount, true)
+            cb(true, Banking.Balance:Get(accountData.Account))
+            return
+          end
+        end
+      elseif action == "DEPOSIT" then
+        local depositAmount = tonumber(data.amount)
+        if
+            depositAmount
+            and depositAmount > 0
+            and HasBankAccountPermission(source, accountData, action, SID)
+        then
+          if Wallet:Modify(source, -depositAmount, true) then
+            local dSucc = Banking.Balance:Deposit(accountData.Account, depositAmount, {
+              type = "deposit",
+              title = "Cash Deposit",
+              description = data.description or "No Description",
+              transactionAccount = false,
+              data = {
+                character = SID,
+              },
+            })
+
+            if dSucc then
+              cb(true, Banking.Balance:Get(accountData.Account))
+              return
+            end
+          end
+        end
+      elseif action == "TRANSFER" then
+        local transferAmount = tonumber(data.amount)
+        local targetAccount = false
+        if data.targetType then
+          targetAccount = Banking.Accounts:GetPersonal(data.target)
+        else
+          targetAccount = Banking.Accounts:Get(tonumber(data.target))
+        end
+
+        if transferAmount and transferAmount > 0 and targetAccount then
+          if
+              accountData.Balance >= transferAmount
+              and HasBankAccountPermission(source, accountData, "WITHDRAW", SID)
+          then
+            local p = promise.new()
+
+            if targetAccount.Type == "personal" or targetAccount.Type == "personal_savings" then
+              local fetchUser = MySQL.single.await("SELECT `User` FROM characters WHERE `SID` = ?", {
+                targetAccount.Owner
+              })
+
+              if not fetchUser or fetchUser and fetchUser.User == char:GetData("User") then
+                Logger:Info("Billing",
+                  string.format(
+                    "%s %s (%s) [%s] Tried Bank Transferring to their other character (SID: %s, Account: %s).",
+                    char:GetData("First"), char:GetData("Last"), char:GetData("SID"), char:GetData("User"), targetAccount
+                    .Owner, targetAccount.Account), {
+                    console = true,
+                    file = true,
+                    database = true,
+                    discord = {
+                      embed = true,
+                      type = 'info',
+                      webhook = GetConvar('discord_log_webhook', ''),
+                    }
+                  })
+
+                return cb(false)
+              else
+                local success = Banking.Balance:Withdraw(accountData.Account, transferAmount, {
+                  type = "transfer",
+                  title = "Outgoing Bank Transfer",
+                  description = string.format(
+                    "Transfer to Account: %s.%s",
+                    targetAccount.Account,
+                    (data.description and (" Description: " .. data.description) or "")
+                  ),
+                  data = {
+                    character = SID,
+                  },
+                })
+
+                if success then
+                  local success2 = Banking.Balance:Deposit(targetAccount.Account, transferAmount, {
+                    type = "transfer",
+                    title = "Incoming Bank Transfer",
+                    description = string.format(
+                      "Transfer from Account: %s.%s",
+                      accountData.Account,
+                      (data.description and (" Description: " .. data.description) or "")
+                    ),
+                    transactionAccount = accountData.Account,
+                    data = {
+                      character = SID,
+                    },
+                  })
+                  cb(success2)
+                  return
+                end
+              end
+            end
+            return cb(false)
+          end
+        end
+      end
+    end
+    return cb(false)
+  end)
 end

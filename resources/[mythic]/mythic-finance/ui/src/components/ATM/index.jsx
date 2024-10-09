@@ -1,43 +1,41 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { makeStyles } from '@material-ui/styles';
-import { Grid } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
+import { TextField, Slide, MenuItem } from '@mui/material';
 import { toast } from 'react-toastify';
-import { Route, Switch } from 'react-router';
 import useKeypress from 'react-use-keypress';
 
-import { Titlebar, Loader } from '../';
+import { Titlebar } from '../';
+import AccountButton from '../Bank/components/AccountButton';
 import Nui from '../../util/Nui';
-import Accounts from './Accounts';
+import Account from './components/Account';
 
 const useStyles = makeStyles((theme) => ({
-	container: {
-		height: '100%',
-	},
-	wrapper: {
-		height: 'calc(100% - 126px)',
-	},
+	container: {},
+	wrapper: {},
 	content: {
-		height: '100%',
+		height: 'calc(624px - 108px)',
+		display: 'flex',
+		gap: 4,
+		overflow: 'hidden',
+	},
+	accounts: {
 		overflowY: 'auto',
 		overflowX: 'hidden',
 	},
-	maxHeight: {
-		height: '100%',
+	accountContainer: {
+		flex: 1,
+		overflow: 'hidden',
+	},
+	account: {
+		background: theme.palette.secondary.dark,
 		border: `1px solid ${theme.palette.border.divider}`,
-	},
-	accountPanel: {
+		padding: 10,
 		height: '100%',
-		overflowY: 'auto',
-		overflowX: 'hidden',
-	},
-	accountList: {
-		height: '100%',
-		overflowY: 'auto',
-		overflowX: 'hidden',
-		backgroundColor: theme.palette.secondary.main,
 		width: '100%',
-		borderRight: `1px solid ${theme.palette.border.divider}`,
+	},
+	field: {
+		marginBottom: 15,
 	},
 }));
 
@@ -45,7 +43,33 @@ export default () => {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 
+	const containerRef = useRef(null);
+	const accountRef = useRef(null);
+
+	const user = useSelector((state) => state.data.data.character);
+	const accounts = useSelector((state) => state.data.data.accounts);
+	const selected = useSelector((state) => state.bank.selected);
+
+	useEffect(() => {
+		if (accounts.length > 0) {
+			setPersonal(accounts.filter((a) => a.Type == 'personal'));
+			setSavings(accounts.filter((a) => a.Type == 'personal_savings'));
+			setOrganization(accounts.filter((a) => a.Type == 'organization'));
+		} else {
+			setPersonal(Array());
+			setSavings(Array());
+			setOrganization(Array());
+		}
+	}, [accounts]);
+
+	const [personal, setPersonal] = useState(Array());
+	const [savings, setSavings] = useState(Array());
+	const [organization, setOrganization] = useState(Array());
+
 	const [loading, setLoading] = useState(false);
+
+	const [titleRendered, setTitleRendered] = useState(false);
+	const [accsRendered, setAccsRendered] = useState(false);
 
 	useEffect(() => {
 		const f = async () => {
@@ -59,6 +83,13 @@ export default () => {
 						payload: {
 							type: 'accounts',
 							data: res.accounts,
+						},
+					});
+					dispatch({
+						type: 'SET_DATA',
+						payload: {
+							type: 'transactions',
+							data: res.transactions,
 						},
 					});
 				} else toast.error('Error Loading Accounts');
@@ -78,19 +109,44 @@ export default () => {
 
 	return (
 		<div className={classes.container}>
-			<Grid container className={classes.maxHeight}>
-				<Grid item xs={12}>
-					<Titlebar />
-				</Grid>
-				<Grid item xs={12} className={classes.wrapper}>
-					<div className={classes.content}>
-						{loading && <Loader static text="Loading Accounts" />}
-						<Switch>
-							<Route path="/" exact component={Accounts} />
-						</Switch>
+			<Titlebar onAnimEnd={() => setTitleRendered(true)} />
+			<div className={classes.content} ref={containerRef}>
+				<Slide
+					in={titleRendered}
+					direction="down"
+					container={containerRef.current}
+					onEntered={() => setAccsRendered(true)}
+				>
+					<div className={classes.accounts}>
+						{personal.map((acc) => {
+							return (
+								<AccountButton key={acc.Account} account={acc} />
+							);
+						})}
+						{savings.map((acc) => {
+							return (
+								<AccountButton key={acc.Account} account={acc} />
+							);
+						})}
+						{organization.map((acc) => {
+							return (
+								<AccountButton key={acc.Account} account={acc} />
+							);
+						})}
 					</div>
-				</Grid>
-			</Grid>
+				</Slide>
+				<div ref={accountRef} className={classes.accountContainer}>
+					<Slide
+						in={Boolean(selected) && accsRendered}
+						direction="right"
+						container={accountRef.current}
+					>
+						<div className={classes.account}>
+							{Boolean(selected) && <Account />}
+						</div>
+					</Slide>
+				</div>
+			</div>
 		</div>
 	);
 };

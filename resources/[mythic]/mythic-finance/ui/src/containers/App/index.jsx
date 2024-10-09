@@ -1,12 +1,12 @@
 import React from 'react';
-import CssBaseline from '@material-ui/core/CssBaseline';
+import CssBaseline from '@mui/material/CssBaseline';
 import {
 	ThemeProvider,
 	createTheme,
 	StyledEngineProvider,
-} from '@material-ui/core';
+} from '@mui/material';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { fas } from '@fortawesome/free-solid-svg-icons';
+import { fas } from '@fortawesome/pro-solid-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
 import { HashRouter } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
@@ -25,7 +25,7 @@ export default () => {
 
 	const muiTheme = createTheme({
 		typography: {
-			fontFamily: ['Oswald'],
+			fontFamily: ['Source Sans Pro'],
 		},
 		palette: palette,
 		components: {
@@ -50,7 +50,7 @@ export default () => {
 				styleOverrides: {
 					root: {
 						height: app == 'ATM' ? 605 : 900,
-						width: app == 'ATM' ? '30%' : '75%',
+						width: app == 'ATM' ? '50%' : '75%',
 						margin: 'auto',
 					},
 				},
@@ -118,8 +118,8 @@ export default () => {
 						left: 0,
 						right: 0,
 						margin: 'auto',
-						height: app == 'ATM' ? 605 : 900,
-						width: app == 'ATM' ? '30%' : '75%',
+						height: app == 'ATM' ? 624 : 936,
+						width: app == 'ATM' ? 800 : 1200,
 						borderRadius: 10,
 						overflowY: 'auto',
 						overflowX: 'hidden',

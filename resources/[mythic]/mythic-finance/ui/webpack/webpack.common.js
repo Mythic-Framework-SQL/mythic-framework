@@ -67,7 +67,7 @@ module.exports = (options) => ({
 				use: 'html-loader',
 			},
 			{
-				test: /\.(eot|otf|ttf|woff|woff2)$/,
+				test: /\.(eot|otf|ttf|woff|woff2|mp3)$/,
 				use: 'file-loader',
 			},
 			{
@@ -112,11 +112,6 @@ module.exports = (options) => ({
 						},
 					},
 				],
-			},
-			{
-				test: /\.js$/,
-				enforce: 'pre',
-				use: ['source-map-loader'],
 			},
 		],
 	},

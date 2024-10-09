@@ -1,29 +1,22 @@
 import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
+import { useDispatch } from 'react-redux';
 
-const WindowListener = props => {
-    const handleEvent = event => {
-        const { dispatch } = props;
-        const { type, data } = event.data;
-        if (type != null) dispatch({ type, payload: { ...data } });
-    };
+export default ({ children }) => {
+	const dispatch = useDispatch();
 
-    useEffect(() => {
-        window.addEventListener('message', handleEvent);
+	const handleEvent = (event) => {
+		const { type, data } = event.data;
+		if (type != null) dispatch({ type, payload: { ...data } });
+	};
 
-        // returned function will be called on component unmount
-        return () => {
-            window.removeEventListener('message', handleEvent);
-        };
-    }, []);
+	useEffect(() => {
+		window.addEventListener('message', handleEvent);
 
-    return React.Children.only(props.children);
+		// returned function will be called on component unmount
+		return () => {
+			window.removeEventListener('message', handleEvent);
+		};
+	}, []);
+
+	return React.Children.only(children);
 };
-
-WindowListener.propTypes = {
-    dispatch: PropTypes.func.isRequired,
-    children: PropTypes.element.isRequired,
-};
-
-export default connect(null, null)(WindowListener);

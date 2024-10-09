@@ -1,7 +1,6 @@
 import React from 'react';
-import { CircularProgress } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
-import { Dot } from 'react-animated-dots';
+import { CircularProgress } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme) => ({
 	wrapper: {
@@ -37,15 +36,6 @@ const useStyles = makeStyles((theme) => ({
 		height: 'fit-content',
 		width: 'fit-content',
 	},
-	dot1: {
-		color: theme.palette.primary.main,
-	},
-	dot2: {
-		color: theme.palette.text.main,
-	},
-	dot3: {
-		color: theme.palette.primary.main,
-	},
 }));
 
 export default (props) => {
@@ -56,12 +46,7 @@ export default (props) => {
 			{Boolean(props.number) && (
 				<span className={classes.timer}>{props.number}</span>
 			)}
-			<div>
-				{props.text ? props.text : 'Loading Data'}
-				<Dot className={classes.dot1}>.</Dot>
-				<Dot className={classes.dot2}>.</Dot>
-				<Dot className={classes.dot3}>.</Dot>
-			</div>
+			<div>{props.text ? props.text : 'Loading Data'}</div>
 			{props.subtext && (
 				<div className={classes.subtext}>{props.subtext}</div>
 			)}

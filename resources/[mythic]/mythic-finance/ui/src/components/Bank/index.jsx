@@ -1,53 +1,83 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { makeStyles } from '@material-ui/styles';
-import { Grid } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
+import { TextField, Slide, MenuItem } from '@mui/material';
 import { toast } from 'react-toastify';
-import { Redirect, Route, Switch } from 'react-router';
 import useKeypress from 'react-use-keypress';
 
-import { Titlebar, Loader } from '../';
+import { Titlebar, Loader, Modal } from '../';
+import AccountButton from './components/AccountButton';
 import Nui from '../../util/Nui';
-import Accounts from './Accounts';
-import Loans from './Loans';
-import LoanView from './LoanView';
+import Account from './components/Account';
 
 const useStyles = makeStyles((theme) => ({
-	container: {
-		height: '100%',
-	},
-	wrapper: {
-		height: 'calc(100% - 126px)',
-	},
+	container: {},
+	wrapper: {},
 	content: {
-		height: '100%',
+		height: 'calc(936px - 108px)',
+		display: 'flex',
+		gap: 4,
+		overflow: 'hidden',
+	},
+	accounts: {
 		overflowY: 'auto',
 		overflowX: 'hidden',
 	},
-	maxHeight: {
-		height: '100%',
+	accountContainer: {
+		flex: 1,
+		overflow: 'hidden',
+	},
+	account: {
+		background: theme.palette.secondary.dark,
 		border: `1px solid ${theme.palette.border.divider}`,
-	},
-	accountPanel: {
+		padding: 10,
 		height: '100%',
-		overflowY: 'auto',
-		overflowX: 'hidden',
-	},
-	accountList: {
-		height: '100%',
-		overflowY: 'auto',
-		overflowX: 'hidden',
-		backgroundColor: theme.palette.secondary.main,
 		width: '100%',
-		borderRight: `1px solid ${theme.palette.border.divider}`,
+	},
+	field: {
+		marginBottom: 15,
 	},
 }));
+
+const Types = [
+	{
+		value: 'personal_savings',
+		label: 'Personal Saving',
+	},
+];
 
 export default () => {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 
+	const containerRef = useRef(null);
+	const accountRef = useRef(null);
+
+	const user = useSelector((state) => state.data.data.character);
+	const accounts = useSelector((state) => state.data.data.accounts);
+	const selected = useSelector((state) => state.bank.selected);
+
+	useEffect(() => {
+		if (accounts.length > 0) {
+			setPersonal(accounts.filter((a) => a.Type == 'personal'));
+			setSavings(accounts.filter((a) => a.Type == 'personal_savings'));
+			setOrganization(accounts.filter((a) => a.Type == 'organization'));
+		} else {
+			setPersonal(Array());
+			setSavings(Array());
+			setOrganization(Array());
+		}
+	}, [accounts]);
+
+	const [personal, setPersonal] = useState(Array());
+	const [savings, setSavings] = useState(Array());
+	const [organization, setOrganization] = useState(Array());
+
 	const [loading, setLoading] = useState(false);
+	const [creating, setCreating] = useState(false);
+
+	const [titleRendered, setTitleRendered] = useState(false);
+	const [accsRendered, setAccsRendered] = useState(false);
 
 	useEffect(() => {
 		const f = async () => {
@@ -70,20 +100,6 @@ export default () => {
 							data: res.transactions,
 						},
 					});
-					// dispatch({
-					// 	type: 'SET_DATA',
-					// 	payload: {
-					// 		type: 'loans',
-					// 		data: res.loans,
-					// 	},
-					// });
-					// dispatch({
-					// 	type: 'SET_DATA',
-					// 	payload: {
-					// 		type: 'credit',
-					// 		data: res.credit,
-					// 	},
-					// });
 				} else toast.error('Error Loading Accounts');
 			} catch (err) {
 				console.log(err);
@@ -99,24 +115,126 @@ export default () => {
 		Nui.send('Close');
 	});
 
+	const onCreate = async (e) => {
+		e.preventDefault();
+
+		if (
+			accounts.filter(
+				(a) => a.Owner == user.SID && a.Type == 'personal_savings',
+			).length > 0
+		) {
+			toast.error('You May Only Own 1 Savings Account');
+			setCreating(false);
+			return;
+		}
+
+		try {
+			setLoading(true);
+			let res = await (
+				await Nui.send('Bank:Register', {
+					type: e.target.type.value,
+					name: e.target.name.value,
+				})
+			).json();
+
+			dispatch({
+				type: 'ADD_DATA',
+				payload: {
+					type: 'accounts',
+					data: res,
+				},
+			});
+			dispatch({
+				type: 'SELECT_ACCOUNT',
+				payload: {
+					account: res.Account,
+				},
+			});
+		} catch (e) {
+			console.log(e);
+			toast.error('Unable To Open Account');
+		}
+
+		setLoading(false);
+		setCreating(false);
+	};
+
 	return (
 		<div className={classes.container}>
-			<Grid container className={classes.maxHeight}>
-				<Grid item xs={12}>
-					<Titlebar />
-				</Grid>
-				<Grid item xs={12} className={classes.wrapper}>
-					<div className={classes.content}>
-						{loading && <Loader static text="Loading Accounts" />}
-						<Switch>
-							<Route path="/" exact component={Accounts} />
-							{/* <Route path="/loans" exact component={Loans} />
-							<Route path="/loans/:id" exact component={LoanView} /> */}
-							<Redirect to="/" />
-						</Switch>
+			<Titlebar
+				onCreate={() => setCreating(true)}
+				onAnimEnd={() => setTitleRendered(true)}
+			/>
+			<div className={classes.content} ref={containerRef}>
+				<Slide
+					in={titleRendered}
+					direction="down"
+					container={containerRef.current}
+					onEntered={() => setAccsRendered(true)}
+				>
+					<div className={classes.accounts}>
+						{personal.map((acc) => {
+							return (
+								<AccountButton key={acc.Account} account={acc} />
+							);
+						})}
+						{savings.map((acc) => {
+							return (
+								<AccountButton key={acc.Account} account={acc} />
+							);
+						})}
+						{organization.map((acc) => {
+							return (
+								<AccountButton key={acc.Account} account={acc} />
+							);
+						})}
 					</div>
-				</Grid>
-			</Grid>
+				</Slide>
+				<div ref={accountRef} className={classes.accountContainer}>
+					<Slide
+						in={Boolean(selected) && accsRendered}
+						direction="right"
+						container={accountRef.current}
+					>
+						<div className={classes.account}>
+							{Boolean(selected) && <Account />}
+						</div>
+					</Slide>
+				</div>
+			</div>
+			<Modal
+				open={creating}
+				title="Open New Account"
+				closeLang="Cancel"
+				maxWidth="sm"
+				onClose={() => setCreating(false)}
+				onSubmit={onCreate}
+			>
+				{loading && <Loader static text="Loading" />}
+				<TextField
+					select
+					fullWidth
+					required
+					name="type"
+					className={classes.field}
+					disabled={true}
+					label="Account Type"
+					defaultValue="personal_savings"
+				>
+					{Types.map((option) => (
+						<MenuItem key={option.value} value={option.value}>
+							{option.label}
+						</MenuItem>
+					))}
+				</TextField>
+				<TextField
+					fullWidth
+					required
+					name="name"
+					className={classes.field}
+					label="Account Name"
+				/>
+			</Modal>
 		</div>
 	);
 };

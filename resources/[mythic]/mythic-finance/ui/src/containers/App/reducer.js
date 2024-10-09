@@ -1,11 +1,7 @@
 export const initialState = {
-	hidden: true,
-	brand: null,
-	app: null,
-
-	// hidden: false,
-	// brand: 'fleeca',
-	// app: 'BANK',
+	hidden: process.env.NODE_ENV == 'production',
+	brand: process.env.NODE_ENV == 'production' ? null : 'fleeca',
+	app: process.env.NODE_ENV == 'production' ? null : 'BANK',
 };
 
 const appReducer = (state = initialState, action) => {

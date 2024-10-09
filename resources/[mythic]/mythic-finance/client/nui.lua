@@ -1,8 +1,7 @@
 RegisterNUICallback("Bank:Fetch", function(data, cb)
-	Callbacks:ServerCallback("Banking:GetAccounts", {}, function(accounts, transactions, _)
+	Callbacks:ServerCallback("Banking:GetAccounts", {}, function(accounts)
 		cb({
 			accounts = accounts,
-			transactions = transactions,
 		})
 		-- Callbacks:ServerCallback("Loans:GetLoans", {}, function(loans, creditScore)
 		-- 	cb({
@@ -85,4 +84,8 @@ RegisterNUICallback("Bank:Transfer", function(data, cb)
 			balance = newBal,
 		})
 	end)
+end)
+
+RegisterNUICallback("Bank:GetTransactions", function(data, cb)
+	Callbacks:ServerCallback("Banking:GetAccountsTransactions", data, cb)
 end)

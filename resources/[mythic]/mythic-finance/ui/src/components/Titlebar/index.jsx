@@ -1,8 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { makeStyles } from '@material-ui/styles';
-import { AppBar, Toolbar, IconButton, Divider, Grid } from '@material-ui/core';
-import { NavLink, Link } from 'react-router-dom';
+import { makeStyles } from '@mui/styles';
+import { AppBar, Toolbar, IconButton, Divider, Fade } from '@mui/material';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -15,99 +14,48 @@ import Nui from '../../util/Nui';
 import { CurrencyFormat } from '../../util/Parser';
 
 const useStyles = makeStyles((theme) => ({
-	root: {
-		flexGrow: 1,
-		background: theme.palette.secondary.dark,
+	container: {
+		height: 100,
 		width: '100%',
-		height: 86,
+		borderLeft: `4px solid ${theme.palette.primary.main}`,
+		display: 'flex',
+		background: `${theme.palette.secondary.dark}`,
+		color: theme.palette.text.main,
 		zIndex: 100,
+		marginBottom: 8,
 	},
-	bankLogoLink: {
-		background: theme.palette.secondary.main,
-		'&:hover': {
-			background: theme.palette.secondary.light,
-			transition: 'background ease-in 0.15s',
-		},
-	},
-	bankLogo: {
-		width: '100%',
-		maxWidth: 298,
-		padding: 4,
-	},
-	tb: {
-		minHeight: 125,
+	branding: {
+		flex: 1,
 		position: 'relative',
 	},
-	navLinks: {
-		display: 'inline-flex',
-		alignItems: 'center',
-		width: '100%',
+	bankLogo: {
+		width: 200,
 		height: 'fit-content',
+		position: 'absolute',
 		top: 0,
 		bottom: 0,
 		margin: 'auto',
 	},
-	navbar: {
-		backgroundColor: theme.palette.secondary.main,
-		width: '100%',
-		borderBottom: `1px solid ${theme.palette.border.divider}`,
-	},
-	right: {
-		display: 'inline-flex',
-		alignItems: 'center',
-		marginRight: 10,
-		position: 'absolute',
-		right: 0,
-	},
-	user: {
-		textAlign: 'right',
+	cash: {
 		fontSize: 18,
-		fontWeight: 'regular',
-		'& small': {
-			'&::before': {
-				content: '", "',
-				color: theme.palette.text.alt,
-			},
-			color: theme.palette.primary.main,
-			marginRight: 10,
-
-			'& b': {
-				color: theme.palette.text.main,
-			},
-		},
-	},
-	money: {
-		display: 'block',
-		fontSize: 14,
+		lineHeight: '100px',
 		marginRight: 10,
-		color: theme.palette.success.main,
-		'&::before': {
-			content: '"Cash:"',
-			marginRight: 5,
-			color: theme.palette.text.alt,
+
+		'& .currency': {
+			color: theme.palette.success.main,
 		},
 	},
-	navLinkContainer: {
-		display: 'inline-flex',
-		alignItems: 'center',
-	},
-	navLink: {
+	close: {
 		fontSize: 16,
-		color: theme.palette.text.alt,
-		transition: 'color ease-in 0.15s',
-		'&:hover': {
-			color: theme.palette.primary.dark,
-		},
-		'&.active': {
-			color: theme.palette.primary.main,
-		},
-		'&:not(:last-of-type)': {
-			marginRight: 20,
-		},
+		padding: 5,
+		paddingLeft: 15,
+		lineHeight: '90px',
+		marginRight: 10,
+		borderLeft: `2px solid ${theme.palette.border.divider}`,
 	},
 }));
 
-export default () => {
+export default ({ onCreate, onAnimEnd }) => {
 	const classes = useStyles();
 	const brand = useSelector((state) => state.app.brand);
 	const app = useSelector((state) => state.app.app);
@@ -132,77 +80,31 @@ export default () => {
 		Nui.send('Close');
 	};
 
-	const getNavLinks = () => {
-		switch (app) {
-			case 'BANK':
-				return [
-					{
-						link: '/',
-						label: 'My Accounts',
-						isExact: true,
-					},
-					// {
-					// 	link: '/loans',
-					// 	label: 'My Loans',
-					// 	isExact: false,
-					// },
-					// {
-					// 	link: '/credit',
-					// 	label: 'My Credit',
-					// 	isExact: true,
-					// },
-				];
-			case 'ATM':
-				return [];
-		}
-	};
-
 	return (
-		<AppBar
-			elevation={0}
-			position="relative"
-			color="secondary"
-			className={classes.navbar}
-		>
-			<Toolbar className={classes.tb} disableGutters>
-				<div className={classes.navLinks}>
-					<Link to="/" className={classes.bankLogoLink}>
-						<img src={getBranding()} className={classes.bankLogo} />
-					</Link>
-					{getNavLinks().length > 0 && (
-						<>
-							<Divider orientation="vertical" flexItem />
-							<div style={{ marginLeft: 20, lineHeight: '20px' }}>
-								{getNavLinks().map((link, k) => {
-									return (
-										<NavLink
-											key={`link-${k}`}
-											className={classes.navLink}
-											to={link.link}
-											exact={link.isExact}
-										>
-											{link.label}
-										</NavLink>
-									);
-								})}
-							</div>
-						</>
-					)}
+		<Fade in={true} onEntered={onAnimEnd}>
+			<div className={classes.container}>
+				<div className={classes.branding}>
+					<img src={getBranding()} className={classes.bankLogo} />
 				</div>
-				<div className={classes.right}>
-					<div className={classes.user}>
-						Welcome
-						<small>{`${user.First} ${user.Last}`}</small>
-						<span className={classes.money}>
-							{CurrencyFormat.format(user.Cash)}
-						</span>
+				<div className={classes.cash}>
+					Your Cash:{' '}
+					<span className="currency">
+						{CurrencyFormat.format(user.Cash)}
+					</span>
+				</div>
+				{app == 'BANK' && (
+					<div className={classes.close}>
+						<IconButton onClick={Boolean(onCreate) && onCreate}>
+							<FontAwesomeIcon icon="plus-circle" />
+						</IconButton>
 					</div>
-					<Divider orientation="vertical" flexItem />
+				)}
+				<div className={classes.close}>
 					<IconButton onClick={onClose}>
-						<FontAwesomeIcon icon={['fas', 'xmark']} />
+						<FontAwesomeIcon icon="x" />
 					</IconButton>
 				</div>
-			</Toolbar>
-		</AppBar>
+			</div>
+		</Fade>
 	);
 };

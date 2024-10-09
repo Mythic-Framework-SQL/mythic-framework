@@ -29,7 +29,7 @@ module.exports = require('./webpack.common')({
 
 	// Emit a source map for easier debugging
 	// See https://webpack.js.org/configuration/devtool/#devtool
-	devtool: 'source-map',
+	// devtool: 'eval-source-map',
 
 	performance: {
 		hints: false,

@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@mui/styles';
 import { ToastContainer, Flip, toast } from 'react-toastify';
-import { Fade, Grow } from '@material-ui/core';
+import { Fade } from '@mui/material';
 
 import { Bank } from '../../components';
 import ATM from '../../components/ATM';
 
 const useStyles = makeStyles((theme) => ({
 	wrapper: {
-		height: '100%',
 		width: '100%',
-		color: theme.palette.primary.main,
-		background: theme.palette.secondary.dark,
 		fontWeight: 'bold',
 		fontSize: 32,
 		position: 'absolute',
@@ -58,6 +55,7 @@ export default () => {
 					<div className={classes.wrapper}>{getAppScreen()}</div>
 				</Fade>
 				<ToastContainer
+					theme="dark"
 					position="bottom-right"
 					newestOnTop={false}
 					closeOnClick
@@ -70,5 +68,4 @@ export default () => {
 			</>
 		);
 	}
-
 };
