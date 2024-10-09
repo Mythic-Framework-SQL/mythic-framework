@@ -83,7 +83,7 @@ function GetContactlessInput(data)
 		},
 	}, "Contactless:Client:RecieveInput", {})
 
-    SetTimeout(30000, function()
+    Citizen.SetTimeout(30000, function()
         if promptPromise and currentlyShowing == showingAtTime then
             Input:Close()
             promptPromise:resolve(false)

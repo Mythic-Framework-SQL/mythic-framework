@@ -3,7 +3,7 @@ local awaitingBowl = false
 local pressedBowl = false
 
 local insideBowlingStart = false
--- CreateThread(function()
+-- Citizen.CreateThread(function()
 --     local center = vector3(728.477, -771.375, 25.446)
 --     local points = GetBowlingPinLayout(center)
 
@@ -11,7 +11,7 @@ local insideBowlingStart = false
 --         for k, v in ipairs(points) do
 --             DrawSphere(v, 0.05, 255, 0, 0, 100)
 --         end
---         Wait(5)
+--         Citizen.Wait(5)
 --     end
 -- end)
 
@@ -47,14 +47,14 @@ AddEventHandler('Businesses:Client:Startup', function()
         if v.interactZone then
             Targeting.Zones:AddBox(
                 string.format("bowling-lane-%s", k),
-                "bowling-ball",
+                "bowling-ball-pin",
                 v.interactZone.center,
                 v.interactZone.length,
                 v.interactZone.width,
                 v.interactZone.options,
                 {
                     {
-                        icon = "bowling-ball",
+                        icon = "bowling-ball-pin",
                         text = "Start Game",
                         event = "Bowling:Client:StartGame",
                         data = k,
@@ -64,7 +64,7 @@ AddEventHandler('Businesses:Client:Startup', function()
                         end,
                     },
                     {
-                        icon = "bowling-ball",
+                        icon = "bowling-ball-pin",
                         text = "Join Game",
                         event = "Bowling:Client:JoinGame",
                         data = k,
@@ -74,7 +74,7 @@ AddEventHandler('Businesses:Client:Startup', function()
                         end,
                     },
                     {
-                        icon = "bowling-ball",
+                        icon = "bowling-ball-pin",
                         text = "End Game",
                         event = "Bowling:Client:EndGame",
                         data = k,
@@ -136,7 +136,7 @@ function CreateBowlingPins(center, skip)
 end
 
 function SendBowlingNotification(text, time)
-    Notification:Custom(text, time or 5000, 'bowling-ball', {
+    Notification:Custom(text, time or 5000, 'bowling-ball-pin', {
         alert = {
             background = "#C05097",
         },
@@ -147,7 +147,7 @@ function SendBowlingNotification(text, time)
 end
 
 function BowlingBlockers()
-    CreateThread(function()
+    Citizen.CreateThread(function()
         while isBowling do
             DisableControlAction(0, 22, true)
             DisableControlAction(0, 24, true)
@@ -157,7 +157,7 @@ function BowlingBlockers()
             DisableControlAction(0, 33, true)
             DisableControlAction(0, 34, true)
             DisableControlAction(0, 35, true)
-            Wait(0)
+            Citizen.Wait(0)
         end
     end)
 end
@@ -200,14 +200,14 @@ function StartBowlingShit(alleyId, isSecondTry, currentPinsDown, currentHitPins)
         TaskPlayAnim(LocalPlayer.state.ped, 'weapons@projectile@', 'aimlive_l', 8.0, -8.0, -1, 17, 0, false, false, false)
     end
 
-    Wait(1000)
+    Citizen.Wait(1000)
 
     pressedBowl = false
     Action:Show('{keybind}bowling_aim_left{/keybind} Aim Left | {keybind}bowling_aim_right{/keybind} Aim Right | {keybind}primary_action{/keybind} Bowl')
 
     local tm = 0
     while tm < 7500 and not pressedBowl do
-        Wait(10)
+        Citizen.Wait(10)
         tm += 10
     end
 
@@ -230,7 +230,7 @@ function StartBowlingShit(alleyId, isSecondTry, currentPinsDown, currentHitPins)
         end
     end
 
-    Wait(150)
+    Citizen.Wait(150)
     DetachEntity(ball)
 
     SetEntityHeading(ball, GetEntityHeading(LocalPlayer.state.ped))
@@ -239,14 +239,14 @@ function StartBowlingShit(alleyId, isSecondTry, currentPinsDown, currentHitPins)
 
     local pinsBitch = true
     local pinsTarget = false
-    SetTimeout(4000, function()
+    Citizen.SetTimeout(4000, function()
         pinsBitch = false
     end)
 
     while pinsBitch do
         if #(GetEntityCoords(ball) - alleyData.endZone) <= 1.5 then
-            CreateThread(function()
-                Wait(750)
+            Citizen.CreateThread(function()
+                Citizen.Wait(750)
                 for k, v in ipairs(pins) do
                     local entRotation = GetEntityRotation(v)
                     if not (entRotation.x <= 10.0 and entRotation.x >= -10.0 and entRotation.y <= 10.0 and entRotation.y >= -10.0 and entRotation.z <= 10.0 and entRotation.z >= -10.0) then
@@ -255,10 +255,10 @@ function StartBowlingShit(alleyId, isSecondTry, currentPinsDown, currentHitPins)
                     end
                 end
             end)
-            Wait(2500)
+            Citizen.Wait(2500)
             pinsTarget = true
         end
-        Wait(100)
+        Citizen.Wait(100)
     end
 
     print('Delete Bowling Ball')
@@ -276,12 +276,12 @@ function StartBowlingShit(alleyId, isSecondTry, currentPinsDown, currentHitPins)
             end
         end
 
-        Wait(3000)
+        Citizen.Wait(3000)
     end
 
     print('Hit Pins: ', pinsDown)
 
-    Wait(2000)
+    Citizen.Wait(2000)
 
     for k, v in ipairs(pins) do
         DeleteEntity(v)
@@ -345,11 +345,11 @@ AddEventHandler('Bowling:Client:StartGame', function(entity, alleyId)
             if success then
                 SendBowlingNotification('Starting a Game of Bowling')
             else
-                Notification:Error('Couldn\'t Start Game', 5000, 'bowling-ball')
+                Notification:Error('Couldn\'t Start Game', 5000, 'bowling-ball-pin')
             end
         end)
     else
-        Notification:Error('Please provide a name longer than 2 letters', 5000, 'bowling-ball')
+        Notification:Error('Please provide a name longer than 2 letters', 5000, 'bowling-ball-pin')
     end
 end)
 
@@ -363,11 +363,11 @@ AddEventHandler('Bowling:Client:JoinGame', function(entity, alleyId)
             if success then
                 SendBowlingNotification('Joined a Game of Bowling')
             else
-                Notification:Error('Couldn\'t Join Game', 5000, 'bowling-ball')
+                Notification:Error('Couldn\'t Join Game', 5000, 'bowling-ball-pin')
             end
         end)
     else
-        Notification:Error('Please provide a name longer than 2 letters', 5000, 'bowling-ball')
+        Notification:Error('Please provide a name longer than 2 letters', 5000, 'bowling-ball-pin')
     end
 end)
 
@@ -398,12 +398,12 @@ AddEventHandler('Keybinds:Client:KeyUp:primary_action', function()
                 Action:Hide()
                 TriggerServerEvent('Bowling:Server:StartBowling', insideBowlingStart)
                 _actionCD = true
-                SetTimeout(30000, function()
+                Citizen.SetTimeout(30000, function()
                     _actionCD = false
                 end)
             end
         else
-            Notification:Error('Not Your Turn', 5000, 'bowling-ball')
+            Notification:Error('Not Your Turn', 5000, 'bowling-ball-pin')
         end
     end
 end)
@@ -415,7 +415,7 @@ AddEventHandler('Bowling:Client:EndGame', function(entity, alleyId)
         if success then
             SendBowlingNotification('Ended a Game of Bowling')
         else
-            Notification:Error('Couldn\'t End Game', 5000, 'bowling-ball')
+            Notification:Error('Couldn\'t End Game', 5000, 'bowling-ball-pin')
         end
     end)
 end)
@@ -425,7 +425,7 @@ AddEventHandler('Bowling:Client:ResetAll', function()
         if success then
             SendBowlingNotification('Reset All')
         else
-            Notification:Error('Couldn\'t Reset', 5000, 'bowling-ball')
+            Notification:Error('Couldn\'t Reset', 5000, 'bowling-ball-pin')
         end
     end)
 end)
@@ -435,7 +435,7 @@ AddEventHandler('Bowling:Client:ClearPins', function()
         if success then
             SendBowlingNotification('Cleared Pins')
         else
-            Notification:Error('Couldn\'t Clear Pins', 5000, 'bowling-ball')
+            Notification:Error('Couldn\'t Clear Pins', 5000, 'bowling-ball-pin')
         end
     end)
 end)

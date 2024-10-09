@@ -4,7 +4,7 @@ local spawnedLaptop = false
 AddEventHandler("Businesses:Client:Startup", function()
     Targeting.Zones:AddBox(
         "rockford-stage",
-        "headphones",
+        "speakers",
         vector3(-1004.11, -249.95, 39.47),
         1.0,
         1.2,
@@ -16,7 +16,7 @@ AddEventHandler("Businesses:Client:Startup", function()
         },
         {
             {
-                icon = "headphones",
+                icon = "speakers",
                 text = "Toggle DJ Stand",
                 event = "Businesses:Client:RockfordStage",
                 jobPerms = {
@@ -106,7 +106,7 @@ function loadModel(model)
 	if IsModelInCdimage(model) then
 		while not HasModelLoaded(model) do
 			RequestModel(model)
-			Wait(5)
+			Citizen.Wait(5)
 		end
 	end
 end

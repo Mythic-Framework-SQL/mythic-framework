@@ -2,7 +2,7 @@ function LoadScaleform(scaleform)
     local scaleformHandle = RequestScaleformMovie(scaleform)
 
     while not HasScaleformMovieLoaded(scaleformHandle) do
-        Wait(100)
+        Citizen.Wait(100)
     end
 
     return scaleformHandle
@@ -37,7 +37,7 @@ function SetupBowlingTVs()
         PopScaleformMovieFunctionVoid()
     end
 
-    CreateThread(function()
+    Citizen.CreateThread(function()
         while insideAlley do
             for k, v in pairs(tvCoords) do
                 DrawScaleformMovie_3dSolid(
@@ -49,7 +49,7 @@ function SetupBowlingTVs()
                     2
                 )
             end
-            Wait(0)
+            Citizen.Wait(0)
         end
     end)
 end
@@ -87,7 +87,7 @@ AddEventHandler('Polyzone:Enter', function(id, testedPoint, insideZones, data)
     if id == 'bowling_alley' then
         insideAlley = true
         SetupBowlingTVs()
-        Wait(2000)
+        Citizen.Wait(2000)
         UpdateBowlingTVs(true)
     end
 end)
@@ -107,7 +107,7 @@ end
 
 RegisterNetEvent('Bowling:Client:TVs:RequestUpdate', function(ignoreFlag)
     if insideAlley then
-        Wait(100)
+        Citizen.Wait(100)
         UpdateBowlingTVs(ignoreFlag)
     end
 end)
@@ -174,7 +174,7 @@ AddEventHandler('Bowling:Client:SetTV', function()
         if success then
             SendBowlingNotification('Updated Link!')
         else
-            Notification:Error('Error', 5000, 'bowling-ball')
+            Notification:Error('Error', 5000, 'bowling-ball-pin')
         end
     end)
 end)
