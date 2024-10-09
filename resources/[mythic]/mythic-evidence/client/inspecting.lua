@@ -44,7 +44,7 @@ AddEventHandler('Animations:Client:UsingCamera', function(using)
 end)
 
 function CanSeeEvidence()
-    return (IsPlayerFreeAiming(LocalPlayer.state.clientID) or ignoreFreeAim)
+    return (IsPlayerFreeAiming(LocalPlayer.state.PlayerID) or ignoreFreeAim)
 end
 
 function StartInspecting()
@@ -53,7 +53,7 @@ function StartInspecting()
         fetchedEvidenceCache = FetchEvidence()
         nearbyEvidence = filterNearbyEvidence(fetchedEvidenceCache)
 
-        CreateThread(function()
+        Citizen.CreateThread(function()
             while inspecting do
                 if CanSeeEvidence() then
                     for k, v in ipairs(nearbyEvidence) do
@@ -87,29 +87,29 @@ function StartInspecting()
 
                     if IsControlJustPressed(0, 38) then
                         PickupClosestEvidence(nearbyEvidence)
-                        Wait(350)
+                        Citizen.Wait(350)
                     end
                 else
-                    Wait(200)
+                    Citizen.Wait(200)
                 end
-                Wait(2)
+                Citizen.Wait(2)
             end
         end)
 
-        CreateThread(function()
+        Citizen.CreateThread(function()
             while inspecting do
                 if CanSeeEvidence() then
                     nearbyEvidence = filterNearbyEvidence(fetchedEvidenceCache) -- Filter down to the relatively close evidence
-                    Wait(1000)
+                    Citizen.Wait(1000)
                 else
-                    Wait(1500)
+                    Citizen.Wait(1500)
                 end
             end
         end)
 
-        CreateThread(function()
+        Citizen.CreateThread(function()
             while inspecting do
-                Wait(30000)
+                Citizen.Wait(30000)
                 fetchedEvidenceCache = FetchEvidence()
             end
         end)
