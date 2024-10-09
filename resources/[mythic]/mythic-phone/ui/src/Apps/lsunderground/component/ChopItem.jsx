@@ -41,7 +41,7 @@ export default ({ chopRequest }) => {
 						<div className={classes.title}>
 							{chopRequest.hv && (
 								<FontAwesomeIcon
-									icon={['fas', 'triangle-exclamation']}
+									icon={['fas', 'diamond-exclamation']}
 								/>
 							)}
 							{chopRequest.name}

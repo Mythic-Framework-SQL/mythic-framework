@@ -1,6 +1,6 @@
 AddEventHandler("Crypto:Server:Startup", function()
     while Crypto == nil do
-        Wait(10)
+        Citizen.Wait(10)
     end
 
     Crypto.Coin:Create("Vroom", "VRM", 100, false, false)

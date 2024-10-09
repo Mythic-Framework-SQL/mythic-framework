@@ -7,8 +7,8 @@ import {
 	StyledEngineProvider,
 } from '@material-ui/core';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { fas } from '@fortawesome/free-solid-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
+import { fas } from '@fortawesome/pro-solid-svg-icons';
 import { HashRouter as Router } from 'react-router-dom';
 
 import 'react-image-lightbox/style.css';

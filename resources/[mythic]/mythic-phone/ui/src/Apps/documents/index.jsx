@@ -2,7 +2,15 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles, withStyles } from '@material-ui/styles';
 import { useHistory } from 'react-router-dom';
-import { AppBar, Grid, Tooltip, IconButton, List, Tab, Tabs } from '@material-ui/core';
+import {
+	AppBar,
+	Grid,
+	Tooltip,
+	IconButton,
+	List,
+	Tab,
+	Tabs,
+} from '@material-ui/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import DocumentList from './components/DocumentList';
@@ -19,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 		lineHeight: '50px',
 		height: 78,
 	},
-    content: {
+	content: {
 		height: '83.5%',
 		overflow: 'hidden',
 	},
@@ -31,14 +39,14 @@ const useStyles = makeStyles((theme) => ({
 		fontWeight: 'bold',
 		marginTop: '25%',
 	},
-    tabPanel: {
-        top: 0,
+	tabPanel: {
+		top: 0,
 		height: '97.5%',
 	},
 	list: {
 		height: '100%',
 		overflow: 'auto',
-	}
+	},
 }));
 
 const YPTabs = withStyles((theme) => ({
@@ -72,18 +80,18 @@ const YPTab = withStyles((theme) => ({
 export default (props) => {
 	const classes = useStyles();
 	const dispatch = useDispatch();
-    const history = useHistory();
+	const history = useHistory();
 	const documents = useSelector((state) => state.data.data.myDocuments);
 
-    const [tab, setTab] = useState(0);
+	const [tab, setTab] = useState(0);
 
-    const handleTabChange = (event, tab) => {
+	const handleTabChange = (event, tab) => {
 		setTab(tab);
 	};
 
-    const createNew = () => {
-        history.push(`/apps/documents/view/doc/new`);
-    };
+	const createNew = () => {
+		history.push(`/apps/documents/view/doc/new`);
+	};
 
 	return (
 		<div className={classes.wrapper}>
@@ -97,7 +105,7 @@ export default (props) => {
 							<span>
 								<IconButton
 									className={classes.headerAction}
-                                    onClick={createNew}
+									onClick={createNew}
 								>
 									<FontAwesomeIcon
 										className={'fa'}
@@ -109,7 +117,7 @@ export default (props) => {
 					</Grid>
 				</Grid>
 			</AppBar>
-            <div className={classes.content}>
+			<div className={classes.content}>
 				<div
 					className={classes.tabPanel}
 					role="tabpanel"
@@ -124,10 +132,12 @@ export default (props) => {
 					hidden={tab !== 1}
 					id="categories"
 				>
-					{tab === 1 && <DocumentList documents={documents} showShared />}
+					{tab === 1 && (
+						<DocumentList documents={documents} showShared />
+					)}
 				</div>
 			</div>
-            <div className={classes.tabs}>
+			<div className={classes.tabs}>
 				<YPTabs
 					value={tab}
 					onChange={handleTabChange}

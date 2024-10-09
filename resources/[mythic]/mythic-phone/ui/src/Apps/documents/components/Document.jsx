@@ -5,9 +5,7 @@ import { ListItem, ListItemText } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import Moment from 'react-moment';
 
-const useStyles = makeStyles((theme) => ({
-
-}));
+const useStyles = makeStyles((theme) => ({}));
 
 export default ({ document }) => {
 	const classes = useStyles();
@@ -23,10 +21,10 @@ export default ({ document }) => {
 				primary={`${document.title}`}
 				secondary={
 					<span>
-                        Last Edited{' '}
-                        <Moment unix fromNow>
-                            {document.time}
-                        </Moment>
+						Last Edited{' '}
+						<Moment unix fromNow>
+							{document.time}
+						</Moment>
 					</span>
 				}
 			/>

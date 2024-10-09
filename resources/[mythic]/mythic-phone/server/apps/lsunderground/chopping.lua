@@ -201,7 +201,6 @@ AddEventHandler("Phone:Server:RegisterCallbacks", function()
 
 		local list = Phone.LSUnderground.Chopping:FindList(source, data.vNet)
 		local isInProg = Phone.LSUnderground.Chopping:InProgress(source, list?.type, model, list?.listId)
-
 		if list ~= nil and not isInProg then
 			_pChopping[source] = entState.VIN
 			_inProgress[entState.VIN] = {
@@ -360,7 +359,7 @@ AddEventHandler("Phone:Server:RegisterCallbacks", function()
 							Reputation.Modify:Add(source, "Chopping", 250 * list.type)
 							Phone.LSUnderground.Chopping:CreatePickupBox(source, list?.entry?.hv or false, list.type)
 
-							SetTimeout(1000 * math.random(20, 60), function()
+							Citizen.SetTimeout(1000 * math.random(20, 60), function()
 								Phone.Email:Send(
 									source,
 									"shadow@ls.undg",

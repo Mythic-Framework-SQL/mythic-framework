@@ -209,7 +209,7 @@ export default compose(
 					)}
 					<FontAwesomeIcon
 						className={`${classes.headerIcon} wifi`}
-						icon={limited ? 'wifi' : 'wifi'}
+						icon={limited ? 'wifi-exclamation' : 'wifi'}
 					/>
 					<FontAwesomeIcon
 						className={classes.headerIcon}

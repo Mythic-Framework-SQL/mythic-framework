@@ -1,9 +1,9 @@
 _publicChoplist = {}
 _vipChopList = {}
 
-CreateThread(function()
+Citizen.CreateThread(function()
 	while not Phone do
-		Wait(10)
+		Citizen.Wait(10)
 	end
 
 	
@@ -59,6 +59,6 @@ CreateThread(function()
 	-- 		end
 	-- 	end
 
-	-- 	Wait(60000)
+	-- 	Citizen.Wait(60000)
 	-- end
 end)

@@ -173,7 +173,7 @@ export default (props) => {
 							className={classes.expandoItem}
 							onClick={textContact}
 						>
-							<FontAwesomeIcon icon="comment-sms" />
+							<FontAwesomeIcon icon="message-sms" />
 						</Grid>
 						<Grid
 							item

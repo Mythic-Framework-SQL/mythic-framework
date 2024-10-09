@@ -2,7 +2,7 @@ PHONE.Store = {
 	Install = {
 		Check = function(self, app, method)
 			-- As of now, just pass true, idfk if we doing this shti
-			Wait(5e3)
+			Citizen.Wait(5e3)
 			return method == "store"
 		end,
 		Do = function(self, app, apps, method)
@@ -17,7 +17,7 @@ PHONE.Store = {
 	},
 	Uninstall = {
 		Check = function(self, app)
-			Wait(5e3)
+			Citizen.Wait(5e3)
 			return true
 		end,
 		Do = function(self, app, apps)
@@ -44,26 +44,26 @@ PHONE.Store = {
 AddEventHandler("Phone:Server:RegisterCallbacks", function()
 	Callbacks:RegisterServerCallback("Phone:Store:Install:Check", function(src, data, cb)
 		local char = Fetch:Source(src):GetData("Character")
-		CreateThread(function()
+		Citizen.CreateThread(function()
 			cb(Phone.Store.Install:Check(data))
 		end)
 	end)
 	Callbacks:RegisterServerCallback("Phone:Store:Install:Do", function(src, data, cb)
 		local char = Fetch:Source(src):GetData("Character")
-		CreateThread(function()
+		Citizen.CreateThread(function()
 			char:SetData("Apps", Phone.Store.Install:Do(data, char:GetData("Apps"), "store"))
 			cb(true, PHONE_APPS[data], os.time() * 1e3)
 		end)
 	end)
 	Callbacks:RegisterServerCallback("Phone:Store:Uninstall:Check", function(src, data, cb)
 		local char = Fetch:Source(src):GetData("Character")
-		CreateThread(function()
+		Citizen.CreateThread(function()
 			cb(Phone.Store.Uninstall:Check(data))
 		end)
 	end)
 	Callbacks:RegisterServerCallback("Phone:Store:Uninstall:Do", function(src, data, cb)
 		local char = Fetch:Source(src):GetData("Character")
-		CreateThread(function()
+		Citizen.CreateThread(function()
 			local nApps = Phone.Store.Uninstall:Do(data, char:GetData("Apps"))
 			char:SetData("Apps", nApps)
 			cb(true)

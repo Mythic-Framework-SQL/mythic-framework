@@ -81,6 +81,7 @@ export const initialState = {
 					'pingem',
 					'calculator',
 					'documents',
+					'lsunderground',
 				],
 				dock: ['contacts', 'phone', 'messages', 'blueline'],
 				installed: [
@@ -107,6 +108,7 @@ export const initialState = {
 					'garage',
 					'pingem',
 					'documents',
+					'lsunderground',
 				],
 			},
 			Armor: 100,

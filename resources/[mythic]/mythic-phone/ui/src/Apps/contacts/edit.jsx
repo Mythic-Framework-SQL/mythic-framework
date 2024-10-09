@@ -306,7 +306,7 @@ export default connect(null, { updateContact })((props) => {
 						onClick={textContact}
 						className={classes.contactButton}
 					>
-						<FontAwesomeIcon icon="comment-sms" />
+						<FontAwesomeIcon icon="message-sms" />
 					</Grid>
 				</Grid>
 			</Paper>
