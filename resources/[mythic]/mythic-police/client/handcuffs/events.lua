@@ -33,12 +33,12 @@ RegisterNetEvent("Handcuffs:Client:CuffingAnim", function()
 		loadAnimDict(animDict)
 
 		while not HasAnimDictLoaded(animDict) do
-			Wait(0)
+			Citizen.Wait(0)
 		end
 
-		Wait(100)
+		Citizen.Wait(100)
 		TaskPlayAnim(LocalPlayer.state.ped, animDict, anim, 8.0, -8, -1, 16, 0, 0, 0, 0)
-		Wait(3250)
+		Citizen.Wait(3250)
 		ClearPedTasksImmediately(LocalPlayer.state.ped)
 	end
 end)
@@ -53,7 +53,7 @@ RegisterNetEvent("Handcuffs:Client:UncuffingAnim", function()
 		Weapons:UnequipIfEquipped()
 
 		while not HasAnimDictLoaded(animDict) do
-			Wait(0)
+			Citizen.Wait(0)
 		end
 
 		if IsEntityPlayingAnim(LocalPlayer.state.ped, animDict, anim, 3) then
@@ -77,14 +77,14 @@ function cuffAnim()
 
 	RequestAnimDict("mp_arresting")
 	while not HasAnimDictLoaded("mp_arresting") do
-		Wait(1)
+		Citizen.Wait(1)
 	end
 	ClearPedTasksImmediately(LocalPlayer.state.ped)
 	TaskPlayAnim(LocalPlayer.state.ped, "mp_arresting", "idle", 8.0, 8.0, -1, _cuffFlags, 0.0, 0, 0, 0)
 end
 
 AddEventHandler("Handcuffs:Client:DoShittyAnim", function()
-	Wait(100)
+	Citizen.Wait(100)
 	cuffAnim()
 end)
 
@@ -95,10 +95,10 @@ RegisterNetEvent("Handcuffs:Client:CuffThread", function(cId)
 	end
 	_cuffThreading = true
 
-	CreateThread(function()
+	Citizen.CreateThread(function()
 		-- Wait till this is synced from server
 		while not LocalPlayer.state.isCuffed do
-			Wait(10)
+			Citizen.Wait(10)
 		end
 
 		while LocalPlayer.state.isCuffed do
@@ -108,7 +108,7 @@ RegisterNetEvent("Handcuffs:Client:CuffThread", function(cId)
 			-- if not IsEntityPlayingAnim(LocalPlayer.state.ped, "mp_arrest_paired", "crook_p2_back_right", 3) then
 			-- 	beingCuffedAnim(tonumber(cId))
 			-- end
-			Wait(5)
+			Citizen.Wait(5)
 
 			Weapons:UnequipIfEquipped()
 
@@ -148,7 +148,7 @@ RegisterNetEvent("Handcuffs:Client:CuffThread", function(cId)
 				cuffAnim()
 			end
 			if LocalPlayer.state.isDead or LocalPlayer.state.inTrunk then
-				Wait(1000)
+				Citizen.Wait(1000)
 			end
 		end
 
