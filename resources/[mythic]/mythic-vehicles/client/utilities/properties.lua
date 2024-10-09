@@ -30,7 +30,7 @@ function GetVehicleProperties(vehicle, initSetup)
             SetVehicleMod(vehicle, 15, -1, false) -- Suspension
             SetVehicleMod(vehicle, 16, -1, false) -- Armour
 
-            Wait(100)
+            Citizen.Wait(100)
         end
 
         return {

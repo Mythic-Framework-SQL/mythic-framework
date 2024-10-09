@@ -62,7 +62,7 @@ AddEventHandler('Vehicles:Client:AnchorBoat', function(entity, data)
                     _anchored = false
                 else
                     _anchored = false
-                    Wait(5)
+                    Citizen.Wait(5)
                     StartAnchor(entity.entity)
                 end
 
@@ -73,7 +73,7 @@ AddEventHandler('Vehicles:Client:AnchorBoat', function(entity, data)
         end)
 
         _anchorCD = true
-        SetTimeout(15000, function()
+        Citizen.SetTimeout(15000, function()
             _anchorCD = false
         end)
     end
@@ -97,7 +97,7 @@ function StartAnchor(veh)
     local pos = GetEntityCoords(veh)
     local lastMag = 0.0
 
-    CreateThread(function()
+    Citizen.CreateThread(function()
         while _anchored do
             if not CheckEntityOwnership(veh) then
                 _anchored = false
@@ -117,7 +117,7 @@ function StartAnchor(veh)
                 end
             end
 
-            Wait(5)
+            Citizen.Wait(5)
         end
     end)
 end

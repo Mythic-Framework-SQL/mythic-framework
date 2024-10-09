@@ -69,7 +69,7 @@ function RegisterCallbacks()
             end
 
             local characterId = character:GetData('SID')
-            Vehicles.Owned:GetAll(storageData.vehType, 0, characterId, function(vehicles)
+            Vehicles.Owned:GetAll(storageData.vehType, 0, fleetFetch == false and characterId or nil, function(vehicles)
                 cb(vehicles)
             end, 1, storageId, true, fleetFetch)
         else
@@ -83,58 +83,60 @@ function RegisterCallbacks()
             cb(false)
             return
         end
-
+    
         local property = Properties:Get(storageId)
         local maxParking = Properties:GetMaxParkingSpaces(storageId)
-
+    
         if property and maxParking and maxParking > 0 then
             local characterId = character:GetData('SID')
             Vehicles.Owned:GetAll(0, false, false, function(vehicles)
-                local c = {}
+                local uniqueOwners = {}
                 local charsToFetch = {}
-
-                for k, v in ipairs(vehicles) do
-                    if v.Owner and v.Owner.Type == 0 and v.Owner.Id then
-                        if not c[v.Owner.Id] then
-                            c[v.Owner.Id] = true
-                            table.insert(charsToFetch, v.Owner.Id)
+    
+                for _, vehicle in ipairs(vehicles) do
+                    vehicle.Owner = json.decode(vehicle.Owner)
+                    vehicle.Storage = json.decode(vehicle.Storage)
+                end
+    
+                for _, vehicle in ipairs(vehicles) do
+                    if vehicle.Owner and vehicle.Owner.Type == 0 and vehicle.Owner.Id then
+                        if not uniqueOwners[vehicle.Owner.Id] then
+                            uniqueOwners[vehicle.Owner.Id] = true
+                            table.insert(charsToFetch, vehicle.Owner.Id)
                         end
                     end
                 end
-
-                Database.Game:find({
-                    collection = 'characters',
-                    query = {
-                        SID = {
-                            ['$in'] = charsToFetch
-                        }
-                    },
-                    options = {
-                        projection = {
-                            SID = 1,
-                            First = 1,
-                            Last = 1,
-                            Phone = 1,
-                        }
-                    }
-                }, function(success, results)
-                    if success and #results > 0 then
-                        local dumbShit = {}
-                        for k, v in ipairs(results) do
-                            dumbShit[v.SID] = v
+    
+                if #charsToFetch > 0 then
+                    local placeholders = table.concat(charsToFetch, ',')
+                    local query = string.format("SELECT `SID`, `First`, `Last`, `Phone` FROM `characters` WHERE `SID` IN (%s)", placeholders)
+                    local results = MySQL.Sync.fetchAll(query)
+    
+                    if results and #results > 0 then
+                        local characterDetails = {}
+                        for _, result in ipairs(results) do
+                            characterDetails[result.SID] = result
                         end
-
+    
                         cb(vehicles, {
                             current = Vehicles.Owned.Properties:GetCount(storageId),
                             max = maxParking or 0
-                        }, characterId, dumbShit)
+                        }, characterId, characterDetails)
                     else
                         cb(false)
                     end
-                end)
+                else
+                    cb(false)
+                end
             end, 2, storageId, true, false)
         else
             cb(false)
+        end
+    end)
+    
+    Callbacks:RegisterServerCallback('Vehicles:GetVehiclesInStorageSelect', function(source, data, cb)
+        if data.VIN then
+            Vehicles.Owned:GetVIN(data.VIN, cb)
         end
     end)
 
@@ -475,59 +477,66 @@ function RegisterCallbacks()
     end)
 
     Callbacks:RegisterServerCallback('Vehicles:CompleteCustoms', function(source, data, cb)
-        local character = Fetch:Source(source):GetData('Character')
-        if not character or type(data.cost) ~= 'number' or type(data.changes) ~= 'table' or not data.vNet then
-            cb(false)
-            return
-        end
+      local character = Fetch:Source(source):GetData('Character')
+      if not character or type(data.cost) ~= 'number' or type(data.changes) ~= 'table' or not data.vNet then
+        cb(false)
+        return
+      end
 
-        local veh = NetworkGetEntityFromNetworkId(data.vNet)
-        local vehState = Entity(veh)
-        if DoesEntityExist(veh) and vehState and vehState.state.VIN then
-            if Wallet:Modify(source, -math.abs(data.cost)) then
-                local vehicleData = Vehicles.Owned:GetActive(vehState.state.VIN)
-                local newProperties = false
-                if vehicleData and vehicleData:GetData('Properties') then
-                    local currentProperties = vehicleData:GetData('Properties')
-    
-                    for k, v in pairs(data.changes) do
-                        if k == 'mods' then
-                            for mod, val in pairs(v) do
-                                currentProperties.mods[mod] = val
-                            end
-                        elseif k == 'extras' then
-                            currentProperties.extras = currentProperties.extras or {}
-                            for extraId, val in pairs(v) do
-                                currentProperties.extras[extraId] = val
-                            end
-                        else
-                            currentProperties[k] = v
-                        end
-                    end
-    
-                    newProperties = currentProperties
-                    vehicleData:SetData('Properties', currentProperties)
-                    vehicleData:SetData('DirtLevel', 0.0)
-                    Vehicles.Owned:ForceSave(vehicleData:GetData('VIN'))
-
-                elseif vehState.state.PleaseDoNotFuckingDelete then
-                    _savedVehiclePropertiesClusterfuck[vehState.state.VIN] = data.new
-                end
-    
-                SetVehicleDirtLevel(veh, 0.0)
-
-                local f = Banking.Accounts:GetOrganization("dgang")
-                Banking.Balance:Deposit(f.Account, math.abs(data.cost), {
-                    type = 'deposit',
-                    title = 'Benny\'s',
-                    description = string.format("Benny's Vehicle Modifications For %s %s", character:GetData("First"), character:GetData("Last")),
-                    data = {},
-                }, true)
-    
-                cb(true, newProperties)
-            else
-                cb(false)
+      local veh = NetworkGetEntityFromNetworkId(data.vNet)
+      local vehState = Entity(veh)
+      if DoesEntityExist(veh) and vehState and vehState.state.VIN then
+        if Wallet:Modify(source, -math.abs(data.cost)) then
+          local vehicleData = Vehicles.Owned:GetActive(vehState.state.VIN)
+          local newProperties = false
+          if vehicleData and vehicleData:GetData('Properties') then
+              local currentProperties = type(vehicleData:GetData('Properties')) == 'string' and json.decode(vehicleData:GetData('Properties')) or vehicleData:GetData('Properties')
+            if not currentProperties then currentProperties = {mods = {},extras = {}} end
+            if not currentProperties.mods then
+              currentProperties.mods = {}
             end
+
+              if not currentProperties.extras then
+                  currentProperties.extras = {}
+              end
+                for k, v in pairs(data.changes) do
+                    if k == 'mods' then
+                        for mod, val in pairs(v) do
+                            currentProperties.mods[mod] = val
+                        end
+                    elseif k == 'extras' then
+                        currentProperties.extras = currentProperties.extras or {}
+                        for extraId, val in pairs(v) do
+                            currentProperties.extras[extraId] = val
+                        end
+                    else
+                        currentProperties[k] = v
+                    end
+                end
+
+                newProperties = currentProperties
+                vehicleData:SetData('Properties', currentProperties)
+                vehicleData:SetData('DirtLevel', 0.0)
+                Vehicles.Owned:ForceSave(vehicleData:GetData('VIN'))
+
+            elseif vehState.state.PleaseDoNotFuckingDelete then
+                _savedVehiclePropertiesClusterfuck[vehState.state.VIN] = data.new
+            end
+
+            SetVehicleDirtLevel(veh, 0.0)
+
+            local f = Banking.Accounts:GetOrganization("dgang")
+            Banking.Balance:Deposit(f.Account, math.abs(data.cost), {
+                type = 'deposit',
+                title = 'Benny\'s',
+                description = string.format("Benny's Vehicle Modifications For %s %s", character:GetData("First"), character:GetData("Last")),
+                data = {},
+            }, true)
+
+            cb(true, newProperties)
+          else
+              cb(false)
+          end
         else
             cb(false)
         end

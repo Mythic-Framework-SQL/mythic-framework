@@ -35,8 +35,8 @@ local _NOSStart = 0
 local _NOSUsage = 0
 
 AddEventHandler("Characters:Client:Spawn", function()
-    Wait(500)
-    Hud:RegisterStatus("nos", 0, 100, "gauge-high", "#892020", true, false, {
+    Citizen.Wait(500)
+    Hud:RegisterStatus("nos", 0, 100, "gauge-circle-plus", "#892020", true, false, {
         hideZero = true,
     })
 end)
@@ -122,7 +122,7 @@ AddEventHandler("Vehicles:Client:StartUp", function()
                 if not cancelled and VEHICLE_INSIDE then
                     cb(VehToNet(VEHICLE_INSIDE))
 
-                    Wait(500)
+                    Citizen.Wait(500)
 
                     DoInitNOSCheck(VEHICLE_INSIDE)
                 else
@@ -193,7 +193,7 @@ function StartVehicleNOS()
 
         _NOSStart = GetGameTimer()
 
-        CreateThread(function()
+        Citizen.CreateThread(function()
             while _usingNOS do
                 if not IsVehicleStopped(_veh) and IsVehicleEngineOn(_veh) and (_hasNOS - _NOSUsage) > 0 then
                     local vehicleModel = GetEntityModel(_veh)
@@ -230,7 +230,7 @@ function StartVehicleNOS()
                     break
                 end
 
-                Wait(5)
+                Citizen.Wait(5)
             end
         end)
     end
@@ -265,14 +265,14 @@ function StartVehiclePurge()
 
         TriggerServerEvent("Vehicles:Server:SyncPurgeEffect", VehToNet(VEHICLE_INSIDE), true)
 
-        CreateThread(function()
+        Citizen.CreateThread(function()
             while _usingPurge do
                 if _NOSCooldown then
                     if _NOSCooldown > _NOSMaxPurge then
                         _NOSCooldown = _NOSCooldown - 400
                     end
                 end
-                Wait(100)
+                Citizen.Wait(100)
             end
         end)
     end
@@ -387,7 +387,7 @@ end)
 function LoadPtfxAsset(dict)
     RequestNamedPtfxAsset(dict)
     while not HasNamedPtfxAssetLoaded(dict) do
-        Wait(10)
+        Citizen.Wait(10)
     end
 end
 
