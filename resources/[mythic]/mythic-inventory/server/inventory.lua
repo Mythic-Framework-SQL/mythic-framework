@@ -103,7 +103,6 @@ function RetrieveComponents()
 	Logger = exports["mythic-base"]:FetchComponent("Logger")
 	Utils = exports["mythic-base"]:FetchComponent("Utils")
 	Fetch = exports["mythic-base"]:FetchComponent("Fetch")
-	Default = exports["mythic-base"]:FetchComponent("Default")
 	Inventory = exports["mythic-base"]:FetchComponent("Inventory")
 	EntityTypes = exports["mythic-base"]:FetchComponent("EntityTypes")
 	Chat = exports["mythic-base"]:FetchComponent("Chat")
@@ -134,7 +133,6 @@ AddEventHandler("Core:Shared:Ready", function()
 		"Inventory",
 		"Chat",
 		"EntityTypes",
-		"Default",
 		"Wallet",
 		"Middleware",
 		"Crafting",
