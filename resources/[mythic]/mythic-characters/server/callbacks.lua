@@ -16,7 +16,7 @@ function RegisterCallbacks()
     while Fetch:Source(source) == nil do
       Citizen.Wait(100)
     end
-    local motd = GetConvar("motd", "Welcome to MythicRP")
+    local motd = GetConvar("motd", "Welcome to PluggedRP")
     cb({ changelog = nil, motd = motd })
   end)
 
@@ -119,7 +119,7 @@ function RegisterCallbacks()
       end
     end
 
-    local dbData = Utils:DeepClone(doc)
+    local dbData = Utils:CloneDeep(doc)
     for k, v in pairs(dbData) do
       if type(v) == 'table' then
         dbData[k] = json.encode(v)
@@ -176,7 +176,7 @@ function RegisterCallbacks()
       return cb(nil)
     end
 
-    local deletingChar = Utils:DeepClone(myCharacter)
+    local deletingChar = Utils:CloneDeep(myCharacter)
     local deletedCharacter = MySQL.update.await(
       [[
         UPDATE `characters` SET `Deleted` = 1 WHERE `User` = @User AND `_id` = @ID

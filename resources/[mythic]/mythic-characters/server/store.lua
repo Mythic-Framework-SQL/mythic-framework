@@ -36,7 +36,7 @@ function StoreData(source)
 
   Logger:Trace("Characters", string.format("Saving Character %s", cId), { console = true })
 
-  local dbData = Utils:DeepClone(data)
+  local dbData = Utils:CloneDeep(data)
 
   for k, v in pairs(dbData) do
     if type(v) == "table" then
