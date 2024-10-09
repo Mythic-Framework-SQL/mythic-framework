@@ -29,7 +29,7 @@ PropertyUpgrades = {
     },
 }
 
-CreateThread(function()
+Citizen.CreateThread(function()
     for k, v in pairs(PropertyInteriors) do
         if PropertyUpgrades[v.type] and PropertyUpgrades[v.type].interior then
             table.insert(PropertyUpgrades[v.type].interior.levels, {

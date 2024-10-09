@@ -1,5 +1,7 @@
 _loadedFurniture = {}
 
+--Broken by SicklyAbility #Fanks
+
 function CreateFurnitureCallbacks()
     Callbacks:RegisterServerCallback("Properties:PlaceFurniture", function(source, data, cb)
         local char = Fetch:Source(source):GetData("Character")
@@ -139,53 +141,46 @@ function GetPropertyFurniture(pId, pInt)
         return _loadedFurniture[pId]
     end
 
-    local p = promise.new()
-    Database.Game:findOne({
-        collection = "properties_furniture",
-        query = { property = pId },
-    }, function(success, results)
-        if success and #results > 0 and results[1] and results[1].furniture then
-            p:resolve(results[1].furniture)
+    local results = MySQL.single.await('SELECT furniture FROM properties_furniture WHERE property = @property', {
+        ['@property'] = pId
+    })
+
+    local furniture
+    if results and #results > 0 and results[1] and results[1].furniture then
+        furniture = json.decode(results[1].furniture)
+    else
+        local interior = PropertyInteriors[pInt]
+        if interior and interior.defaultFurniture then
+            furniture = interior.defaultFurniture
         else
-            local interior = PropertyInteriors[pInt]
-            if interior?.defaultFurniture then
-                p:resolve(interior.defaultFurniture)
-            else
-                p:resolve({})
-            end
+            furniture = {}
         end
-    end)
+    end
 
-    local res = Citizen.Await(p)
+    _loadedFurniture[pId] = furniture
 
-    _loadedFurniture[pId] = res
-
-    return res
+    return furniture
 end
 
+
 function SetPropertyFurniture(pId, newFurniture, updater)
-    local p = promise.new()
+    local success = MySQL.query.await('UPDATE properties_furniture SET furniture = @furniture, updatedTime = @updatedTime, updatedBy = @updatedBy WHERE property = @property', {
+        ['@furniture'] = json.encode(newFurniture),
+        ['@updatedTime'] = os.time(),
+        ['@updatedBy'] = updater,
+        ['@property'] = pId
+    })
 
-    Database.Game:updateOne({
-        collection = "properties_furniture",
-        query = { property = pId },
-        update = {
-            ["$set"] = {
-                furniture = newFurniture,
-                updatedTime = os.time(),
-                updatedBy = updater,
-            },
-        },
-        options = {
-            upsert = true
-        }
-    }, function(success, updated)
-        p:resolve(success)
-    end)
+    if success == 0 then -- if not fucking rows updated insert a new shit record FUCK SAKE
+        success = MySQL.query.await('INSERT INTO properties_furniture (property, furniture, updatedTime, updatedBy) VALUES (@property, @furniture, @updatedTime, @updatedBy)', {
+            ['@property'] = pId,
+            ['@furniture'] = json.encode(newFurniture),
+            ['@updatedTime'] = os.time(),
+            ['@updatedBy'] = updater
+        })
+    end
 
-    local res = Citizen.Await(p)
-
-    if res then
+    if success then
         _loadedFurniture[pId] = newFurniture
         return newFurniture
     else
@@ -193,19 +188,13 @@ function SetPropertyFurniture(pId, newFurniture, updater)
     end
 end
 
+
 function DeletePropertyFurniture(pId)
-    local p = promise.new()
+    local success = MySQL.query.await('DELETE FROM properties_furniture WHERE property = @property', {
+        ['@property'] = pId
+    })
 
-    Database.Game:deleteOne({
-        collection = "properties_furniture",
-        query = { property = pId },
-    }, function(success)
-        p:resolve(success)
-    end)
-
-    local res = Citizen.Await(p)
-
-    if res then
+    if success then
         _loadedFurniture[pId] = nil
         return true
     else

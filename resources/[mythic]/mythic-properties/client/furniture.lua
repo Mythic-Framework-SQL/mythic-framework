@@ -25,7 +25,7 @@ function PlaceFurniture(v)
         SetEntityHeading(obj, v.heading + 0.0)
         FreezeEntityPosition(obj, true)
         while not DoesEntityExist(obj) do
-            Wait(1)
+            Citizen.Wait(1)
         end
 
         local furnData = FurnitureConfig[v.model]
@@ -37,7 +37,7 @@ function PlaceFurniture(v)
 
         if furnData then
             if _specCategories[furnData.cat] then
-                local icon = "square"
+                local icon = "draw-square"
                 local menu = {
                     {
                         icon = "arrows-up-down-left-right",
@@ -76,10 +76,10 @@ function PlaceFurniture(v)
                 }
 
                 if furnData.cat == "storage" then
-                    icon = "boxes-packing"
+                    icon = "box-open-full"
 
                     table.insert(menu, {
-                        icon = "boxes-packing",
+                        icon = "box-open-full",
                         text = "Access Storage",
                         event = "Properties:Client:Stash",
                         isEnabled = function(data)
@@ -91,7 +91,7 @@ function PlaceFurniture(v)
                     })
 
                     table.insert(menu, {
-                        icon = "shirt",
+                        icon = "clothes-hanger",
                         text = "Open Wardrobe",
                         event = "Properties:Client:Closet",
                     })
@@ -124,7 +124,7 @@ function PlaceFurniture(v)
             targeting = hasTargeting,
         })
 
-        Wait(1)
+        Citizen.Wait(1)
     else
         print("Failed to Load Model: " .. v.model)
     end
@@ -148,7 +148,7 @@ function SetFurnitureEditMode(state)
         if state then
             for k, v in ipairs(_spawnedFurniture) do
                 if not v.targeting then
-                    Targeting:AddEntity(v.entity, "square", {
+                    Targeting:AddEntity(v.entity, "draw-square", {
                         {
                             icon = "arrows-up-down-left-right",
                             text = "Move",
@@ -210,7 +210,7 @@ function CycleFurniture(direction)
 
     InfoOverlay:Close()
     ObjectPlacer:Cancel(true, true)
-    Wait(200)
+    Citizen.Wait(200)
     local fKey = _furnitureCategory[_furnitureCategoryCurrent]
     local fData = FurnitureConfig[fKey]
     if fData then
@@ -259,7 +259,7 @@ AddEventHandler("Furniture:Client:Cancel", function()
             Phone:Open()
         end
 
-        Wait(200)
+        Citizen.Wait(200)
         DisablePauseMenu(false)
         InfoOverlay:Close()
     end
@@ -312,7 +312,7 @@ AddEventHandler("Furniture:Client:CancelMove", function(data)
             Phone:Open()
         end
 
-        Wait(200)
+        Citizen.Wait(200)
         DisablePauseMenu(false)
     end
 end)
@@ -324,7 +324,7 @@ RegisterNetEvent("Furniture:Client:AddItem", function(property, index, item)
 
         if LocalPlayer.state.furnitureEdit then
             SetFurnitureEditMode(false)
-            Wait(100)
+            Citizen.Wait(100)
             SetFurnitureEditMode(true)
         end
     end
@@ -352,7 +352,7 @@ RegisterNetEvent("Furniture:Client:MoveItem", function(property, id, item)
 
         if LocalPlayer.state.furnitureEdit then
             SetFurnitureEditMode(false)
-            Wait(100)
+            Citizen.Wait(100)
             SetFurnitureEditMode(true)
         end
 
@@ -406,10 +406,10 @@ function DisablePauseMenu(state)
     if _disablePause ~= state then
         _disablePause = state
         if _disablePause then
-            CreateThread(function()
+            Citizen.CreateThread(function()
 				while _disablePause do
 					DisableControlAction(0, 200, true)
-					Wait(1)
+					Citizen.Wait(1)
 				end
 			end)
         end

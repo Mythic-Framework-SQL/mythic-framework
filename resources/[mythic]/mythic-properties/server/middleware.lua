@@ -24,47 +24,34 @@ function RegisterMiddleware()
 	end)
 
 	Middleware:Add("Characters:GetSpawnPoints", function(source, charId)
-		local p = promise.new()
+		local result = MySQL.query.await('SELECT * FROM properties WHERE type NOT IN (?, ?)', 
+		{ 'container', 'warehouse' })
+	
+		if not result or #result == 0 then
+			return {}
+		end
+	
+		local spawns = {}
+		local keys = {}
+	
+		for _, v in ipairs(result) do
+			local decodedKeys = json.decode(v.keys)
+			
+			if decodedKeys and decodedKeys[charId] then
 
-		Database.Game:find({
-			collection = "properties",
-			query = {
-				[string.format("keys.%s", charId)] = {
-					["$exists"] = true,
-				},
-				foreclosed = {
-					["$ne"] = true,
-				},
-				type = {
-					["$nin"] = {
-						"container",
-						"warehouse",
-					}
-				}
-			},
-		}, function(success, results)
-			if not success or not #results then
-				p:resolve({})
-				return
-			end
-			local spawns = {}
-
-			local keys = {}
-
-			for k, v in pairs(results) do
-				table.insert(keys, v._id)
-				local property = _properties[v._id]
+				table.insert(keys, v.id)
+				local property = _properties[v.id]
 				if property ~= nil then
-					local interior = property.upgrades?.interior
+					local interior = property.upgrades and property.upgrades.interior
 					local interiorData = PropertyInteriors[interior]
-
+	
 					local icon = "house"
 					if property.type == "warehouse" then
 						icon = "warehouse"
 					elseif property.type == "office" then
 						icon = "building"
 					end
-
+	
 					if interiorData ~= nil then
 						table.insert(spawns, {
 							id = property.id,
@@ -81,10 +68,10 @@ function RegisterMiddleware()
 					end
 				end
 			end
-			GlobalState[string.format("Char:Properties:%s", charId)] = keys
-			p:resolve(spawns)
-		end)
-
-		return Citizen.Await(p)
+		end
+	
+		GlobalState[string.format("Char:Properties:%s", charId)] = keys
+		return spawns
 	end, 3)
+	
 end
