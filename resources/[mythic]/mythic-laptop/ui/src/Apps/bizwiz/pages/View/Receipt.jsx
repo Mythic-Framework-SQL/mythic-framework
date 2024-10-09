@@ -57,7 +57,7 @@ export default ({ onNav, data }) => {
 	};
 
 	const onDelete = async () => {
-		if (hasJobPerm('LAPTOP_MANAGE_RECEIPT', onDuty)) {
+		if (hasJobPerm('TABLET_MANAGE_RECEIPT', onDuty)) {
 			try {
 				let res = await (
 					await Nui.send('BusinessReceiptDelete', {
@@ -77,7 +77,7 @@ export default ({ onNav, data }) => {
 	};
 
 	const canEditReport = () => {
-		return hasJobPerm('LAPTOP_MANAGE_RECEIPT', onDuty);
+		return hasJobPerm('TABLET_MANAGE_RECEIPT', onDuty);
 	};
 
 	const fetch = async () => {
@@ -147,7 +147,7 @@ export default ({ onNav, data }) => {
 								<Button disabled={!canEditReport} onClick={onEdit}>
 									Edit Document
 								</Button>
-								{hasJobPerm('LAPTOP_MANAGE_RECEIPT', onDuty) && <Button onClick={onDelete}>Delete Document</Button>}
+								{hasJobPerm('TABLET_MANAGE_RECEIPT', onDuty) && <Button onClick={onDelete}>Delete Document</Button>}
 							</ButtonGroup>
 						</Grid>
 						<Grid item xs={12}>

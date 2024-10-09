@@ -28,9 +28,9 @@ export default (props) => {
 
 	const useStyles = makeStyles((theme) => ({
 		wrapper: {
-			maxHeight: 918,
+			maxHeight: 1000,
 			height: '100%',
-			maxWidth: 1632,
+			maxWidth: 1600,
 			width: '100%',
 			position: 'absolute',
 			top: 0,

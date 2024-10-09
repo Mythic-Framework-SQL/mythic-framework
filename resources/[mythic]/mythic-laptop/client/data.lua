@@ -1,6 +1,6 @@
 RegisterNetEvent("Laptop:Client:SetData", function(type, data, options)
 	while Laptop == nil do
-		Wait(10)
+		Citizen.Wait(10)
 	end
 	Laptop.Data:Set(type, data)
 end)

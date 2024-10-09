@@ -85,10 +85,10 @@ export default ({ onNav }) => {
 
 			if (res) {
 				setPfp(res);
-                showAlert("Business Twitter Profile Updated");
+                showAlert("Business Spammer Profile Updated");
 			} else {
 				setPfp('');
-                showAlert("Failed to Update Business Twitter Profle");
+                showAlert("Failed to Update Business Spammer Profle");
 			}
 		} catch (err) {
 			console.log(err);
@@ -104,7 +104,7 @@ export default ({ onNav }) => {
             ) : (
                 <Grid container spacing={1}>
 					<Grid item xs={12}>
-						<Alert severity="info">Please use for business purposes only. Abuse of this will have your business permanently banned from using Twitter.</Alert>
+						<Alert severity="info">Please use for business purposes only. Abuse of this will have your business permanently banned from using Spammer.</Alert>
 					</Grid>
                     <Grid item xs={1}>
                         <Avatar

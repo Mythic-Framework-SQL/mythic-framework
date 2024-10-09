@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Moment from 'react-moment';
 
 import { useMyApps, useMyStates } from '../../hooks';
-import mfwLogo from '../../assets/imgs/mythic_logo_laptop.png';
+import mrpLogo from '../../assets/imgs/search.png';
 
 export default (props) => {
 	const dispatch = useDispatch();
@@ -76,7 +76,7 @@ export default (props) => {
 			'&:first-of-type': {
 				marginLeft: 0,
 			},
-			'&.signal': {
+			'&.wifi': {
 				color: hasState('PHONE_VPN')
 					? theme.palette.error.main
 					: theme.palette.text.main,
@@ -132,13 +132,13 @@ export default (props) => {
 	};
 
 	const GoHome = () => {
-		history.push('/');
+		//history.push('/');
 	};
 
 	return (
 		<div className={classes.taskbar}>
 			<div className={classes.startBtn} onClick={GoHome}>
-				<img src={mfwLogo} className={classes.startIcon} />
+				<img src={mrpLogo} className={classes.startIcon} />
 			</div>
 			<div className={classes.appIcons}>
 				{openApps.map((appState) => {
@@ -181,8 +181,8 @@ export default (props) => {
 				)}
 				<div className={classes.sysTime}>
 					<FontAwesomeIcon
-						className={`${classes.headerIcon} signal`}
-						icon="signal"
+						className={`${classes.headerIcon} wifi`}
+						icon={'wifi'}
 					/>
 				</div>
 				<div className={classes.sysTime}>
@@ -194,17 +194,17 @@ export default (props) => {
 				<div className={classes.sysTime}>
 					<FontAwesomeIcon
 						className={classes.headerIcon}
-						icon="wifi"
+						icon="signal"
 					/>
 				</div>
-				<div className={classes.sysTime} style={{ width: '90px' }}>
+				<div className={classes.sysTime} style={{ width: 90 }}>
 					<div className={classes.dateWrapper}>
 						<div className={classes.dateDetails}>
-						{String(time?.hour ?? 0).padStart(2, '0')}:
-						{String(time?.minute ?? 0).padStart(2, '0')}
+							{(time?.hour ?? 0).toString().padStart(2, '0')}:
+							{(time?.minute ?? 0).toString().padStart(2, '0')}
 						</div>
 						<div className={classes.dateDetails}>
-						<Moment format="MM/DD/YYYY" />
+							<Moment format="YYYY/MM/DD" />
 						</div>
 					</div>
 				</div>

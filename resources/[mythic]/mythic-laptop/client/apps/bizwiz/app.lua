@@ -81,7 +81,7 @@ RegisterNUICallback("GetBusinessTwitter", function(data, cb)
 	Callbacks:ServerCallback("Laptop:BizWiz:GetTwitterProfile", data, cb)
 end)
 
-RegisterNUICallback("SendTweet", function(data, cb)
+RegisterNUICallback("SendBusinessTweet", function(data, cb)
 	Callbacks:ServerCallback("Laptop:BizWiz:SendTweet", data, cb)
 end)
 

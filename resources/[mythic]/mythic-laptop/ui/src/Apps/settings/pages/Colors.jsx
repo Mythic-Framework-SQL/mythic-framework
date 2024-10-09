@@ -10,7 +10,7 @@ import { UpdateSetting } from '../actions';
 
 const useStyles = makeStyles((theme) => ({
 	wrapper: {
-		height: '93.25%',
+		height: '94%',
 		background: theme.palette.secondary.main,
 		textAlign: 'center',
 		padding: '0 2px',

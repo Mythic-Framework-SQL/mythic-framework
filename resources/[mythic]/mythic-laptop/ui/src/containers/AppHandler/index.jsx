@@ -8,11 +8,11 @@ import { useDispatch, useSelector } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
 	appScreen: {
-		height: '80%',
-		width: '80%',
+		height: '100%',
+		width: '100%',
 		position: 'absolute',
-		top: '10%',
-		left: '10%',
+		top: 0,
+		left: 0,
 	},
 	clickHandler: {
 		height: '100%',

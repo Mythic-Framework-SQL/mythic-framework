@@ -1,7 +1,7 @@
 import Nui from '../../util/Nui';
 
 export const initialState = {
-	visible: false,
+	visible: process.env.NODE_ENV != 'production',
 	clear: false,
 	expanded: true,
 	limited: false,
@@ -13,36 +13,10 @@ export const initialState = {
 		process.env.NODE_ENV == 'production'
 			? {}
 			: {
-					recyclebin: {
-						label: 'Recycle Bin',
-						name: 'recyclebin',
-						icon: ['fas', 'trash-can'],
-						color: '#303030',
-						hidden: false,
-						unread: 0,
-						fake: true,
-					},
-					settings: {
-						label: 'Settings',
-						name: 'settings',
-						icon: ['fas', 'gear'],
-						color: '#303030',
-						hidden: false,
-						unread: 0,
-					},
-					files: {
-						label: 'Files',
-						name: 'files',
-						icon: ['fas', 'folder-open'],
-						color: '#D8A71E',
-						hidden: false,
-						unread: 0,
-						fake: true,
-					},
 					internet: {
 						label: 'Interwebz',
 						name: 'internet',
-						icon: ['fas', 'globe'],
+						icon: ['fas', 'spider-web'],
 						color: '#1db5e7',
 						hidden: false,
 						unread: 0,
@@ -54,13 +28,6 @@ export const initialState = {
 						icon: ['fas', 'business-time'],
 						color: '#135dd8',
 						hidden: false,
-						unread: 0,
-					},
-					teams: {
-						label: 'Teams',
-						name: 'teams',
-						icon: 'people-group',
-						color: '#00FF8A',
 						unread: 0,
 					},
 					// terminal: {
@@ -86,7 +53,7 @@ export const initialState = {
 						},
 					},
 					lsunderground: {
-						label: 'LS Underground',
+						label: 'LS UGND',
 						name: 'lsunderground',
 						icon: 'user-secret',
 						color: '#E95200',
@@ -94,6 +61,30 @@ export const initialState = {
 						restricted: {
 							state: 'ACCESS_LSUNDERGROUND',
 						},
+					},
+					teams: {
+						label: 'Teams',
+						name: 'teams',
+						icon: 'people-group',
+						color: '#00FF8A',
+						unread: 0,
+					},
+					settings: {
+						label: 'Settings',
+						name: 'settings',
+						icon: ['fas', 'gear'],
+						color: '#18191e',
+						hidden: false,
+						unread: 0,
+					},
+					files: {
+						label: 'Files',
+						name: 'files',
+						icon: ['fas', 'folder-open'],
+						color: '#D8A71E',
+						hidden: false,
+						unread: 0,
+						fake: true,
 					},
 			  },
 };

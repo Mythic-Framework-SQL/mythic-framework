@@ -28,7 +28,7 @@ export default (props) => {
 
 	const onCopyLink = () => {
 		alert('Link Copied To Clipboard');
-	}
+	};
 
 	return (
 		<>
@@ -39,7 +39,9 @@ export default (props) => {
 						if (domNode?.name == 'img') {
 							return (
 								<img
-									onClick={() => setLbImg(domNode.attribs.src)}
+									onClick={() =>
+										setLbImg(domNode.attribs.src)
+									}
 									src={domNode.attribs.src}
 									className={`${props.wrapperClass} image`}
 								/>
@@ -50,7 +52,9 @@ export default (props) => {
 									text={domNode.attribs['href']}
 									onCopy={onCopyLink}
 								>
-									<span className={classes.copyableText}>{domNode.children[0].data}</span>
+									<span className={classes.copyableText}>
+										{domNode.children[0].data}
+									</span>
 								</CopyToClipboard>
 							);
 						} else if (domNode?.name === 'iframe') {
@@ -76,7 +80,9 @@ export default (props) => {
 									ImgComponent={({ responce }) => {
 										return (
 											<img
-												onClick={() => setLbImg(responce.url)}
+												onClick={() =>
+													setLbImg(responce.url)
+												}
 												src={responce.url}
 												alt={responce.author_name}
 												className={`${props.wrapperClass} image`}
@@ -94,7 +100,12 @@ export default (props) => {
 					},
 				})}
 			</div>
-			{lbImg != null && <Lightbox mainSrc={lbImg} onCloseRequest={() => setLbImg(null)} />}
+			{lbImg != null && (
+				<Lightbox
+					mainSrc={lbImg}
+					onCloseRequest={() => setLbImg(null)}
+				/>
+			)}
 		</>
 	);
 };

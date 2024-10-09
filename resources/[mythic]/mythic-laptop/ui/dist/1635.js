@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkhrrp_laptop=self.webpackChunkhrrp_laptop||[]).push([[1635],{21635:(e,l,a)=>{a.r(l),a.d(l,{propertyCategories:()=>r});var r=[{value:"all",label:"All"},{value:"house",label:"House"},{value:"office",label:"Office"},{value:"warehouse",label:"Warehouse"}]}}]);

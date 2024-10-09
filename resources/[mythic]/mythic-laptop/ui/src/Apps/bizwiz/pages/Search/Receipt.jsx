@@ -148,8 +148,8 @@ export default ({ onNav }) => {
 		setLoading(false);
 	};
 
-	const canCreateReceipts = hasJobPerm('LAPTOP_CREATE_RECEIPT', onDuty);
-	const canClearReceipts = hasJobPerm('LAPTOP_CLEAR_RECEIPT', onDuty);
+	const canCreateReceipts = hasJobPerm('TABLET_CREATE_RECEIPT', onDuty);
+	const canClearReceipts = hasJobPerm('TABLET_CLEAR_RECEIPT', onDuty);
 
 	return (
 		<div className={classes.wrapper}>

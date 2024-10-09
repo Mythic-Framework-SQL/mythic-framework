@@ -65,7 +65,7 @@ export default ({ onNav, data }) => {
 	const [loading, setLoading] = useState(false);
 	const [state, setState] = useState(initialState);
 
-	const canPin = hasJobPerm('LAPTOP_PIN_DOCUMENT', onDuty);
+	const canPin = hasJobPerm('TABLET_PIN_DOCUMENT', onDuty);
 
 	useEffect(() => {
 		const f = async (id) => {

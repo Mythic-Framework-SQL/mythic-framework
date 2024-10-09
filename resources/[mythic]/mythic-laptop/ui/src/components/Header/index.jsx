@@ -48,7 +48,7 @@ export default compose(
 			'&:first-of-type': {
 				marginLeft: 0,
 			},
-			'&.signal': {
+			'&.wifi': {
 				color: hasState('PHONE_VPN')
 					? theme.palette.error.main
 					: theme.palette.text.main,
@@ -119,12 +119,12 @@ export default compose(
 						/>
 					)}
 					<FontAwesomeIcon
-						className={`${classes.headerIcon} signal`}
-						icon={'signal'}
+						className={`${classes.headerIcon} wifi`}
+						icon={'wifi'}
 					/>
 					<FontAwesomeIcon
 						className={classes.headerIcon}
-						icon="wifi"
+						icon="signal"
 					/>
 				</Grid>
 			</Grid>

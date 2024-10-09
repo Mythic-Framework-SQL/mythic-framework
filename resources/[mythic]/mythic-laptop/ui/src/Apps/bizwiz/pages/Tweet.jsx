@@ -61,9 +61,9 @@ export default ({ onNav }) => {
         });
     };
 
-    const SendTweet = async (tweet) => {
+    const sendTweet = async (tweet) => {
         try {
-            let res = await (await Nui.send('SendTweet', tweet)).json();
+            let res = await (await Nui.send('SendBusinessTweet', tweet)).json();
 
             if (res) {
                 setState({
@@ -82,7 +82,7 @@ export default ({ onNav }) => {
     };
 
     const onCreate = async (e) => {
-        let res = await SendTweet({
+        let res = await sendTweet({
             time: Date.now(),
             content: state.tweet,
             image: {
@@ -94,19 +94,19 @@ export default ({ onNav }) => {
 
         if (res) onNav("Dashboard");
 
-        showAlert(res ? 'Tweet Created' : 'Unable to Create Tweet');
+        showAlert(res ? 'Spam Created' : 'Unable to Create Spam');
     };
 
     return (
         <div className={classes.wrapper}>
             <Grid container spacing={1}>
                 <Grid item xs={12}>
-                    <Alert severity="info">Please use for business purposes only. Abuse of this will have your business permanently banned from using Twitter.</Alert>
+                    <Alert severity="info">Please use for business purposes only. Abuse of this will have your business permanently banned from using Spammer.</Alert>
                 </Grid>
                 <Grid item xs={10}>
                     <TextField
                         className={classes.editField}
-                        label="Tweet"
+                        label="Spam"
                         name="tweet"
                         type="text"
                         fullWidth
@@ -122,7 +122,7 @@ export default ({ onNav }) => {
                 </Grid>
                 <Grid item xs={2}>
                     <Button variant="outlined" fullWidth onClick={onCreate}>
-                        Post Tweet
+                        Post Spam
                     </Button>
                 </Grid>
             </Grid>

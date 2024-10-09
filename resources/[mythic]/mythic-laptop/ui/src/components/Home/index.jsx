@@ -59,9 +59,9 @@ const useStyles = makeStyles((theme) => ({
 		},
 	},
 	appIcon: {
-		fontSize: 30,
-		width: 50,
-		height: 50,
+		fontSize: 35,
+		width: 60,
+		height: 60,
 		margin: 'auto',
 		color: '#fff',
 	},

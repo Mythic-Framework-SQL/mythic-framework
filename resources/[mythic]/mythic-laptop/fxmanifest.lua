@@ -12,18 +12,19 @@ client_script("@mythic-pwnzor/client/check.lua")
 ui_page("ui/dist/index.html")
 
 files({
-	"ui/dist/*.*",
+  "ui/dist/*.*",
 })
 
 client_scripts({
-	"client/*.lua",
-	"client/apps/**/*.lua",
+  "client/*.lua",
+  "client/apps/**/*.lua",
 })
 shared_scripts({
-	"config.lua",
+  "config.lua",
 })
 
 server_scripts({
-	"server/*.lua",
-	"server/apps/**/*.lua",
+  '@oxmysql/lib/MySQL.lua',
+  "server/*.lua",
+  "server/apps/**/*.lua",
 })

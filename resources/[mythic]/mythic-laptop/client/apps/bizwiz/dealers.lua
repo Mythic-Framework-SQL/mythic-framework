@@ -44,10 +44,10 @@ end)
 
 RegisterNUICallback("PDMRunCredit", function(data, cb)
 	Callbacks:ServerCallback(
-        "Dealerships:CheckPersonsCredit", 
-        { dealerId = LocalPlayer.state.onDuty, SID = data.term }, 
-        cb
-    )
+		"Dealerships:CheckPersonsCredit",
+		{ dealerId = LocalPlayer.state.onDuty, SID = data.term },
+		cb
+	)
 end)
 
 RegisterNUICallback("PDMStartSale", function(data, cb)

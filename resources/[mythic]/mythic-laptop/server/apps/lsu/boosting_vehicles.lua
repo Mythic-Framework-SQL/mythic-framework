@@ -1757,7 +1757,7 @@ BOOSTING_VEHICLE_CONFIG = {
                 model = "LC500",
                 priceBase = 42,
             },
-
+            
         }
     },
     ["S+"] = {
@@ -1856,7 +1856,7 @@ BOOSTING_VEHICLE_CONFIG = {
                 make = "Karin",
                 model = "Sultan RSV8",
                 priceBase = 70,
-            },
+            },       
             {
                 vehicle = "gtr",
                 make = "Elegy",
@@ -1881,7 +1881,7 @@ BOOSTING_VEHICLE_CONFIG = {
                 model = "GT32",
                 priceBase = 70,
             },
-
+            
         }
     }
 }

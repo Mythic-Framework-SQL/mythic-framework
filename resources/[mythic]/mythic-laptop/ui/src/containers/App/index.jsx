@@ -7,7 +7,7 @@ import {
 	StyledEngineProvider,
 } from '@mui/material';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { fas } from '@fortawesome/free-solid-svg-icons';
+import { fas } from '@fortawesome/pro-solid-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
 
 import 'react-image-lightbox/style.css';
@@ -111,8 +111,8 @@ export default (props) => {
 						height: '100%',
 						width: '100%',
 						margin: 'auto',
-						maxWidth: 1632,
-						maxHeight: 918,
+						maxWidth: 1600,
+						maxHeight: 1100,
 					},
 				},
 			},

@@ -145,7 +145,7 @@ export default ({ contract, repLevel }) => {
 
 	const isDisabled = disabledContracts?.includes(contract.id);
 	const isDisabledByRep = (repLevel < contract.vehicle.classLevel && !contract.vehicle.rewarded);
-	//console.log("BC Disabled", contract.vehicle.label, isDisabled, isDisabledByRep);
+	console.log("BC Disabled", contract.vehicle.label, isDisabled, isDisabledByRep);
 
 	return (
 		<Grid item xs={2}>

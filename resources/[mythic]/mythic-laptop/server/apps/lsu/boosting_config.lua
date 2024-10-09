@@ -20,6 +20,11 @@ BOOSTING_TIME_BETWEEN_MAX = 4
 BOOSTING_RANDOMNESS = 3
 BOOSTING_RANDOMNESS_DIFFICULT = 6
 
+_boostingRequiredRep = {
+    rep = "Chopping",
+    level = 5,
+}
+
 _boostingRepToClass = {
     "D",
     "C",

@@ -1,104 +1,103 @@
 AddEventHandler("Laptop:Server:RegisterCallbacks", function()
-	Database.Game:find({
-		collection = "business_notices",
-		query = {},
-	}, function(success, results)
-		if not success then
-			return
-		end
+  local fetchBusinessNotices = MySQL.query.await("SELECT * FROM business_notices")
 
-		Logger:Trace("Laptop", "[BizWiz] Loaded ^2" .. #results .. "^7 Business Notices", { console = true })
-		_businessNotices = results
-	end)
+  Logger:Trace("Laptop", "[BizWiz] Loaded ^2" .. #fetchBusinessNotices .. "^7 Business Notices", { console = true })
+  if #fetchBusinessNotices > 0 then
+    for k, v in ipairs(fetchBusinessNotices) do
+      v.author = json.decode(v.author)
+    end
+  end
+  _businessNotices = fetchBusinessNotices
 
-	Callbacks:RegisterServerCallback("Laptop:BizWiz:Notice:Create", function(source, data, cb)
-		local job = CheckBusinessPermissions(source, "LAPTOP_CREATE_NOTICE")
-		if job then
-			cb(Laptop.BizWiz.Notices:Create(source, job, data.doc))
-		else
-			cb(false)
-		end
-	end)
+  Callbacks:RegisterServerCallback("Laptop:BizWiz:Notice:Create", function(source, data, cb)
+    local job = CheckBusinessPermissions(source, "TABLET_CREATE_NOTICE")
+    if job then
+      cb(Laptop.BizWiz.Notices:Create(source, job, data.doc))
+    else
+      cb(false)
+    end
+  end)
 
-	Callbacks:RegisterServerCallback("Laptop:BizWiz:Notice:Delete", function(source, data, cb)
-		local job = CheckBusinessPermissions(source, "LAPTOP_DELETE_NOTICE")
-		if job then
-			cb(Laptop.BizWiz.Notices:Delete(job, data.id))
-		else
-			cb(false)
-		end
-	end)
+  Callbacks:RegisterServerCallback("Laptop:BizWiz:Notice:Delete", function(source, data, cb)
+    local job = CheckBusinessPermissions(source, "TABLET_DELETE_NOTICE")
+    if job then
+      cb(Laptop.BizWiz.Notices:Delete(job, data.id))
+    else
+      cb(false)
+    end
+  end)
 end)
 
 LAPTOP.BizWiz = LAPTOP.BizWiz or {}
 LAPTOP.BizWiz.Notices = {
-	Create = function(self, source, job, data)
-		local char = Fetch:Source(source):GetData("Character")
-		if char then
-			local p = promise.new()
+  Create = function(self, source, job, data)
+    local char = Fetch:Source(source):GetData("Character")
+    if char then
+      local insertNotice = MySQL.insert.await(
+        "INSERT INTO business_notices (job, author, title, description, date) VALUES (@job, @author, @title, @description, @date)",
+        {
+          ["@job"] = job,
+          ["@author"] = json.encode({
+            SID = char:GetData("SID"),
+            First = char:GetData("First"),
+            Last = char:GetData("Last"),
+          }),
+          ["@title"] = data.title,
+          ["@description"] = data.description,
+          ["@date"] = os.time() * 1000,
+        })
 
-			data.job = job
-			data.author = {
-				SID = char:GetData("SID"),
-				First = char:GetData("First"),
-				Last = char:GetData("Last"),
-			}
+      if not insertNotice then
+        return false
+      end
 
-			Database.Game:insertOne({
-				collection = "business_notices",
-				document = data,
-			}, function(success, result, insertIds)
-				if not success then
-					p:resolve(false)
-					return
-				end
+      local notice = {
+        id = insertNotice,
+        job = job,
+        author = {
+          SID = char:GetData("SID"),
+          First = char:GetData("First"),
+          Last = char:GetData("Last"),
+        },
+        title = data.title,
+        description = data.description,
+        date = os.time() * 1000,
+      }
+      table.insert(_businessNotices, notice)
 
-				data._id = insertIds[1]
-				table.insert(_businessNotices, data)
+      local jobDutyData = Jobs.Duty:GetDutyData(job)
+      if jobDutyData and jobDutyData.DutyPlayers then
+        for k, v in ipairs(jobDutyData.DutyPlayers) do
+          TriggerClientEvent("Laptop:Client:AddData", v, "businessNotices", notice)
+        end
+      end
+      return true
+    end
+    return false
+  end,
+  Delete = function(self, job, id)
+    local deleted = MySQL.query.await("DELETE FROM business_notices WHERE id = @id AND job = @job", {
+      ["@id"] = id,
+      ["@job"] = job,
+    })
 
-				local jobDutyData = Jobs.Duty:GetDutyData(job)
-				if jobDutyData and jobDutyData.DutyPlayers then
-					for k, v in ipairs(jobDutyData.DutyPlayers) do
-						TriggerClientEvent("Laptop:Client:AddData", v, "businessNotices", data)
-					end
-				end
+    if not deleted then
+      return false
+    end
 
-				p:resolve(insertIds[1])
-			end)
-			return Citizen.Await(p)
-		end
-		return false
-	end,
-	Delete = function(self, job, id)
-		local p = promise.new()
-		Database.Game:deleteOne({
-			collection = "business_notices",
-			query = {
-				_id = id,
-				job = job,
-			},
-		}, function(success, deleted)
-			if not success then
-				p:resolve(false)
-				return
-			end
+    for k, v in ipairs(_businessNotices) do
+      if v.id == id then
+        table.remove(_businessNotices, k)
+        break
+      end
+    end
 
-			for k, v in ipairs(_businessNotices) do
-				if v._id == id then
-					table.remove(_businessNotices, k)
-					break
-				end
-			end
-
-			local jobDutyData = Jobs.Duty:GetDutyData(job)
-			if jobDutyData and jobDutyData.DutyPlayers then
-				for k, v in ipairs(jobDutyData.DutyPlayers) do
-					TriggerClientEvent("Laptop:Client:RemoveData", v, "businessNotices", id)
-				end
-			end
-
-			p:resolve(true)
-		end)
-		return Citizen.Await(p)
-	end,
+    local jobDutyData = Jobs.Duty:GetDutyData(job)
+    if jobDutyData and jobDutyData.DutyPlayers then
+      for k, v in ipairs(jobDutyData.DutyPlayers) do
+        TriggerClientEvent("Laptop:Client:RemoveData", v, "businessNotices", id)
+      end
+    end
+    return true
+  end,
 }

@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Divider, List, ListItem, ListItemText, Grid, Alert, Button, ButtonGroup } from '@mui/material';
+import {
+	Divider,
+	List,
+	ListItem,
+	ListItemText,
+	Grid,
+	Alert,
+	Button,
+	ButtonGroup,
+} from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import Moment from 'react-moment';
 
@@ -40,28 +49,28 @@ const useStyles = makeStyles((theme) => ({
 		},
 	},
 	maxHeight: {
-		maxHeight: "60vh",
+		maxHeight: '60vh',
 		overflowY: 'scroll',
 	},
 }));
 
 export default ({ data, onNav }) => {
 	const classes = useStyles();
-    const dispatch = useDispatch();
+	const dispatch = useDispatch();
 	const alert = useAlert();
 	const hasJobPerm = useJobPermissions();
-    const onDuty = useSelector((state) => state.data.data.onDuty);
+	const onDuty = useSelector((state) => state.data.data.onDuty);
 
 	const [err, setErr] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [report, setReport] = useState(null);
 
 	const onEdit = () => {
-        onNav('Create/Document', { id: report._id });
+		onNav('Create/Document', { id: report._id });
 	};
 
 	const onDelete = async () => {
-		if (hasJobPerm('LAPTOP_DELETE_DOCUMENT', onDuty)) {
+		if (hasJobPerm('TABLET_DELETE_DOCUMENT', onDuty)) {
 			try {
 				let res = await (
 					await Nui.send('BusinessDocumentDelete', {
@@ -69,19 +78,19 @@ export default ({ data, onNav }) => {
 					})
 				).json();
 				if (res) {
-                    alert('Document Deleted');
+					alert('Document Deleted');
 
-                    onNav('Dashboard')
+					onNav('Dashboard');
 				} else alert('Unable to Delete Document');
 			} catch (err) {
 				console.log(err);
-                alert('Unable to Delete Document');
+				alert('Unable to Delete Document');
 			}
 		}
 	};
 
 	const canEditReport = () => {
-		return hasJobPerm('LAPTOP_PIN_DOCUMENT', onDuty);
+		return hasJobPerm('TABLET_PIN_DOCUMENT', onDuty);
 	};
 
 	const fetch = async () => {
@@ -113,7 +122,7 @@ export default ({ data, onNav }) => {
 			else alert('Unable to Load Document');
 		} catch (err) {
 			console.log(err);
-            alert('Unable to Load Document');
+			alert('Unable to Load Document');
 			setErr(true);
 		}
 		setLoading(false);
@@ -126,7 +135,10 @@ export default ({ data, onNav }) => {
 	return (
 		<div>
 			{loading || (!report && !err) ? (
-				<div className={classes.wrapper} style={{ position: 'relative' }}>
+				<div
+					className={classes.wrapper}
+					style={{ position: 'relative' }}
+				>
 					<Loader static text="Loading" />
 				</div>
 			) : err ? (
@@ -145,24 +157,41 @@ export default ({ data, onNav }) => {
 								<Button onClick={fetch} disabled={loading}>
 									Refresh
 								</Button>
-								<Button disabled={!canEditReport} onClick={onEdit}>
+								<Button
+									disabled={!canEditReport}
+									onClick={onEdit}
+								>
 									Edit Document
 								</Button>
-								{hasJobPerm('LAPTOP_DELETE_DOCUMENT', onDuty) && <Button onClick={onDelete}>Delete Document</Button>}
+								{hasJobPerm(
+									'TABLET_DELETE_DOCUMENT',
+									onDuty,
+								) && (
+									<Button onClick={onDelete}>
+										Delete Document
+									</Button>
+								)}
 							</ButtonGroup>
 						</Grid>
 						<Grid item xs={12}>
 							<Grid container spacing={2}>
 								<Grid item xs={6}>
 									<ListItem>
-										<ListItemText primary="Document Title" secondary={report.title} />
+										<ListItemText
+											primary="Document Title"
+											secondary={report.title}
+										/>
 									</ListItem>
 								</Grid>
 								<Grid item xs={3}>
 									<ListItemText
 										primary={
 											<span>
-												Created <Moment date={report.time} fromNow />
+												Created{' '}
+												<Moment
+													date={report.time}
+													fromNow
+												/>
 											</span>
 										}
 										secondary={
@@ -170,7 +199,10 @@ export default ({ data, onNav }) => {
 												By&nbsp;
 												{`${report.author.First} ${report.author.Last} (${report.author.SID})`}
 												&nbsp;on&nbsp;
-												<Moment date={report.time} format="LLL" />
+												<Moment
+													date={report.time}
+													format="LLL"
+												/>
 											</span>
 										}
 									/>
@@ -180,7 +212,14 @@ export default ({ data, onNav }) => {
 										<ListItemText
 											primary={
 												<span>
-													Last Updated <Moment date={report.lastUpdated?.Time} fromNow />
+													Last Updated{' '}
+													<Moment
+														date={
+															report.lastUpdated
+																?.Time
+														}
+														fromNow
+													/>
 												</span>
 											}
 											secondary={
@@ -188,7 +227,13 @@ export default ({ data, onNav }) => {
 													By&nbsp;
 													{`${report.lastUpdated.First} ${report.lastUpdated.Last} (${report.lastUpdated.SID})`}
 													&nbsp;on&nbsp;
-													<Moment date={report.lastUpdated?.Time} format="LLL" />
+													<Moment
+														date={
+															report.lastUpdated
+																?.Time
+														}
+														format="LLL"
+													/>
 												</span>
 											}
 										/>
@@ -203,7 +248,10 @@ export default ({ data, onNav }) => {
 									<ListItemText primary="Document" />
 								</ListItem>
 								<div className={classes.notes}>
-									<UserContent wrapperClass={classes.notes} content={report.notes} />
+									<UserContent
+										wrapperClass={classes.notes}
+										content={report.notes}
+									/>
 								</div>
 							</List>
 						</Grid>

@@ -81,37 +81,37 @@ export default ({ banned, reputations }) => {
 
 	const myGroup = useSelector((state) => state.data.data.myGroup);
 	const queue = useSelector((state) => state.data.data.boostingQueue);
-	const alias = useSelector((state) => state.data.data.player.Alias?.redline);
+	const alias = useSelector((state) => state.data.data.player.Profiles?.redline);
 
-	const myContracts = useSelector((state) => state.data.data.player.BoostingContracts);
+	//const myContracts = useSelector((state) => state.data.data.player.BoostingContracts);
 
-	// const [myContracts, setMyContracts] = useState(
-	// 	[...Array(3).keys()].map((i) => {
-	// 		return {
-	// 			id: i,
-	// 			owner: {
-	// 				SID: 1,
-	// 				Alias: 'MeFast',
-	// 			},
-	// 			vehicle: {
-	// 				model: 'drafter',
-	// 				label: 'Drafter',
-	// 				class: 'A+',
-	// 			},
-	// 			prices: {
-	// 				standard: {
-	// 					price: 25,
-	// 					coin: 'VRM',
-	// 				},
-	// 				scratch: {
-	// 					price: 50,
-	// 					coin: 'VRM',
-	// 				},
-	// 			},
-	// 			expires: 1659553001,
-	// 		};
-	// 	}),
-	// );
+	const [myContracts, setMyContracts] = useState(
+		[...Array(3).keys()].map((i) => {
+			return {
+				id: i,
+				owner: {
+					SID: 1,
+					Alias: 'MeFast',
+				},
+				vehicle: {
+					model: 'drafter',
+					label: 'Drafter',
+					class: 'A+',
+				},
+				prices: {
+					standard: {
+						price: 25,
+						coin: 'VRM',
+					},
+					scratch: {
+						price: 50,
+						coin: 'VRM',
+					},
+				},
+				expires: 1659553001,
+			};
+		}),
+	);
 
 	const [queueModal, setQueueModal] = useState(false);
 

@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Alert, Grid, List, ListItem, IconButton, Pagination } from '@mui/material';
+import {
+	Alert,
+	Grid,
+	List,
+	ListItem,
+	IconButton,
+	Pagination,
+} from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useJobPermissions } from '../../../../hooks';
@@ -36,11 +43,11 @@ const useStyles = makeStyles((theme) => ({
 export default ({ onNav }) => {
 	const classes = useStyles();
 	const hasJobPerm = useJobPermissions();
-    const onDuty = useSelector((state) => state.data.data.onDuty);
+	const onDuty = useSelector((state) => state.data.data.onDuty);
 	const notices = useSelector((state) => state.data.data.businessNotices);
 
-    const jobs = useSelector((state) => state.data.data.player.Jobs);
-    const jobData = jobs?.find(j => j.Id == onDuty);
+	const jobs = useSelector((state) => state.data.data.player.Jobs);
+	const jobData = jobs?.find((j) => j.Id == onDuty);
 
 	const PER_PAGE = 6;
 
@@ -61,8 +68,11 @@ export default ({ onNav }) => {
 			<div className={classes.block}>
 				<div className={classes.header}>
 					{jobData?.Name || 'Notice Board'}
-					{hasJobPerm('LAPTOP_CREATE_NOTICE', onDuty) && (
-						<IconButton onClick={() => onNav('Create/Notice')} className={classes.create}>
+					{hasJobPerm('TABLET_CREATE_NOTICE', onDuty) && (
+						<IconButton
+							onClick={() => onNav('Create/Notice')}
+							className={classes.create}
+						>
 							<FontAwesomeIcon icon={['fas', 'plus']} />
 						</IconButton>
 					)}
@@ -73,7 +83,12 @@ export default ({ onNav }) => {
 							.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 							.sort((a, b) => b.time - a.time)
 							.map((notice, k) => {
-								return <Item key={`notices-${k}`} notice={notice} />;
+								return (
+									<Item
+										key={`notices-${k}`}
+										notice={notice}
+									/>
+								);
 							})
 					) : (
 						<ListItem>

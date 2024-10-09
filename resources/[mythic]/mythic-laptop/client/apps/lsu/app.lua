@@ -7,16 +7,16 @@ end)
 RegisterNetEvent("Characters:Client:Spawn")
 AddEventHandler("Characters:Client:Spawn", function()
     while not GlobalState.LSUPickupLocation do
-        Wait(100)
+        Citizen.Wait(100)
     end
 
     PedInteraction:Add("lsu-pickup-guy", `s_m_y_dockwork_01`, GlobalState.LSUPickupLocation.coords, GlobalState.LSUPickupLocation.heading, 50.0, {
 		{
-			icon = "box-archive",
+			icon = "box-taped",
 			text = "Collect Order",
 			event = "Laptop:Client:LSUnderground:Collect",
 		},
-	}, 'truck-ramp-box', 'WORLD_HUMAN_SMOKING', true)
+	}, 'box-taped', 'WORLD_HUMAN_SMOKING', true)
 end)
 
 LAPTOP.LSUnderground = {

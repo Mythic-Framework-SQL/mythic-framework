@@ -5,6 +5,7 @@ import { Tab, Tabs } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { throttle } from 'lodash';
 
+import ChopList from './ChopList';
 import Reputations from './Reputations';
 import { useReputation } from '../../hooks';
 import Nui from '../../util/Nui';
@@ -38,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	tabPanel: {
 		top: 0,
-		height: '92.25%',
+		height: '94.5%',
 	},
 	list: {
 		height: '100%',
@@ -85,6 +86,7 @@ export default (props) => {
 	const visible = useSelector((state) => state.laptop.visible);
 	const [tab, setTab] = useState(0);
 
+	const [chops, setChops] = useState(Array());
 	const [reps, setReps] = useState(Array());
 	const [items, setItems] = useState(Array());
 	const [banned, setBanned] = useState(null);
@@ -98,11 +100,13 @@ export default (props) => {
 				try {
 					let res = await (await Nui.send('GetLSUDetails')).json();
 					if (res) {
+						setChops(res.chopList);
 						setReps(res.reputations);
 						setItems(res.items);
 						setBanned(res.banned);
 						setCanBoost(res.canBoost);
 					} else {
+						setChops(null);
 						setReps(Array());
 						setItems(Array());
 						setBanned(null);
@@ -110,6 +114,7 @@ export default (props) => {
 					}
 				} catch (err) {
 					console.log(err);
+					setChops(null);
 					setReps(Array());
 					setItems([
 						{
@@ -125,7 +130,7 @@ export default (props) => {
 						},
 					]);
 					//setBanned(["Boosting"])
-					setCanBoost(true);
+					//setCanBoost(true);
 				}
 				setLoading(false);
 			}, 1000),
@@ -170,6 +175,15 @@ export default (props) => {
 				<div
 					className={classes.tabPanel}
 					role="tabpanel"
+					hidden={tab !== 2}
+					id="latest"
+				>
+					{tab === 2 && <ChopList chopList={chops} />}
+				</div>
+
+				<div
+					className={classes.tabPanel}
+					role="tabpanel"
 					hidden={tab !== 3}
 					id="market"
 				>
@@ -203,8 +217,8 @@ export default (props) => {
 								/>
 							}
 						/>
-						<YPTab // shitty chopping
-							disabled
+						<YPTab
+							disabled={!chops}
 							icon={
 								<FontAwesomeIcon
 									icon={['fas', 'screwdriver-wrench']}
@@ -212,12 +226,12 @@ export default (props) => {
 							}
 						/>
 						<YPTab
-							icon={<FontAwesomeIcon icon={['fas', 'cart-shopping']} />}
+							icon={<FontAwesomeIcon icon={['fas', 'cart-shopping-fast']} />}
 						/>
 						<YPTab
 							icon={
 								<FontAwesomeIcon
-									icon={['fas', 'list']}
+									icon={['fas', 'list-timeline']}
 								/>
 							}
 						/>

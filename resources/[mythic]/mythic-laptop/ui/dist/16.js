@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkhrrp_laptop=self.webpackChunkhrrp_laptop||[]).push([[16],{70016:(a,l,e)=>{e.r(l),e.d(l,{gameCatagories:()=>p});var p=[{value:"all",label:"All"},{value:"blackjack",label:"Blackjack"}]}}]);

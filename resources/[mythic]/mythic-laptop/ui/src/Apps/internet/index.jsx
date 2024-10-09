@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	tabPanel: {
 		top: 0,
-		height: '93.25%',
+		height: '94.5%',
 	},
 	list: {
 		height: '100%',

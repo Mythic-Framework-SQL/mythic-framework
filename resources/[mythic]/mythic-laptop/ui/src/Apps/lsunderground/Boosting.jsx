@@ -59,7 +59,7 @@ export default ({ canBoost, banned, reputations }) => {
 
 	const myGroup = useSelector((state) => state.data.data.myGroup);
 	const queue = useSelector((state) => state.data.data.boostingQueue);
-	const alias = useSelector((state) => state.data.data.player.Alias?.redline);
+	const alias = useSelector((state) => state.data.data.player.Profiles?.redline);
 
 	const myContracts = useSelector((state) => state.data.data.player.BoostingContracts);
 
@@ -267,7 +267,7 @@ export default ({ canBoost, banned, reputations }) => {
 
 	if (!canBoost) {
 		return <div className={classes.wrapper}>
-			<div className={classes.emptyMsg}>Insufficient Items to Begin Boosting</div>
+			<div className={classes.emptyMsg}>Insufficient Reputation to Begin Boosting</div>
 		</div>
 	}
 
@@ -293,7 +293,7 @@ export default ({ canBoost, banned, reputations }) => {
 										style={{ height: '100%' }}
 										onClick={startCreatingContract}
 									>
-										<FontAwesomeIcon icon={['fas', 'file-circle-plus']} />
+										<FontAwesomeIcon icon={['fas', 'file-plus']} />
 									</Button>
 								</Grid>
 								<Grid item xs={12}>
@@ -303,7 +303,7 @@ export default ({ canBoost, banned, reputations }) => {
 										style={{ height: '100%' }}
 										onClick={onStartBanning}
 									>
-										<FontAwesomeIcon icon={['fas', 'person-circle-minus']} />
+										<FontAwesomeIcon icon={['fas', 'ban']} />
 									</Button>
 								</Grid>
 							</Grid>

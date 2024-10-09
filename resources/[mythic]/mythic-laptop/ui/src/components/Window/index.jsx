@@ -20,13 +20,11 @@ export default ({
 	const focused = useSelector((state) => state.apps.focused);
 	const useStyles = makeStyles((theme) => ({
 		window: {
-			maxHeight:
-				appState.maximized || !Boolean(appData.size) ? '100%' : height,
-			maxWidth:
-				appState.maximized || !Boolean(appData.size) ? '100%' : width,
-			height: '100%',
-			width: '100%',
 			position: 'absolute',
+			height: '90%',
+			width: '85%',
+			left: 150,
+			top: 40,
 			zIndex: focused == app ? 200 : 100,
 			border: !Boolean(appData.size)
 				? 'none'
@@ -59,10 +57,26 @@ export default ({
 			display: 'inline-block',
 			textAlign: 'center',
 		},
-		action: {
-			height: 50,
-			width: 60,
-			color: theme.palette.text.main,
+		appControlMinimizeBtn: {
+			border: `none`,
+			minWidth: `17px`,
+			minHeight: `17px`,
+			borderRadius: `50px`,
+			marginRight: '0.5rem',
+			backgroundColor: `#FFBF60`,
+			'&:hover': {
+				cursor: 'pointer'
+			}
+		},
+		appControlCloseBtn: {
+			border: `none`,
+			minWidth: `17px`,
+			minHeight: `17px`,
+			borderRadius: `50px`,
+			backgroundColor: `#FF6060`,
+			'&:hover': {
+				cursor: 'pointer'
+			}
 		},
 		content: {
 			height: 'calc(100% - 50px)',
@@ -117,15 +131,10 @@ export default ({
 
 	return (
 		<Draggable
-			bounds="parent"
-			defaultClassName={classes.windowDrag}
-			handle={`.${classes.titlebar}`}
-			defaultPosition={{ x: 0, y: 0 }}
-			disabled={width == '100%' && height == '100%'}
-			onStart={onStart}
+			handle={'section'}
 		>
 			<div className={classes.window} onClick={onClick}>
-				<div className={classes.titlebar}>
+				<section className={classes.titlebar}>
 					<div className={classes.title}>{title}</div>
 					<div className={classes.actions}>
 						{Boolean(onRefresh) && (
@@ -135,22 +144,21 @@ export default ({
 								/>
 							</Button>
 						)}
-						<Button
-							fullWidth
-							className={classes.action}
-							onClick={onMinimize}
+
+						<div
+							style={{
+								marginRight: '1vh'
+							}}
 						>
-							<FontAwesomeIcon icon={['fas', 'minus']} />
-						</Button>
-						<Button
-							fullWidth
-							className={classes.action}
-							onClick={onClose}
-						>
-							<FontAwesomeIcon icon={['fas', 'x']} />
-						</Button>
+							<Button className={classes.appControlMinimizeBtn}>
+								<div></div>
+							</Button>
+							<Button onClick={onClose} className={classes.appControlCloseBtn}>
+								<div></div>
+							</Button>
+						</div>
 					</div>
-				</div>
+				</section>
 				<div className={classes.content}>{children}</div>
 			</div>
 		</Draggable>

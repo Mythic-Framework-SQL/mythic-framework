@@ -189,8 +189,8 @@ end)
 
 RegisterNetEvent("Characters:Client:Spawn")
 AddEventHandler("Characters:Client:Spawn", function()
-    Wait(1000)
-    Hud:RegisterStatus("boosting-timer", 0, 100, "hourglass", "#892020", false, false, {
+    Citizen.Wait(1000)
+    Hud:RegisterStatus("boosting-timer", 0, 100, "timer", "#892020", false, false, {
         hideZero = true,
     })
 end)
@@ -203,24 +203,20 @@ RegisterNetEvent("Laptop:Client:LSUnderground:Boosting:Start", function(data)
 
     if _boosting then
         if _boosting.pickUp then
-            local function getRandomPointWithinCircle(center, maxRadius)
-                local angle = math.random() * 2 * math.pi
-                local distance = math.sqrt(math.random()) * maxRadius
-                local offsetX = math.cos(angle) * distance
-                local offsetY = math.sin(angle) * distance
-                return vector3(center.x + offsetX, center.y + offsetY, center.z)
-            end
-
-            local radius = 100.0
-            local randomizedCenter = getRandomPointWithinCircle(_boosting.pickUp, radius)
-
-            local blip = AddBlipForRadius(randomizedCenter.x, randomizedCenter.y, randomizedCenter.z, radius)
-            SetBlipHighDetail(blip, true)
-            SetBlipColour(blip, 17)
-            SetBlipAlpha(blip, 128)
-            SetBlipAsShortRange(blip, true)
-
-            _boosting.blip = blip
+            Blips:Add(
+                "boosting-contract",
+                "[Contract]: Target Vehicle",
+                _boosting.pickUp,
+                523,
+                17,
+                1.1,
+                2,
+                false,
+                false
+            )
+    
+            ClearGpsPlayerWaypoint()
+            SetNewWaypoint(_boosting.pickUp.x, _boosting.pickUp.y)
         end
 
         Polyzone.Create:Circle("boosting-dropoff", _boosting.dropOff, 30.0, {})
@@ -235,10 +231,7 @@ RegisterNetEvent("Laptop:Client:LSUnderground:Boosting:UpdateState", function(st
     _boosting.state = state
 
     if state == 1 then
-        if _boosting and _boosting.blip then
-            RemoveBlip(_boosting.blip)
-            _boosting.blip = nil
-        end
+        Blips:Remove("boosting-contract")
     elseif state == 2 then
 
         if data then
@@ -248,7 +241,7 @@ RegisterNetEvent("Laptop:Client:LSUnderground:Boosting:UpdateState", function(st
 
         if not trackerThread then
             trackerThread = true
-            CreateThread(function()
+            Citizen.CreateThread(function()
                 while _boosting and _boosting.state == 2 and LocalPlayer.state.loggedIn do
                     if NetworkDoesEntityExistWithNetworkId(_boosting.vehicleNet) then
                         local veh = NetToVeh(_boosting.vehicleNet)
@@ -256,8 +249,8 @@ RegisterNetEvent("Laptop:Client:LSUnderground:Boosting:UpdateState", function(st
                             UISounds.Play:FrontEnd(-1, "5_SEC_WARNING", "HUD_MINI_GAME_SOUNDSET")
                         end
                     end
-
-                    Wait(7000 + (_boosting.trackerDelay * 1000))
+    
+                    Citizen.Wait(7000 + (_boosting.trackerDelay * 1000))
                 end
             end)
         end
@@ -275,8 +268,8 @@ RegisterNetEvent("Laptop:Client:LSUnderground:Boosting:UpdateState", function(st
             false
         )
 
-        --ClearGpsPlayerWaypoint()
-        --SetNewWaypoint(_boosting.dropOff.x, _boosting.dropOff.y)
+        ClearGpsPlayerWaypoint()
+        SetNewWaypoint(_boosting.dropOff.x, _boosting.dropOff.y)
         TriggerEvent("Status:Client:Update", "boosting-timer", 0)
     end
 end)
@@ -293,46 +286,46 @@ AddEventHandler("Laptop:Client:LSUnderground:Boosting:AttemptExterior", function
                     --numPeds = 0
                     local availableWeapons = _availableWeaponsForClass[_boosting.vehicleData?.class or "D"]
 
-                    CreateThread(function()
+                    Citizen.CreateThread(function()
                         for i = 1, numPeds do
                             local model = _pedModels[math.random(#_pedModels)]
                             local spawn = _boosting.pedSpawns[#_boosting.pedSpawns]
-
+    
                             -- Requesting model
                             RequestModel(model)
                             while not HasModelLoaded(model) do
-                                Wait(5)
+                                Citizen.Wait(5)
                             end
                             SetModelAsNoLongerNeeded(model)
-
+    
                             local ped = CreatePed(5, model, spawn.x, spawn.y, spawn.z, spawn.w, true, true)
                             while not DoesEntityExist(ped) do
-                                Wait(1)
+                                Citizen.Wait(1)
                             end
-
+    
                             Entity(ped).state:set('crimePed', true, true)
-
+    
                             local w = Utils:WeightedRandom(availableWeapons)
                             GiveWeaponToPed(ped, w, 99999, false, true)
                             SetCurrentPedWeapon(ped, w, true)
-
+    
                             SetEntityMaxHealth(ped, makeDifficult and 250 or 150)
                             SetEntityHealth(ped, makeDifficult and 250 or 150)
                             if makeDifficult then
                                 SetPedArmour(ped, 150)
                             end
-
+    
                             DecorSetBool(ped, 'ScriptedPed', true)
                             SetEntityAsMissionEntity(ped, 1, 1)
-
+    
                             SetPedRelationshipGroupDefaultHash(ped, `BOBCAT_SECURITY`)
                             SetPedRelationshipGroupHash(ped, `BOBCAT_SECURITY`)
                             SetPedRelationshipGroupHash(ped, `HATES_PLAYER`)
                             SetCanAttackFriendly(ped, false, true)
                             SetPedAsCop(ped)
-
+    
                             TaskTurnPedToFaceEntity(ped, LocalPlayer.state.ped, 1.0)
-
+    
                             SetPedCombatMovement(ped, 2)
                             SetPedCombatRange(ped, 0)
                             SetPedCombatAttributes(ped, 46, 1)
@@ -340,21 +333,21 @@ AddEventHandler("Laptop:Client:LSUnderground:Boosting:AttemptExterior", function
                             SetPedCombatAttributes(ped, 5000, 1)
                             SetPedFleeAttributes(ped, 0, 0)
                             SetPedAsEnemy(ped, true)
-
+    
                             SetPedSeeingRange(ped, 100.0)
                             SetPedHearingRange(ped, 100.0)
                             SetPedAlertness(ped, 3)
-
+    
                             TaskCombatHatedTargetsAroundPed(ped, 100.0, 0)
-
+    
                             local _, cur = GetCurrentPedWeapon(ped, true)
                             SetPedInfiniteAmmo(ped, true, cur)
                             SetPedDropsWeaponsWhenDead(ped, false)
 
                             if i <= (numPeds / 2) then
-                                Wait(3000)
+                                Citizen.Wait(3000)
                             else
-                                Wait(math.random(10, 35) * 1000)
+                                Citizen.Wait(math.random(10, 35) * 1000)
                             end
                         end
                     end)
@@ -392,7 +385,7 @@ AddEventHandler("Laptop:Client:LSUnderground:Boosting:SuccessIgnition", function
             Callbacks:ServerCallback("Laptop:LSUnderground:Boosting:Ignition", {
                 location = string.format("%s - %s", GetStreetNameFromHashKey(main), GetLabelText(GetNameOfZone(coords.x, coords.y, coords.z)))
             }, function()
-
+                
             end)
         end
     end
@@ -401,14 +394,14 @@ end)
 function BoostingTrackerCooldown()
     trackerTimer = GetGameTimer() + 30000
 
-    CreateThread(function()
+    Citizen.CreateThread(function()
         while _boosting and trackerTimer > GetGameTimer() do
 
             local time = math.floor((trackerTimer - GetGameTimer()) / 1000)
             local percent = math.floor((time / 30) * 100)
 
             TriggerEvent("Status:Client:Update", "boosting-timer", percent)
-            Wait(500)
+            Citizen.Wait(500)
         end
 
         TriggerEvent("Status:Client:Update", "boosting-timer", 0)
@@ -422,6 +415,7 @@ function RegisterBoostingCallbacks()
             hackData = _trackerHacks.B
         end
 
+        
         if _boosting and (not trackerTimer or GetGameTimer() >= trackerTimer) and hackData and NetworkDoesEntityExistWithNetworkId(_boosting.vehicleNet) then
             local veh = NetToVeh(_boosting.vehicleNet)
 
@@ -484,9 +478,9 @@ end)
 AddEventHandler("Vehicles:Client:ExitVehicle", function(veh)
     if not _boosting then return; end
 
-    if
-        _boosting.state == 3
-        and inZone
+    if 
+        _boosting.state == 3 
+        and inZone 
         and NetworkDoesEntityExistWithNetworkId(_boosting.vehicleNet) 
         and veh == NetToVeh(_boosting.vehicleNet)
         and not CheckPDInZone(_boosting.dropOff, 60.0)

@@ -64,7 +64,7 @@ const useStyles = makeStyles((theme) => ({
 		overflowY: 'auto',
 		overflowX: 'hidden',
 		'&::-webkit-scrollbar': {
-			width: 8,
+			width: 6,
 		},
 		'&::-webkit-scrollbar-thumb': {
 			background: '#ffffff52',
@@ -464,7 +464,7 @@ export default () => {
 							>
 								<FontAwesomeIcon
 									className={classes.avatarIcon}
-									icon={['fas', 'image']}
+									icon={['fas', 'image-polaroid']}
 								/>
 							</Avatar>
 						</Grid>

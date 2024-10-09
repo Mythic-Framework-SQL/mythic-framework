@@ -42,7 +42,7 @@ export default (props) => {
 			onMouseUp={versionEnd}
 			onMouseLeave={versionEnd}
 		>
-			Mythic OS <small>v{__APPVERSION__}</small>
+			Depression OS <small>v{__APPVERSION__}</small>
 		</div>
 	);
 };

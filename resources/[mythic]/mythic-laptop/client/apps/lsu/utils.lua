@@ -16,10 +16,10 @@ end
 function PedFaceCoord(pPed, pCoords)
     TaskTurnPedToFaceCoord(pPed, pCoords.x, pCoords.y, pCoords.z)
 
-    Wait(100)
+    Citizen.Wait(100)
 
     while GetScriptTaskStatus(pPed, 0x574bb8f5) == 1 do
-        Wait(0)
+        Citizen.Wait(0)
     end
 end
 

@@ -73,14 +73,14 @@ const useStyles = makeStyles((theme) => ({
 		background: `${theme.palette.primary.main}40`,
 	},
 	appIcon: {
-		fontSize: 30,
-		width: 50,
-		height: 50,
+		fontSize: 35,
+		width: 60,
+		height: 60,
 		margin: 'auto',
 		color: '#fff',
 	},
 	appLabel: {
-		fontSize: 12,
+		fontSize: 16,
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
 		textShadow: '0px 0px 5px #000000',
