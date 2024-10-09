@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import Moment from "react-moment";
 import Truncate from "@nosferatu500/react-truncate";
 
-import { Modal, UserContent } from "../";
+import { Modal, UserContent, Loader } from "../";
 import { Sanitize } from "../../util/Parser";
 import Nui from "../../util/Nui";
 import { usePerson, usePermissions } from '../../hooks';
@@ -49,8 +49,10 @@ export default ({ notice }) => {
   const classes = useStyles();
   const hasPerms = usePermissions();
   const user = useSelector(state => state.app.user);
-  const canDelete = hasPerms(true) || notice.author == user.SID;
+  const canDelete = hasPerms(true) || notice.creator == user?.SID;
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [noticeData, setNoticeData] = useState(null);
 
   const onDismiss = async () => {
     if (!canDelete) return;
@@ -58,7 +60,7 @@ export default ({ notice }) => {
       let res = await (
         await Nui.send("Delete", {
           type: "notice",
-          id: notice._id,
+          id: notice.id,
         })
       ).json();
 
@@ -72,39 +74,72 @@ export default ({ notice }) => {
     setOpen(false);
   };
 
+  const onOpen = async () => {
+    setOpen(true);
+    setLoading(true);
+
+    try {
+      let res = await (
+        await Nui.send("View", {
+          type: "notice",
+          id: notice.id,
+        })
+      ).json();
+
+      if (res) {
+        setNoticeData(res);
+      } else toast.error("Unable to View Notice");
+    } catch (e) {
+      setNoticeData({ description: 'test' });
+      console.log(e);
+    }
+
+    setLoading(false);
+  };
+
+  const onClose = async () => {
+    if (!loading) setOpen(false);
+  };
+
   return (
     <>
-      <ListItem className={classes.wrapper} onClick={() => setOpen(true)}>
+      <ListItem className={classes.wrapper} onClick={onOpen}>
         <ListItemAvatar>
           <Avatar>
-            <FontAwesomeIcon icon={["fas", notice.job ? 'lock' : 'circle-info']} />
+            <FontAwesomeIcon icon={["fas", (notice.restricted != "public" && notice.restricted != "government") ? 'lock' : 'circle-info']} />
           </Avatar>
         </ListItemAvatar>
-        <ListItemText
-          primary={<Truncate lines={1}>{notice.title}</Truncate>}
-          secondary={<Truncate lines={1}>{Sanitize(notice.description)}</Truncate>}
-        />
-        <Moment className={classes.time} date={notice.time} fromNow />
+        <ListItemText primary={<Truncate lines={1}>{notice.title}</Truncate>} />
+        <Moment className={classes.time} date={notice.created} fromNow />
       </ListItem>
       <Modal
         open={open}
         title={notice.title}
+        maxWidth="lg"
         deleteLang="Delete"
-        onClose={() => setOpen(false)}
-        onDelete={canDelete ? onDismiss : null}
+        onClose={() => onClose()}
+        onDelete={(canDelete && !loading) ? onDismiss : null}
       >
-        <List className={classes.author}>
+        {loading || !open ? (
+          <Loader />
+        ) : (
+          <List className={classes.author}>
             <UserContent
-                wrapperClass={classes.notes}
-                content={notice.description}
+              wrapperClass={classes.notes}
+              content={noticeData?.description}
             />
             <ListItem>
-                <ListItemText 
-                    primary="Created On"
-                    secondary={<Moment date={notice.time} format="LLL" />}
-                />
+              <ListItemText
+                primary="Created On"
+                secondary={<Moment date={noticeData?.created} format="LLL" />}
+              />
+              <ListItemText
+                primary="Author"
+                secondary={`State ID ${noticeData?.creator}`}
+              />
             </ListItem>
-        </List>
+          </List>
+        )}
       </Modal>
     </>
   );

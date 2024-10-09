@@ -40,21 +40,31 @@ export default (props) => {
 								/>
 							);
 						} else if (domNode?.name === 'a') {
-							if (domNode.attribs['href'].startsWith('http')) {
-								if (domNode.attribs['href'].startsWith(base)) {
-									return <Link to={domNode.attribs['href']}>{domNode.children[0].data}</Link>;
-								} else {
-									return (
-										<CopyToClipboard
-											text={domNode.attribs['href']}
-											onCopy={() => toast.info('Link Copied To Clipboard')}
-										>
-											<span className={classes.copyableText}>{domNode.children[0].data}</span>
-										</CopyToClipboard>
-									);
-								}
+							if (domNode.children[0].name == "img") {
+								return (
+									<img
+										onClick={() => setLbImg(domNode.children[0].attribs.src)}
+										src={domNode.children[0].attribs.src}
+										className={`${props.wrapperClass} image`}
+									/>
+								);
 							} else {
-								return <Link to={domNode.attribs['href']}>{domNode.children[0].data}</Link>;
+								if (domNode.attribs['href'].startsWith('http')) {
+									if (domNode.attribs['href'].startsWith(base)) {
+										return <Link to={domNode.attribs['href']}>{domNode.children[0].data}</Link>;
+									} else {
+										return (
+											<CopyToClipboard
+												text={domNode.attribs['href']}
+												onCopy={() => toast.info('Link Copied To Clipboard')}
+											>
+												<span className={classes.copyableText}>{domNode.children[0].data}</span>
+											</CopyToClipboard>
+										);
+									}
+								} else {
+									return <Link to={domNode.attribs['href']}>{domNode.children[0].data}</Link>;
+								}
 							}
 						} else if (domNode?.name === 'iframe') {
 							let src =

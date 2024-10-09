@@ -1,7 +1,8 @@
 _governmentJobs = { -- In order of "importance"
 	'government',
 	'police',
-	'ems'
+	'ems',
+	'prison',
 }
 
 _permissions = {
@@ -11,6 +12,10 @@ _permissions = {
 	},
 	["ems_alerts"] = {
 		name = "Medical Alerts",
+		restrict = false,
+	},
+	["doc_alerts"] = {
+		name = "DOC View Dispatch",
 		restrict = false,
 	},
 
@@ -126,26 +131,6 @@ _permissions = {
 		}
 	},
 
-	['USE_PD_TAGS'] = {
-		name = "Use Police Tags",
-		restrict = {
-			job = 'police',
-		}
-	},
-	['USE_EMS_TAGS'] = {
-		name = "Use EMS Tags",
-		restrict = {
-			job = 'ems',
-		}
-	},
-	['USE_DOJ_TAGS'] = {
-		name = "Use DOJ Tags",
-		restrict = {
-			job = 'government',
-			workplace = 'doj',
-		}
-	},
-
 	-- Report Permissions
 	['MDT_INCIDENT_REPORT_VIEW'] = {
 		name = "View Incident Reports",
@@ -206,6 +191,13 @@ _permissions = {
 			workplace = 'dattorney',
 		}
 	},
+	['MDT_PUBDEFENDER_REPORTS'] = {
+		name = "Public Defender Reports",
+		restrict = {
+			job = 'government',
+			workplace = 'publicdefenders',
+		}
+	},
 	['MDT_MEDICAL_REPORTS'] = {
 		name = "Medical Reports",
 		restrict = {
@@ -260,13 +252,114 @@ _permissions = {
 			workplace = 'doj',
 		}
 	},
+	['GOV_MAYOR'] = {
+		name = "Govt. Mayor",
+		restrict = {
+			job = 'government',
+			workplace = 'mayoroffice',
+		}
+	},
+	['GOV_DA'] = {
+		name = "Govt. District Attorney",
+		restrict = {
+			job = 'government',
+			workplace = 'dattorney',
+		}
+	},
+	['GOV_CPUB'] = {
+		name = "Chief Public Defender",
+		restrict = {
+			job = 'government',
+			workplace = 'publicdefenders',
+		}
+	},
+	['BAR_CERTIFICATIONS'] = {
+		name = "Grant Bar Certification",
+		restrict = {
+			job = 'government',
+			workplace = 'doj',
+		}
+	},
+	['REVOKE_LICENSE_SUSPENSIONS'] = {
+		name = "Revoke License Suspensions",
+		restrict = {
+			job = 'government',
+			workplace = 'doj',
+		}
+	},
+	['EXPUNGEMENT'] = {
+		name = "Expungements",
+		restrict = {
+			job = 'government',
+			workplace = 'doj',
+		}
+	},
 	['PD_MANAGE_TRIALS'] = {
 		name = "Manage Interceptor Trials",
 		restrict = {
 			job = 'police',
-			workplace = 'sasp',
 		}
 	},
+	['DOJ_DOCUMENTS_VIEW'] = {
+		name = "View DOJ Documents",
+		restrict = {}
+	},
+	['DOJ_DOCUMENTS_CREATE'] = {
+		name = "Create DOJ Documents",
+		restrict = {
+			job = 'government',
+			workplace = 'doj',
+		}
+	},
+	['DOJ_TRIAL_FINDINGS_CREATE'] = {
+		name = "Create DOJ Trial Findings",
+		restrict = {
+			job = 'government',
+			workplace = 'doj',
+		}
+	},
+	['DOC_HIGH_COMMAND'] = {
+		name = "DOC - High Command",
+		restrict = {
+			job = 'prison',
+			workplace = 'corrections',
+		}
+	},
+	['DOC_REPORTS_VIEW'] = {
+		name = 'View DOC Reports',
+		restrict = {
+			job = 'prison',
+			workplace = 'corrections',
+		}
+	},
+	['DOC_REPORTS_CREATE'] = {
+		name = 'Create DOC Reports',
+		restrict = {
+			job = 'prison',
+			workplace = 'corrections',
+		}
+	},
+	['DOC_DOCUMENTS_VIEW'] = {
+		name = 'View DOC Documents',
+		restrict = {
+			job = 'prison',
+			workplace = 'corrections',
+		}
+	},
+	['DOC_DOCUMENTS_CREATE'] = {
+		name = 'Create DOC Documents',
+		restrict = {
+			job = 'prison',
+			workplace = 'corrections',
+		}
+	},
+	['DOC_REDUCTION'] = {
+		name = 'DOC - Reduce Sentence',
+		restrict = {
+			job = 'prison',
+			workplace = 'corrections',
+		}	
+	}
 }
 
 _qualifications = {
@@ -292,14 +385,12 @@ _qualifications = {
 		name = "PD Interceptor Cert.",
 		restrict = {
 			job = 'police',
-			workplace = 'sasp',
 		}
 	},
 	['PD_BIKE'] = {
 		name = "PD Bike Cert.",
 		restrict = {
 			job = 'police',
-			workplace = 'sasp',
 		}
 	},
 	['PD_SWAT'] = {
@@ -308,20 +399,38 @@ _qualifications = {
 			job = 'police',
 		}
 	},
+	['PD_DETCOORDS'] = {
+		name = "PD Det Coords",
+		restrict = {
+			job = 'police',
+		}
+	},
 	['PD_BEANBAG'] = {
 		name = "PD Beanbag",
 		restrict = {
-			job = 'police',
+			weapon = true,
 		}
 	},
 	['PD_SMG'] = {
 		name = "PD SMG",
 		restrict = {
-			job = 'police',
+			weapon = true,
 		}
 	},
 	['PD_AR'] = {
 		name = "PD AR",
+		restrict = {
+			weapon = true,
+		}
+	},
+	['PD_SHOTGUN'] = {
+		name = "PD Shotgun",
+		restrict = {
+			weapon = true,
+		}
+	},
+	['PD_GRAPPLE'] = {
+		name = "PD Grapple Gun",
 		restrict = {
 			job = 'police',
 		}
@@ -336,10 +445,6 @@ _qualifications = {
 	},
 	['EMS_DIVING'] = {
 		name = 'Scuba Cert.',
-		restrict = {
-			job = 'ems',
-			workplace = 'safd',
-		}
 	},
 	['EMS_FTO'] = {
 		name = 'Diving Cert.',
@@ -356,7 +461,7 @@ _qualifications = {
 		}
 	},
 	['EMS_MH'] = {
-		name = 'Mental Health Cert.',
+		name = 'Counseling Cert.',
 		restrict = {
 			job = 'ems',
 			workplace = 'safd',

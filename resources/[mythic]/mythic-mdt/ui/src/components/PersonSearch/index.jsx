@@ -9,7 +9,7 @@ import {
 	InputAdornment,
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import _, { debounce } from 'lodash';
+import { debounce } from 'lodash';
 
 import Nui from '../../util/Nui';
 
@@ -28,6 +28,10 @@ const useStyles = makeStyles((theme) => ({
 			color: theme.palette.primary.main,
 		},
 	},
+	item: {
+		margin: 5,
+		border: `1px solid ${theme.palette.border.divider}`
+	}
 }));
 
 export default ({
@@ -39,6 +43,7 @@ export default ({
 	setOptions,
 	onChange,
 	onInputChange,
+	disabled = false,
 }) => {
 	const classes = useStyles();
 	const [loading, setLoading] = useState(false);
@@ -48,7 +53,7 @@ export default ({
 			debounce(async (v) => {
 				try {
 					let res = await (
-						await Nui.send('Search', {
+						await Nui.send('InputSearch', {
 							type: 'people',
 							term: v,
 						})
@@ -58,7 +63,7 @@ export default ({
 					setOptions(Array());
 				}
 				setLoading(false);
-			}, 1500),
+			}, 2000),
 		[],
 	);
 
@@ -79,6 +84,7 @@ export default ({
 			loading={loading}
 			fullWidth
 			multiple
+			disabled={disabled}
 			className={classes.editorField}
 			getOptionLabel={(option) => {
 				return `${option.First} ${option.Last} [${option.SID}]`;
@@ -101,6 +107,7 @@ export default ({
 					placeholder={placeholder}
 					label={label}
 					fullWidth
+					variant="standard"
 				/>
 			)}
 			renderTags={(value, getTagProps) =>
@@ -108,9 +115,12 @@ export default ({
 					return (
 						<Chip
 							color="default"
+							className={classes.item}
+							size="small"
 							variant="outlined"
 							label={`${option.First} ${option.Last} [${option.SID}]`}
 							{...getTagProps({ index })}
+							disabled={disabled}
 						/>
 					);
 				})

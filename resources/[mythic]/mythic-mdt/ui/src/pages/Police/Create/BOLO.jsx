@@ -9,7 +9,6 @@ import {
 	Button,
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import _ from 'lodash';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -127,6 +126,7 @@ export default (props) => {
 						<TextField
 							required
 							fullWidth
+							variant="standard"
 							className={classes.editorField}
 							label="BOLO Title"
 							name="title"
@@ -137,6 +137,7 @@ export default (props) => {
 						<TextField
 							required
 							fullWidth
+							variant="standard"
 							select
 							label="Type"
 							name="type"
@@ -156,6 +157,7 @@ export default (props) => {
 						<TextField
 							required
 							fullWidth
+							variant="standard"
 							className={classes.editorField}
 							label="BOLO Summary"
 							name="summary"
@@ -166,6 +168,7 @@ export default (props) => {
 						<TextField
 							required
 							fullWidth
+							variant="standard"
 							className={classes.editorField}
 							label="BOLO Description"
 							multiline

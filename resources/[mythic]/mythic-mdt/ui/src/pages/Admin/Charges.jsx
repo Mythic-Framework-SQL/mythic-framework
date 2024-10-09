@@ -12,7 +12,6 @@ import { makeStyles } from '@mui/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import Truncate from '@nosferatu500/react-truncate';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { toast } from 'react-toastify';
 
 import { Modal } from '../../components';
@@ -151,22 +150,22 @@ export default () => {
 
 		try {
 			let res = await (
-				await Nui.send(selected._id ? 'Update' : 'Create', {
+				await Nui.send(selected.id ? 'Update' : 'Create', {
 					type: 'charge',
 					doc: selected,
 				})
 			).json();
 
 			if (res) {
-				toast.success(`Charge ${selected._id ? 'Edited' : 'Created'}`);
+				toast.success(`Charge ${selected.id ? 'Edited' : 'Created'}`);
 				setSelected(null);
 			} else
 				toast.error(
-					`Unable to ${selected._id ? 'Edit' : 'Create'} Charge`,
+					`Unable to ${selected.id ? 'Edit' : 'Create'} Charge`,
 				);
 		} catch (err) {
 			console.log(err);
-			toast.error(`Unable to ${selected._id ? 'Edit' : 'Create'} Charge`);
+			toast.error(`Unable to ${selected.id ? 'Edit' : 'Create'} Charge`);
 		}
 	};
 
@@ -180,22 +179,21 @@ export default () => {
 	const onDisable = async () => {
 		try {
 			let res = await (
-				await Nui.send('Update', {
+				await Nui.send('Delete', {
 					type: 'charge',
 					doc: {
 						...selected,
-						active: false,
 					},
 				})
 			).json();
 
 			if (res) {
-				toast.success(`Charge Disabled`);
+				toast.success(`Charge Deleted`);
 				setSelected(null);
-			} else toast.error('Unable to Disable Charge');
+			} else toast.error('Unable to Delete Charge');
 		} catch (err) {
 			console.log(err);
-			toast.error('Unable to Disable Charge');
+			toast.error('Unable to Delete Charge');
 		}
 	};
 
@@ -234,7 +232,7 @@ export default () => {
 				<Grid item xs={4}>
 					<TextField
 						fullWidth
-						variant="outlined"
+						variant="standard"
 						name="search"
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
@@ -268,54 +266,49 @@ export default () => {
 					</Button>
 				</Grid>
 			</Grid>
-			<TransitionGroup className={classes.chargesWrapper}>
+			<div className={classes.chargesWrapper}>
 				{filtered
 					.sort((a, b) => a.fine - b.fine)
 					.sort((a, b) => a.jail - b.jail)
 					.sort((a, b) => a.type - b.type)
 					.map((charge) => {
 						return (
-							<CSSTransition
-								key={`avail-${charge._id}`}
-								timeout={500}
-								classNames="item"
+							<div
+								key={charge.id}
+								className={`${classes.charge} type-${charge.type}`}
+								title={charge.title}
+								onClick={() => setSelected(charge)}
 							>
-								<div
-									className={`${classes.charge} type-${charge.type}`}
-									title={charge.title}
-									onClick={() => setSelected(charge)}
-								>
-									<Truncate lines={1}>
-										{charge.title}
-									</Truncate>
-									<div>
-										<small>
-											{charge.jail
-												? `Time: ${charge.jail} `
-												: null}
-											{charge.fine
-												? `Fine: ${CurrencyFormat.format(
-														charge.fine,
-												  )} `
-												: null}
-											{charge.points
-												? `Points: ${charge.points}`
-												: null}
-										</small>
-									</div>
+								<Truncate lines={1}>
+									{charge.title}
+								</Truncate>
+								<div>
+									<small>
+										{charge.jail
+											? `Time: ${charge.jail} `
+											: null}
+										{charge.fine
+											? `Fine: ${CurrencyFormat.format(
+												charge.fine,
+											)} `
+											: null}
+										{charge.points
+											? `Points: ${charge.points}`
+											: null}
+									</small>
 								</div>
-							</CSSTransition>
+							</div>
 						);
 					})}
-			</TransitionGroup>
+			</div>
 			<Modal
 				open={selected != null}
-				title={`${selected?._id ? 'Edit' : 'Create'} Charge`}
-				submitLang={selected?._id ? 'Edit' : 'Create'}
-				deleteLang="Disable"
+				title={`${selected?.id ? 'Edit' : 'Create'} Charge`}
+				submitLang={selected?.id ? 'Edit' : 'Create'}
+				deleteLang="Delete"
 				onSubmit={onSubmit}
 				onClose={() => setSelected(null)}
-				//onDelete={selected?._id ? onDisable : null}
+				onDelete={selected?.id ? onDisable : null}
 			>
 				{Boolean(selected) ? (
 					<>

@@ -7,39 +7,30 @@ import { Route, Routes } from 'react-router';
 import links from './links';
 import { Navbar, AdminRoute, ErrorBoundary } from '../../components';
 
-import {
-	PenalCode,
-	Error,
-	CreateReport,
-	ViewPerson,
-	ViewVehicle,
-	ViewFirearm,
-	ViewReport,
-	ViewWarrant,
-	SearchPeople,
-	SearchVehicle,
-	SearchProperty,
-	SearchFirearm,
-	SearchReport,
-	SearchWarrants,
-	SearchEvidence,
-	RosterIndex,
-	PermissionManager,
-} from '../../pages/Shared';
-
+import Error from '../../pages/Error';
+import Reports from '../../pages/Reports';
+import Roster from '../../pages/Roster';
+import People from '../../pages/People';
+import PenalCode from '../../pages/PenalCode';
+import Vehicles from '../../pages/Vehicles';
+import Properties from '../../pages/Properties';
+import PermissionManager from '../../pages/PermissionManager';
+import Firearms from '../../pages/Firearms';
+import Warrants from '../../pages/Warrants';
+import FleetManager from '../../pages/FleetManager';
+import Library from '../../pages/Library';
 import { Dashboard, CreateBOLO } from '../../pages/Police';
+import { AdminCharges, AdminNotice } from '../../pages/Admin';
 
-import { AdminMetrics, AdminCharges, AdminTags, AdminRoster, AdminNotice } from '../../pages/Admin';
 import Titlebar from '../../components/Titlebar';
-import SOPs from '../../pages/Police/SOPs';
-import Comms from '../../pages/Police/Comms';
 
 const useStyles = makeStyles((theme) => ({
 	container: {
 		height: '100%',
 	},
 	wrapper: {
-		height: '100%',
+		maxHeight: 'calc(100% - 193px)',
+		flexGrow: 1,
 	},
 	content: {
 		height: '100%',
@@ -47,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
 		overflowX: 'hidden',
 	},
 	maxHeight: {
-		height: 'calc(100% - 86px)',
+		height: '100%',
 	},
 	noCallsign: {
 		position: 'absolute',
@@ -59,6 +50,11 @@ const useStyles = makeStyles((theme) => ({
 		right: 0,
 		margin: 'auto',
 	},
+	mdt: {
+		display: 'flex',
+		flexDirection: 'column',
+		height: '100%',
+	}
 }));
 
 export default () => {
@@ -77,61 +73,48 @@ export default () => {
 					<p>If you're not sure why you're seeing this message, contact a superior.</p>
 				</Alert>
 			) : (
-				<Grid container className={classes.maxHeight}>
-					<Grid item xs={12}>
-						<Titlebar />
-					</Grid>
-					<Grid item xs={2} className={classes.wrapper}>
-						<Navbar links={links(job?.Id)} />
-					</Grid>
-					<Grid item xs={10} className={classes.wrapper}>
+				<div className={classes.mdt}>
+					<div>
+						<Titlebar>
+							<Navbar links={links(job?.Id)} />
+						</Titlebar>
+					</div>
+					<div className={classes.wrapper}>
 						<ErrorBoundary>
 							<div className={classes.content}>
 								<Routes>
-									<Route exact path="/search/people" element={<SearchPeople />} />
-									<Route exact path="/search/vehicles" element={<SearchVehicle />} />
-									<Route exact path="/search/properties" element={<SearchProperty />} />
-									<Route exact path="/search/firearms" element={<SearchFirearm />} />
-									<Route exact path="/search/reports" element={<SearchReport />} />
-									<Route exact path="/search/evidence" element={<SearchEvidence />} />
-									<Route exact path="/create/report" element={<CreateReport />} />
-									<Route exact path="/create/bolo" element={<CreateBOLO />} />
-									<Route exact path="/search/people/:id" element={<ViewPerson />} />
-									<Route exact path="/search/vehicles/:id" element={<ViewVehicle />} />
-									<Route exact path="/search/firearms/:id" element={<ViewFirearm />} />
-									<Route exact path="/search/reports/:id" element={<ViewReport />} />
-									<Route exact path="/warrants/:id" element={<ViewWarrant />} />
-									<Route exact path="/warrants" element={<SearchWarrants />} />
-									<Route exact path="/roster" element={<RosterIndex />} />
-									<Route exact path="/sops" element={<SOPs />} />
-									<Route exact path="/comms" element={<Comms />} />
+									<Route exact path="/reports" element={<Reports />} />
+									<Route exact path="/people" element={<People />} />
+									<Route exact path="/vehicles" element={<Vehicles />} />
+									<Route exact path="/properties" element={<Properties />} />
+									<Route exact path="/firearms" element={<Firearms />} />
+									<Route exact path="/warrants" element={<Warrants />} />
+									<Route exact path="/roster" element={<Roster />} />
 									<Route exact path="/penal-code" element={<PenalCode />} />
+									<Route exact path="/library" element={<Library />} />
+									<Route exact path="create/bolo" element={<CreateBOLO />} />
+									<Route exact path="fleet-manager" element={<FleetManager job="police" />} />
 
+									<Route exact path="create/notice" element={<AdminNotice />} />
+									<Route path="/admin" element={<AdminRoute permission={'PD_HIGH_COMMAND'} />}>
+										<Route exact path="permissions" element={<PermissionManager job="police" />} />
+									</Route>
+									<Route exact path="/" element={<Dashboard />} />
+									<Route element={<Error />} />
 									<Route path="/system" element={<AdminRoute permission={true} />}>
-										<Route index element={<AdminMetrics />} />
 										<Route exact path="charges" element={<AdminCharges />} />
-										<Route exact path="tags" element={<AdminTags />} />
-										<Route exact path="gov-roster" element={<AdminRoster />} />
+										<Route exact path="gov-roster" element={<Roster systemAdminMode />} />
 										<Route
 											exact
 											path="gov-permissions"
 											element={<PermissionManager job="system" />}
 										/>
 									</Route>
-
-									<Route exact path="create/notice" element={<AdminNotice />} />
-
-									<Route path="/admin" element={<AdminRoute permission={'PD_HIGH_COMMAND'} />}>
-										<Route index element={<AdminMetrics />} />
-										<Route exact path="permissions" element={<PermissionManager job="police" />} />
-									</Route>
-									<Route exact path="/" element={<Dashboard />} />
-									<Route element={<Error />} />
 								</Routes>
 							</div>
 						</ErrorBoundary>
-					</Grid>
-				</Grid>
+					</div>
+				</div>
 			)}
 		</div>
 	);

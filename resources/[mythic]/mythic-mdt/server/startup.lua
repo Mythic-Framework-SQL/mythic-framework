@@ -1,118 +1,83 @@
 _warrants = {}
 _charges = {}
-_tags = {}
 _notices = {}
 
 local _ran = false
 
 function Startup()
-	if _ran then
-		return
-	end
-	AddDefaultData()
-	RegisterTasks()
+  if _ran then
+    return
+  end
+  RegisterTasks()
 
-	Database.Game:update({
-		collection = "mdt_warrants",
-		query = {
-			expires = {
-				["$lte"] = (os.time() * 1000),
-			},
-		},
-		update = {
-			['$set'] = {
-				state = "expired",
-			}
-		}
-	}, function(success, updated)
-		if success then
-			Logger:Trace("MDT", "Expired ^2" .. updated .. "^7 Old Warrants", { console = true })
-		end
+  -- Set Expired Active Warrants to Expired
+  MySQL.query.await("UPDATE mdt_warrants SET state = ? WHERE state = ? AND expires < NOW()", {
+    "expired",
+    "active",
+  })
 
-		Database.Game:find({
-			collection = "mdt_warrants",
-			query = {
-				state = "active",
-			}
-		}, function(success, results)
-			if not success then
-				return
-			end
-	
-			Logger:Trace("MDT", "Loaded ^2" .. #results .. "^7 Active Warrants", { console = true })
-			_warrants = results
-		end)
-	end)
+  _charges = MySQL.query.await("SELECT * from mdt_charges")
+  Logger:Trace("MDT", "Loaded ^2" .. #_charges .. "^7 Charges", { console = true })
 
-	Database.Game:find({
-		collection = "mdt_charges",
-		query = {}
-	}, function(success, results)
-		if not success then
-			return
-		end
+  local fetchVehicles = MySQL.query.await("SELECT * from vehicles", {})
 
-		Logger:Trace("MDT", "Loaded ^2" .. #results .. "^7 Charges", { console = true })
-		_charges = results
-	end)
+  for k, v in ipairs(fetchVehicles) do
+    if v.RegisteredPlate and v.Type == 0 then
+      Radar:AddFlaggedPlate(v.RegisteredPlate, "Vehicle Flagged in MDT")
+    end
+  end
 
-	Database.Game:find({
-		collection = "mdt_tags",
-		query = {}
-	}, function(success, results)
-		if not success then
-			return
-		end
+  _ran = true
 
-		Logger:Trace("MDT", "Loaded ^2" .. #results .. "^7 Tags", { console = true })
-		_tags = results
-	end)
+  -- SetHttpHandler(function(req, res)
+  -- 	if req.path == '/charges' then
+  -- 		res.send(json.encode(_charges))
+  -- 	end
+  -- end)
 
-	Database.Game:find({
-		collection = "mdt_notices",
-		query = {}
-	}, function(success, results)
-		if not success then
-			return
-		end
+  local thirtyDaysAgo = (os.time() * 1000) - (60 * 60 * 24 * 30 * 1000)
+  -- Select vehicles that match the query
+  local selectQuery = [[
+    SELECT _id, Strikes
+    FROM vehicles
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM JSON_TABLE(Strikes, '$[*]' COLUMNS (
+        Date BIGINT PATH '$.Date'
+      )) AS jt
+      WHERE jt.Date >= ?
+    )
+    AND EXISTS (
+      SELECT 1
+      FROM JSON_TABLE(Strikes, '$[*]' COLUMNS (
+        Date BIGINT PATH '$.Date'
+      )) AS jt
+      WHERE jt.Date <= ?
+    )
+  ]]
+  local selectParams = { thirtyDaysAgo, thirtyDaysAgo }
 
-		Logger:Trace("MDT", "Loaded ^2" .. #results .. "^7 Notices", { console = true })
-		_notices = results
-	end)
+  MySQL.Async.fetchAll(selectQuery, selectParams, function(results)
+    for _, vehicle in ipairs(results) do
+      local strikes = json.decode(vehicle.Strikes)
+      local updatedStrikes = {}
 
-	Database.Game:find({
-		collection = "vehicles",
-		query = {
-			Flags = {
-				['$elemMatch'] = {
-					radarFlag = true,
-				}
-			}
-		},
-		options = {
-			projection = {
-				VIN = 1,
-				Flags = 1,
-				RegisteredPlate = 1,
-			}
-		}
-	}, function(success, results)
-		if not success then
-			return
-		end
+      for _, strike in ipairs(strikes) do
+        if strike.Date < thirtyDaysAgo then
+          table.insert(updatedStrikes, strike)
+        end
+      end
 
-		for k,v in ipairs(results) do
-			if v.RegisteredPlate and v.Type == 0 then
-				Radar:AddFlaggedPlate(v.RegisteredPlate, 'Vehicle Flagged in MDT')
-			end
-		end
-	end)
+      local updateQuery = [[
+        UPDATE vehicles
+        SET Strikes = ?
+        WHERE id = ?
+      ]]
+      local updateParams = { json.encode(updatedStrikes), vehicle._id }
 
-	_ran = true
-
-	SetHttpHandler(function(req, res)
-		if req.path == '/charges' then
-			res.send(json.encode(_charges))
-		end
-	end)
+      MySQL.Async.execute(updateQuery, updateParams, function(affectedRows)
+        -- Handle the result if needed
+      end)
+    end
+  end)
 end

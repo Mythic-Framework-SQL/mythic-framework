@@ -1,6 +1,5 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Grid } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Route, Routes } from 'react-router';
 
@@ -8,15 +7,28 @@ import links from './links';
 import { Navbar, ErrorBoundary } from '../../components';
 import Titlebar from '../../components/Titlebar';
 
-import { PenalCode, Error, SearchWarrants, SearchReport, ViewReport } from '../../pages/Shared';
+import Error from '../../pages/Error';
 import { Landing } from '../../pages/Public';
+
+import Reports from '../../pages/Reports';
+import Roster from '../../pages/Roster';
+import People from '../../pages/People';
+import PenalCode from '../../pages/PenalCode';
+import Vehicles from '../../pages/Vehicles';
+import Properties from '../../pages/Properties';
+import PermissionManager from '../../pages/PermissionManager';
+import Firearms from '../../pages/Firearms';
+import Warrants from '../../pages/Warrants';
+import Library from '../../pages/Library';
+import { AdminCharges, AdminNotice } from '../../pages/Admin';
 
 const useStyles = makeStyles((theme) => ({
 	container: {
 		height: '100%',
 	},
 	wrapper: {
-		height: '100%',
+		maxHeight: 'calc(100% - 193px)',
+		flexGrow: 1,
 	},
 	content: {
 		height: '100%',
@@ -24,37 +36,49 @@ const useStyles = makeStyles((theme) => ({
 		overflowX: 'hidden',
 	},
 	maxHeight: {
-		height: 'calc(100% - 86px)',
+		height: '100%',
 	},
+	mdt: {
+		display: 'flex',
+		flexDirection: 'column',
+		height: '100%',
+	}
 }));
 
 export default () => {
 	const classes = useStyles();
+	const job = useSelector((state) => state.app.govJob);
 
 	return (
 		<div className={classes.container}>
-			<Grid container className={classes.maxHeight}>
-				<Grid item xs={12}>
-					<Titlebar />
-				</Grid>
-				<Grid item xs={2} className={classes.wrapper}>
-					<Navbar links={links('attorney')} />
-				</Grid>
-				<Grid item xs={10} className={classes.wrapper}>
+			<div className={classes.mdt}>
+				<div>
+					<Titlebar>
+						<Navbar links={links(job?.Id, job?.Workplace?.Id)} />
+					</Titlebar>
+				</div>
+				<div className={classes.wrapper}>
 					<ErrorBoundary>
 						<div className={classes.content}>
 							<Routes>
-								<Route exact path="/" element={<Landing />} />
-								<Route exact path="/warrants" element={<SearchWarrants />} />
+								<Route exact path="/reports" element={<Reports />} />
+								<Route exact path="/people" element={<People />} />
+								<Route exact path="/vehicles" element={<Vehicles />} />
+								<Route exact path="/properties" element={<Properties />} />
+								<Route exact path="/firearms" element={<Firearms />} />
+								<Route exact path="/warrants" element={<Warrants />} />
+								<Route exact path="/roster" element={<Roster />} />
 								<Route exact path="/penal-code" element={<PenalCode />} />
-								<Route exact path="/search/reports" element={<SearchReport />} />
-								<Route exact path="/search/reports/:id" element={<ViewReport />} />
+								<Route exact path="/library" element={<Library />} />
+
+								<Route exact path="create/notice" element={<AdminNotice />} />
+								<Route exact path="/" element={<Landing />} />
 								<Route element={<Error />} />
 							</Routes>
 						</div>
 					</ErrorBoundary>
-				</Grid>
-			</Grid>
+				</div>
+			</div>
 		</div>
 	);
 };

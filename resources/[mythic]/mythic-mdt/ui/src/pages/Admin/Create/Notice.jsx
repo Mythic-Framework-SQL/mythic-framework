@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Grid, TextField, MenuItem, Backdrop, ButtonGroup, Button } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import _ from 'lodash';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -63,25 +62,13 @@ export default (props) => {
 	const dispatch = useDispatch();
 	const hasPerm = usePermissions();
 	const myJob = useSelector(state => state.app.govJob);
-	const user = useSelector((state) => state.app.user);
 
 	const governmentJobs = useSelector((state) => state.data.data.governmentJobs);
 	const allJobData = useSelector((state) => state.data.data.governmentJobsData);
 
-	const [selectedJob, setSelectedJob] = useState(myJob.Id);
-	const [jobData, setJobData] = useState(allJobData?.[selectedJob]);
-	const [workplace, setWorkplace] = useState(jobData?.Workplaces?.[0].Id);
+	const postPublic = hasPerm('DOJ_JUDGE') || hasPerm('GOV_MAYOR') || hasPerm('GOV_DA');
 
-	useEffect(() => {
-		setJobData(allJobData?.[selectedJob]);
-		setWorkplace(false);
-	}, [selectedJob]);
-
-	useEffect(() => {
-		setJobData(allJobData?.[selectedJob]);
-		setWorkplace(false);
-	}, []);
-
+	const [restricted, setRestricted] = useState(myJob.Id);
 	const [loading, setLoading] = useState(false);
 	const [state, setState] = useState({
 		...initialState,
@@ -99,10 +86,7 @@ export default (props) => {
 				type: 'notice',
 				doc: {
 					...state,
-					time: Date.now(),
-					job: selectedJob,
-					workplace: workplace,
-					author: user.SID,
+					restricted,
 				},
 			});
 
@@ -133,6 +117,7 @@ export default (props) => {
 						<TextField
 							required
 							fullWidth
+							variant="standard"
 							className={classes.editorField}
 							label="Notice Title"
 							name="title"
@@ -143,43 +128,21 @@ export default (props) => {
 						<TextField
 							select
 							fullWidth
+							variant="standard"
 							label="Restrict Notice"
 							className={classes.editorField}
-							value={selectedJob}
-							disabled={!hasPerm(true)}
-							onChange={(e) => setSelectedJob(e.target.value)}
+							value={restricted}
+							onChange={(e) => setRestricted(e.target.value)}
 						>
-							<MenuItem key={'public'} value={false}>
-								Public Notice
-							</MenuItem>
-							<MenuItem key={'government'} value={true}>
-								Government Employee Notice
-							</MenuItem>
-							{governmentJobs.map((j) => (
+							{postPublic && <MenuItem key={'public'} value={'public'}>
+								Public Records Notice
+							</MenuItem>}
+							{governmentJobs.filter(j => myJob.Id == j || hasPerm(true)).map((j) => (
 								<MenuItem key={j} value={j}>
 									{allJobData[j]?.Name ?? 'Unknown'}
 								</MenuItem>
 							))}
 						</TextField>
-						{typeof selectedJob == 'string' && (
-							<TextField
-								select
-								fullWidth
-								label="Department"
-								className={classes.editorField}
-								value={workplace}
-								onChange={(e) => setWorkplace(e.target.value)}
-							>
-								<MenuItem key={'all'} value={false}>
-									All Departments
-								</MenuItem>
-								{jobData?.Workplaces?.map((w) => (
-									<MenuItem key={w.Id} value={w.Id}>
-										{w.Name ?? 'Unknown'}
-									</MenuItem>
-								))}
-							</TextField>
-						)}
 						<Editor
 							allowMedia
 							name="description"

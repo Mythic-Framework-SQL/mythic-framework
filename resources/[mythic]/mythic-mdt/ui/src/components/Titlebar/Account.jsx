@@ -4,7 +4,7 @@ import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme) => ({
 	callsign: {
-		fontSize: 14,
+		fontSize: 18,
 		color: theme.palette.primary.main,
 	},
 }));
@@ -20,31 +20,26 @@ export default () => {
 
 	switch (job?.Id) {
 		case 'police':
+		case 'prison':
 			return (
 				<>
-					<small>
-						{job.Workplace?.Name}
-					</small>
+					<span>
+						{job.Grade?.Name} {cData.First[0]}. {cData.Last}
+					</span>
 					{Boolean(cData) && (
 						<>
-							[
+							{' '}[
 							<span className={classes.callsign}>
 								{cData.Callsign}
 							</span>
-							]{' '}
+							]
 						</>
 					)}
-					<span>
-						{job.Grade?.Name} {cData.First} {cData.Last}
-					</span>
 				</>
 			);
 		case 'government':
 			return (
 				<>
-					<small>
-						{job.Workplace?.Name}
-					</small>
 					<span>
 						{job.Grade?.Name} {cData.First} {cData.Last}
 					</span>
@@ -53,24 +48,21 @@ export default () => {
 		case 'ems':
 			return (
 				<>
-					<small>
-						{job.Workplace?.Name}
-					</small>
-					{(Boolean(cData) && cData.Callsign) && (
+					<span>
+						{job.Grade?.Name} {cData.First[0]}. {cData.Last}
+					</span>
+					{Boolean(cData) && (
 						<>
-							[
+							{' '}[
 							<span className={classes.callsign}>
 								{cData.Callsign}
 							</span>
-							]{' '}
+							]
 						</>
 					)}
-					<span>
-						{job.Grade?.Name} {cData.First} {cData.Last}
-					</span>
 				</>
 			);
 		default:
-		return null;
+			return null;
 	}
 };

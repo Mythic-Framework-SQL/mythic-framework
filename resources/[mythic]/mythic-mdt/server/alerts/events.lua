@@ -2,7 +2,7 @@ local _predefined = {
 	injuredPerson = {
 		code = "10-47",
 		title = "Injured Person",
-		type = 2,
+		type = {"police_alerts", "ems_alerts"},
 		isPanic = false,
 		blip = {
 			icon = 280,
@@ -10,11 +10,12 @@ local _predefined = {
 			color = 8,
 			duration = (60 * 5),
 		},
+		styleOverride = 2,
 	},
 	illegalHunting = {
 		code = "10-35",
 		title = "Illegal Hunting",
-		type = 1,
+		type = "police_alerts",
 		isPanic = false,
 		blip = {
 			icon = 141,
@@ -26,7 +27,7 @@ local _predefined = {
 	bane = {
 		code = "10-31",
 		title = "Breaking & Entering",
-		type = 1,
+		type = "police_alerts",
 		isPanic = false,
 		blip = {
 			icon = 311,
@@ -38,7 +39,7 @@ local _predefined = {
 	shotsfired = {
 		code = "10-99",
 		title = "Shots Fired",
-		type = 1,
+		type = "police_alerts",
 		isPanic = false,
 		blip = {
 			icon = 110,
@@ -50,7 +51,7 @@ local _predefined = {
 	shotsfiredvehicle = {
 		code = "10-99",
 		title = "Shots Fired From A Vehicle",
-		type = 1,
+		type = "police_alerts",
 		isPanic = false,
 		blip = {
 			icon = 229,
@@ -62,7 +63,7 @@ local _predefined = {
 	oxysale = {
 		code = "10-31",
 		title = "Suspicious Activity",
-		type = 1,
+		type = "police_alerts",
 		isPanic = false,
 		blip = {
 			icon = 66,
@@ -75,7 +76,7 @@ local _predefined = {
 	lockpickext = {
 		code = "10-31",
 		title = "Suspicious Activity",
-		type = 1,
+		type = "police_alerts",
 		isPanic = false,
 		blip = {
 			icon = 66,
@@ -85,9 +86,9 @@ local _predefined = {
 		},
 	},
 	lockpickint = {
-		code = "10-60",
+		code = "10-99B",
 		title = "Stolen Vehicle",
-		type = 1,
+		type = "police_alerts",
 		isPanic = false,
 		blip = {
 			icon = 326,
@@ -99,7 +100,7 @@ local _predefined = {
 	caraccident = {
 		code = "10-50",
 		title = "Vehicle Accident",
-		type = 2,
+		type = {"police_alerts", "ems_alerts"},
 		isPanic = false,
 		blip = {
 			icon = 620,
@@ -107,11 +108,12 @@ local _predefined = {
 			color = 30,
 			duration = (60 * 3),
 		},
+		styleOverride = 2,
 	},
 	planeaccident = {
 		code = "10-50",
 		title = "Plane Crash",
-		type = 2,
+		type = {"police_alerts", "ems_alerts"},
 		isPanic = false,
 		blip = {
 			icon = 307,
@@ -119,11 +121,12 @@ local _predefined = {
 			color = 30,
 			duration = (60 * 3),
 		},
+		styleOverride = 2,
 	},
 	heliaccident = {
 		code = "10-50",
 		title = "Helicopter Accident",
-		type = 2,
+		type = {"police_alerts", "ems_alerts"},
 		isPanic = false,
 		blip = {
 			icon = 64,
@@ -131,11 +134,12 @@ local _predefined = {
 			color = 30,
 			duration = (60 * 3),
 		},
+		styleOverride = 2,
 	},
 	boataccident = {
 		code = "10-50",
 		title = "Boating Accident",
-		type = 2,
+		type = {"police_alerts", "ems_alerts"},
 		isPanic = false,
 		blip = {
 			icon = 427,
@@ -143,11 +147,12 @@ local _predefined = {
 			color = 30,
 			duration = (60 * 3),
 		},
+		styleOverride = 2,
 	},
 	call911 = {
 		code = "911",
 		title = "911 Call",
-		type = 2,
+		type = {"police_alerts", "ems_alerts"},
 		isPanic = false,
 		blip = {
 			icon = 280,
@@ -160,7 +165,7 @@ local _predefined = {
 	call311 = {
 		code = "311",
 		title = "311 Call",
-		type = 2,
+		type = {"police_alerts", "ems_alerts"},
 		isPanic = false,
 		blip = {
 			icon = 280,
@@ -173,7 +178,7 @@ local _predefined = {
 	call911anon = {
 		code = "911",
 		title = "911 Call",
-		type = 2,
+		type = {"police_alerts", "ems_alerts"},
 		isPanic = false,
 		isAnon = true,
 		blip = {
@@ -187,7 +192,7 @@ local _predefined = {
 	call311anon = {
 		code = "311",
 		title = "311 Call",
-		type = 2,
+		type = {"police_alerts", "ems_alerts"},
 		isPanic = false,
 		isAnon = true,
 		blip = {
@@ -201,7 +206,7 @@ local _predefined = {
 	bankjob = {
 		code = "10-90",
 		title = "Bank Robbery",
-		type = 1,
+		type = "police_alerts",
 		isPanic = false,
 		blip = {
 			icon = 311,
@@ -213,7 +218,7 @@ local _predefined = {
 	bobcat = {
 		code = "10-90",
 		title = "Armed Robbery",
-		type = 1,
+		type = "police_alerts",
 		isPanic = false,
 		blip = {
 			icon = 311,
@@ -225,13 +230,13 @@ local _predefined = {
 	icurequest = {
 		code = "NA",
 		title = "ICU Patient Assistance",
-		type = 2,
+		type = "ems_alerts",
 		isPanic = false,
 	},
 	illegalStreetRacing = {
 		code = "10-35",
 		title = "Illegal Street Racing",
-		type = 1,
+		type = "police_alerts",
 		isPanic = false,
 		blip = {
 			icon = 227,
@@ -243,7 +248,7 @@ local _predefined = {
 	towRequest = {
 		code = "TOW",
 		title = "PD Tow Request",
-		type = 3,
+		type = "tow_alerts",
 		isPanic = false,
 		blip = {
 			icon = 68,
@@ -252,7 +257,31 @@ local _predefined = {
 			duration = (60 * 5),
 			flashing = true,
 		},
-	}
+	},
+	boosting = {
+		code = "10-99A",
+		title = "Grand Theft Auto",
+		type = "police_alerts",
+		isPanic = false,
+		blip = {
+			icon = 523,
+			size = 0.9,
+			color = 17,
+			duration = (60 * 3),
+		},
+	},
+	boostingTracked = {
+		code = "10-99A",
+		title = "Grand Theft Auto - Tracker Tampering",
+		type = "police_alerts",
+		isPanic = false,
+		blip = {
+			icon = 523,
+			size = 0.9,
+			color = 17,
+			duration = (60 * 3),
+		},
+	},
 }
 
 AddEventHandler("Job:Server:DutyAdd", function(dutyData, source, stateId, callsign)
@@ -345,22 +374,4 @@ RegisterNetEvent("EmergencyAlerts:Server:DoPredefined", function(type, descripti
 		end)
 	end
 
-end)
-
-RegisterNetEvent("EmergencyAlerts:Server:ChangeUnit", function(data)
-	if data.primary and data.type then
-		EmergencyAlerts.Units:ChangeType(data.primary, data.type)
-	end
-end)
-
-RegisterNetEvent("EmergencyAlerts:Server:OperateUnder", function(data)
-	if data.primary and data.unit then
-		EmergencyAlerts.Units:OperateUnder(data.primary, data.unit)
-	end
-end)
-
-RegisterNetEvent("EmergencyAlerts:Server:BreakOff", function(data)
-	if data.primary and data.unit then
-		EmergencyAlerts.Units:BreakOff(data.primary, data.unit)
-	end
 end)

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import {
-	Grid,
+    Grid,
     Avatar
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
@@ -11,9 +11,13 @@ const DepartmentData = {
         name: 'Los Santos\n Police Department',
         color: '#2a4179',
     },
-    lscso: {
+    bcso: {
         name: 'Blaine County\n Sheriff\'s Office',
         color: '#755613',
+    },
+    guardius: {
+        name: 'Guardius',
+        color: '#C5B358',
     },
     sasp: {
         name: 'San Andreas Highway Patrol',
@@ -34,6 +38,10 @@ const DepartmentData = {
     publicdefenders: {
         name: 'Public Defenders Office',
         color: '#452f00',
+    },
+    corrections: {
+        name: 'San Andreas Department of Corrections',
+        color: '#C0C0C0',
     },
 }
 
@@ -57,8 +65,8 @@ export default ({ data }) => {
             padding: '15px',
         },
         avatar: {
-            height: 175,
-            width: 175,
+            height: 170,
+            width: 170,
             margin: 'auto',
         },
         departmentBanner: {
@@ -79,7 +87,7 @@ export default ({ data }) => {
             color: theme.palette.text.dark,
             textAlign: 'center',
             textTransform: 'capitalize',
-            fontSize: 34,
+            fontSize: 28,
             fontWeight: 700,
             margin: 0,
         },
@@ -87,14 +95,14 @@ export default ({ data }) => {
             color: theme.palette.text.dark,
             textAlign: 'center',
             textTransform: 'capitalize',
-            fontSize: 28,
+            fontSize: 26,
             margin: 0,
         },
         callsignText: {
             color: theme.palette.text.dark,
             textAlign: 'center',
             textTransform: 'capitalize',
-            fontSize: 22,
+            fontSize: 20,
             fontWeight: 700,
             margin: 0,
         },
@@ -102,7 +110,7 @@ export default ({ data }) => {
 
     const classes = useStyles();
 
-	return (
+    return (
         <div className={classes.container}>
             <div className={classes.infoPane}>
                 <Grid container direction="column" className={classes.fullHeight}>
@@ -115,7 +123,7 @@ export default ({ data }) => {
                     <Grid item xs={2} className={classes.departmentBanner}>
                         <p className={classes.bannerText}>{DepartmentData[data?.Department]?.name ?? 'San Andreas Government'}</p>
                     </Grid>
-                    <Grid item xs={4} style={{ padding: '15px', overflow: 'none' }}>
+                    <Grid item xs={4} style={{ padding: '0px 15px', overflow: 'none' }}>
                         <p className={classes.titleText}>{data?.Title}</p>
                         <p className={classes.nameText}>{data?.First?.[0]?.toUpperCase()}. {data?.Last?.substr(0, 16)}</p>
                         {data?.Callsign && <p className={classes.callsignText}>#{data?.Callsign}</p>}
@@ -124,5 +132,5 @@ export default ({ data }) => {
                 </Grid>
             </div>
         </div>
-	);
+    );
 };

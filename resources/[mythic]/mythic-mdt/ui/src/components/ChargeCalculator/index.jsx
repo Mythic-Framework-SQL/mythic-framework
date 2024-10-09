@@ -13,7 +13,6 @@ import { makeStyles } from '@mui/styles';
 import { useSelector } from 'react-redux';
 import Truncate from '@nosferatu500/react-truncate';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import { Modal } from '../';
 import { ChargeTypes } from '../../data';
@@ -197,16 +196,33 @@ export default ({ selected, onChange, onRemove, wrapperClass }) => {
 	const classes = useStyles();
 	const charges = useSelector((state) => state.data.data.charges);
 
-	const months = selected
+	const [susCharges, setSusCharges] = useState(Array());
+
+	useEffect(() => {
+		if (selected) {
+			setSusCharges(
+				selected
+					.filter((c) => charges.find(ch => ch.id === c.id))
+					.map(c => ({
+						...charges.find(ch => ch.id == c.id),
+						id: c.id,
+						count: c.count,
+					}))
+			);
+		}
+	}, [selected]);
+
+	const months = susCharges
 		.filter((c) => c.jail)
-		.reduce((a, b) => +a + +b.jail * b.count, 0);
-	const fine = selected
+		.reduce((a, b) => +a + +b.jail, 0);
+	//.reduce((a, b) => +a + +b.jail * b.count, 0);
+	const fine = susCharges
 		.filter((c) => c.fine)
 		.reduce((a, b) => +a + +b.fine * b.count, 0);
-	const points = selected
+	const points = susCharges
 		.filter((c) => c.points)
 		.reduce((a, b) => +a + +b.points * b.count, 0);
-	const isFelony = selected.filter((c) => c.type > 2).length > 0;
+	const isFelony = susCharges.filter((c) => c.type > 2).length > 0;
 
 	const [filtered, setFiltered] = useState(Array());
 	const [search, setSearch] = useState('');
@@ -271,6 +287,7 @@ export default ({ selected, onChange, onRemove, wrapperClass }) => {
 							<Grid item xs={6} style={{ textAlign: 'right' }}>
 								<TextField
 									size="small"
+									variant="standard"
 									placeholder="Search Charges"
 									value={search}
 									onChange={(e) => setSearch(e.target.value)}
@@ -278,6 +295,7 @@ export default ({ selected, onChange, onRemove, wrapperClass }) => {
 										endAdornment: (
 											<InputAdornment position="end">
 												<IconButton
+													size="small"
 													onClick={() =>
 														setSearch('')
 													}
@@ -293,62 +311,57 @@ export default ({ selected, onChange, onRemove, wrapperClass }) => {
 								/>
 							</Grid>
 						</Grid>
-						<TransitionGroup className={classes.chargesBody}>
+						<div className={classes.chargesBody}>
 							{filtered
 								.sort((a, b) => a.fine - b.fine)
 								.sort((a, b) => a.jail - b.jail)
 								.sort((a, b) => a.type - b.type)
 								.map((charge) => {
 									return (
-										<CSSTransition
-											key={`avail-${charge._id}`}
-											timeout={500}
-											classNames="item"
+										<div
+											key={charge.id}
+											className={`${classes.charge} type-${charge.type}`}
+											title={charge.title}
+											onClick={() => onChange(charge)}
 										>
-											<div
-												className={`${classes.charge} type-${charge.type}`}
-												title={charge.title}
-												onClick={() => onChange(charge)}
-											>
-												<Truncate lines={1}>
-													{charge.title}
-												</Truncate>
-												<div>
-													<small>
-														{charge.jail
-															? `Time: ${charge.jail} `
-															: null}
-														{charge.fine
-															? `Fine: ${CurrencyFormat.format(
-																	charge.fine,
-															  )} `
-															: null}
-														{charge.points
-															? `Points: ${charge.points}`
-															: null}
-													</small>
-												</div>
-												<IconButton
-													className={
-														classes.detailsbtn
-													}
-													onClick={(e) => {
-														e.stopPropagation();
-														setSelCharge(charge);
-													}}
-												>
-													<FontAwesomeIcon
-														icon={[
-															'fas',
-															'circle-question',
-														]}
-													/>
-												</IconButton>
+											<Truncate lines={1}>
+												{charge.title}
+											</Truncate>
+											<div>
+												<small>
+													{charge.jail
+														? `Time: ${charge.jail} `
+														: null}
+													{charge.fine
+														? `Fine: ${CurrencyFormat.format(
+															charge.fine,
+														)} `
+														: null}
+													{charge.points
+														? `Points: ${charge.points}`
+														: null}
+												</small>
 											</div>
-										</CSSTransition>
+											<IconButton
+												className={
+													classes.detailsbtn
+												}
+												onClick={(e) => {
+													e.stopPropagation();
+													setSelCharge(charge);
+												}}
+											>
+												<FontAwesomeIcon
+													icon={[
+														'fas',
+														'circle-question',
+													]}
+												/>
+											</IconButton>
+										</div>
 									);
 								})}
-						</TransitionGroup>
+						</div>
 					</div>
 				</Grid>
 				<Grid item xs={4} style={{ height: '100%' }}>
@@ -359,10 +372,10 @@ export default ({ selected, onChange, onRemove, wrapperClass }) => {
 							</Grid>
 						</Grid>
 						<ul className={classes.selectedBody}>
-							{selected.map((charge) => {
+							{susCharges.map((charge) => {
 								return (
 									<li
-										key={`selected-${charge._id}`}
+										key={`selected-${charge.id}`}
 										className={classes.selectedCharge}
 									>
 										{charge.title} x{charge.count}

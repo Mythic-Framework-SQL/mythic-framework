@@ -6,7 +6,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme, StyledEngineProvider } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { fas } from '@fortawesome/free-solid-svg-icons';
+import { fas } from '@fortawesome/pro-solid-svg-icons';
+import { far } from '@fortawesome/pro-regular-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
 import { HashRouter } from 'react-router-dom';
 
@@ -18,7 +19,7 @@ import Badge from '../GovBadge';
 import { GetDeptPalette } from './Palettes';
 import BodyCam from '../BodyCam';
 
-library.add(fab, fas);
+library.add(fab, fas, far);
 
 export default () => {
 	const theme = 'dark';
@@ -27,7 +28,7 @@ export default () => {
 
 	const muiTheme = createTheme({
 		typography: {
-			fontFamily: ['Exo'],
+			fontFamily: ['Source Sans Pro'],
 			fontWeightRegular: 400,
 		},
 		palette: palette,
@@ -59,7 +60,7 @@ export default () => {
 			MuiBackdrop: {
 				styleOverrides: {
 					root: {
-						height: '90%',
+						height: '95%',
 						width: '90%',
 						margin: 'auto',
 					},
@@ -113,7 +114,7 @@ export default () => {
 						left: 0,
 						right: 0,
 						margin: 'auto',
-						height: '90%',
+						height: '95%',
 						width: '90%',
 						borderRadius: 10,
 						overflowY: 'auto',
@@ -218,9 +219,13 @@ export default () => {
 							borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.23)' : 'rgba(0, 0, 0, 0.23)',
 						},
 					},
-					'.ck-content': {
-						minHeight: 300,
+					'.ck-editor': {
+						maxHeight: '100% !important',
 					},
+					// '.ck-content': {
+					// 	height: '100%',
+					// 	//maxHeight: '50vh',
+					// },
 					'.ck-balloon-panel_visible': {
 						zIndex: '10000 !important',
 					},

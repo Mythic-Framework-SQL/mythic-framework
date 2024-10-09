@@ -37,17 +37,14 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-export default ({ unit, onChange }) => {
+export default ({ current, unit, onChange }) => {
 	const classes = useStyles();
-	const user = useSelector((state) => state.app.user);
-	const onDuty = useSelector((state) => state.alerts.onDuty);
 
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [open, setOpen] = useState(null);
 
 	switch (unit.job) {
 		case 'police':
-			const pdunit = onDuty.find(u => u.primary == unit.primary);
 			return (
 				<>
 					<MenuItem onClick={(e) => {
@@ -56,9 +53,9 @@ export default ({ unit, onChange }) => {
 					}}>
 						Change Type
 					</MenuItem>
-					<Menu 
-						anchorEl={anchorEl} 
-						open={open != null} 
+					<Menu
+						anchorEl={anchorEl}
+						open={open != null}
 						onClose={() => setOpen(null)}
 						PaperProps={{
 							style: {
@@ -70,34 +67,25 @@ export default ({ unit, onChange }) => {
 						{Boolean(open) && (
 							<div>
 								<MenuItem
-									disabled={
-										(pdunit.type == 'car'
-										&& user.Callsign != pdunit.primary
-										&& !pdunit.units.includes(user.Callsign))
-										|| pdunit.type == 'car'
-									}
+									disabled={current == 'car'}
 									onClick={() => onChange('car')}
 								>
 									Ground Unit
 								</MenuItem>
 								<MenuItem
-									disabled={
-										(pdunit.type == 'motorcycle'
-										&& user.Callsign != pdunit.primary
-										&& !pdunit.units.includes(user.Callsign))
-										|| pdunit.type == 'motorcycle'
-									}
+									disabled={current == 'heat'}
+									onClick={() => onChange('heat')}
+								>
+									Heat Unit
+								</MenuItem>
+								<MenuItem
+									disabled={current == 'motorcycle'}
 									onClick={() => onChange('motorcycle')}
 								>
 									Motorcycle Unit
 								</MenuItem>
 								<MenuItem
-									disabled={
-										(pdunit.type == 'air1'
-										&& user.Callsign != pdunit.primary
-										&& !pdunit.units.includes(user.Callsign))
-										|| pdunit.type == 'air1'
-									}
+									disabled={current == 'air1'}
 									onClick={() => onChange('air1')}
 								>
 									Air Unit
@@ -108,7 +96,6 @@ export default ({ unit, onChange }) => {
 				</>
 			);
 		case 'ems':
-			const emsunit = onDuty.find(u => u.primary == unit.primary);
 			return (
 				<>
 					<MenuItem onClick={(e) => {
@@ -117,9 +104,9 @@ export default ({ unit, onChange }) => {
 					}}>
 						Change To
 					</MenuItem>
-					<Menu 
-						anchorEl={anchorEl} 
-						open={open != null} 
+					<Menu
+						anchorEl={anchorEl}
+						open={open != null}
 						onClose={() => setOpen(null)}
 						PaperProps={{
 							style: {
@@ -132,36 +119,21 @@ export default ({ unit, onChange }) => {
 							<div>
 								<MenuItem
 									button
-									disabled={
-										(emsunit.type == 'bus' &&
-											user.Callsign != emsunit.primary &&
-											!emsunit.units.includes(user.Callsign)) ||
-										emsunit.type == 'bus'
-									}
+									disabled={current == "bus"}
 									onClick={() => onChange('bus')}
 								>
 									Ambulance
 								</MenuItem>
 								<MenuItem
 									button
-									disabled={
-										(emsunit.type == 'car' &&
-											user.Callsign != emsunit.primary &&
-											!emsunit.units.includes(user.Callsign)) ||
-										emsunit.type == 'car'
-									}
+									disabled={current == "car"}
 									onClick={() => onChange('car')}
 								>
 									Rapid Response
 								</MenuItem>
 								<MenuItem
 									button
-									disabled={
-										(emsunit.type == 'lifeflight' &&
-											user.Callsign != emsunit.primary &&
-											!emsunit.units.includes(user.Callsign)) ||
-										emsunit.type == 'lifeflight'
-									}
+									disabled={current == "lifeflight"}
 									onClick={() => onChange('lifeflight')}
 								>
 									Life Flight

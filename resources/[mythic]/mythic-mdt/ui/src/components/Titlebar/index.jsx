@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@mui/styles';
-import { AppBar, Toolbar, IconButton, Divider } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Divider, Grid } from '@mui/material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -11,57 +11,53 @@ import Nui from '../../util/Nui';
 import Account from './Account';
 
 const useStyles = makeStyles((theme) => ({
-	root: {
-		flexGrow: 1,
-		background: theme.palette.secondary.dark,
-		width: '100%',
-		height: 86,
-		zIndex: 100,
+	cityLogoContainer: {
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'center',
 	},
 	cityLogo: {
-		width: 80,
-		padding: 4,
-	},
-	cityLogoLink: {
-		background: theme.palette.secondary.main,
-		'&:hover': {
-			background: theme.palette.secondary.light,
-			transition: 'background ease-in 0.15s',
-		},
+		width: 90,
+		paddingLeft: 10,
 	},
 	branding: {
 		marginLeft: 10,
-		marginRight: 10,
+		marginRight: 50,
 		fontSize: 22,
 		'& small': {
 			display: 'block',
-			fontSize: 14,
+			fontSize: 16,
 			color: theme.palette.text.alt,
 		},
-	},
-	navLinks: {
-		display: 'inline-flex',
-		alignItems: 'center',
-		width: '100%',
 	},
 	navbar: {
 		backgroundColor: theme.palette.secondary.main,
 		width: '100%',
 		borderBottom: `1px solid ${theme.palette.border.divider}`,
+		userSelect: 'none',
 	},
 	title: {
-		flexGrow: 1,
+		display: 'flex',
+		alignContent: 'center',
+		background: theme.palette.secondary.light,
+		margin: 10,
+		borderRadius: 1000,
 	},
 	right: {
-		display: 'inline-flex',
-		alignItems: 'center',
 		marginRight: 10,
+		maxWidth: '50%',
+		alignSelf: 'stretch',
+	},
+	rightNav: {
+		display: 'flex',
+		padding: '10px 0',
+		flexDirection: 'row-reverse',
 	},
 	user: {
 		marginRight: 10,
 		textAlign: 'right',
+		fontSize: 18,
 		'& small': {
-			display: 'block',
 			color: theme.palette.text.alt,
 		},
 	},
@@ -69,9 +65,17 @@ const useStyles = makeStyles((theme) => ({
 		fontSize: 14,
 		color: theme.palette.primary.main,
 	},
+	motd: {
+		margin: 'auto 10px auto 0px',
+	},
+	middle: {
+		flexGrow: 1,
+		alignSelf: 'stretch',
+		zIndex: 2,
+	}
 }));
 
-export default ({ businessData }) => {
+export default ({ businessData, children }) => {
 	const classes = useStyles();
 	const history = useNavigate();
 	const location = useLocation();
@@ -101,41 +105,50 @@ export default ({ businessData }) => {
 
 	return (
 		<AppBar elevation={0} position="relative" color="secondary" className={classes.navbar}>
-			<Toolbar disableGutters>
+			<Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
+				<div className={classes.title}>
+					<div className={classes.cityLogoContainer}>
+						<img src={getSeal()} className={classes.cityLogo} />
+					</div>
+					<div className={classes.branding}>
+						<p>
+							{branding.primary}
+							<small>{branding.secondary}</small>
+						</p>
+					</div>
+				</div>
 				<div
-					className={classes.title}
+					className={classes.middle}
 					onMouseEnter={() => hoverChange(true)}
 					onMouseLeave={() => hoverChange(false)}
 				>
-					<div className={classes.navLinks}>
-						<Link to="/" className={classes.cityLogoLink}>
-							<img src={getSeal()} className={classes.cityLogo} />
-						</Link>
-						<Divider orientation="vertical" flexItem />
-						<div className={classes.branding}>
-							<span>
-								{branding.primary}
-								<small>{branding.secondary}</small>
-							</span>
-						</div>
-					</div>
 				</div>
 				<div className={classes.right}>
-					<div className={classes.user}>
-						<Account />
-					</div>
-					<Divider orientation="vertical" flexItem />
-					<IconButton onClick={() => history(-1)}>
-						<FontAwesomeIcon icon={['fas', 'chevron-left']} />
-					</IconButton>
-					<IconButton onClick={() => history(1)}>
-						<FontAwesomeIcon icon={['fas', 'chevron-right']} />
-					</IconButton>
-					<IconButton onClick={onClose}>
-						<FontAwesomeIcon icon={['fas', 'xmark']} />
-					</IconButton>
+					<Grid container direction="column" justifyContent="space-between" spacing={4}>
+						<Grid item xs={12}>
+							<div className={classes.rightNav}>
+								<IconButton onClick={onClose}>
+									<FontAwesomeIcon icon={['fas', 'xmark']} />
+								</IconButton>
+								<IconButton onClick={() => history(1)}>
+									<FontAwesomeIcon icon={['fas', 'arrow-right']} />
+								</IconButton>
+								<IconButton onClick={() => history(-1)}>
+									<FontAwesomeIcon icon={['fas', 'arrow-left']} />
+								</IconButton>
+								{/* <Divider orientation="vertical" flexItem />
+								<p className={classes.motd}>Message of the Day</p> */}
+							</div>
+						</Grid>
+						<Grid item xs={12} >
+							<div className={classes.user}>
+								<Account />
+							</div>
+						</Grid>
+					</Grid>
 				</div>
 			</Toolbar>
+			{children}
 		</AppBar>
 	);
 };

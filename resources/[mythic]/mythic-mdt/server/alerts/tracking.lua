@@ -1,23 +1,25 @@
-_trackingEmployees = {}
+local memberCoords = {}
 
 function StartAETrackingThreads()
-    GlobalState.GovernmentTrackers = {}
-
-    CreateThread(function()
+    Citizen.CreateThread(function()
         while true do
-            Wait(2500)
+            Citizen.Wait(3000)
             for k, v in pairs(emergencyAlertsData) do
-                if v ~= nil and v.Source then
-                    local tpCoords = Player(v.Source)?.state?.tpLocation
-                    if tpCoords then
-                        emergencyAlertsData[k].Coords = vector3(tpCoords.x, tpCoords.y, tpCoords.z)
-                    else
-                        emergencyAlertsData[k].Coords = GetEntityCoords(GetPlayerPed(k))
+                if v ~= nil and v.Source and GetPlayerEndpoint(v.Source) then
+                    if not v.TrackerDisabled then
+                        local tpCoords = Player(v.Source)?.state?.tpLocation
+                        if tpCoords then
+                            memberCoords[k] = vector3(tpCoords.x, tpCoords.y, tpCoords.z)
+                        else
+                            memberCoords[k] = GetEntityCoords(GetPlayerPed(k))
+                        end
                     end
+                else
+                    memberCoords[k] = nil
                 end
             end
 
-            GlobalState.GovernmentTrackers = emergencyAlertsData
+            EmergencyAlerts:SendOnDutyEvent("EmergencyAlerts:Client:UpdateTrackers", memberCoords)
         end
     end)
 end

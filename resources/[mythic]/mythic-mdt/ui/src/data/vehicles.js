@@ -1,5 +1,1 @@
-export const VehicleTypes = [
-    'Vehicle',
-    'Boat',
-    'Aircraft',
-];
+export const VehicleTypes = ['Vehicle', 'Boat', 'Aircraft'];

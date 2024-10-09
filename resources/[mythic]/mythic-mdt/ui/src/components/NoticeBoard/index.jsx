@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { Alert, Grid, List, ListItem, IconButton, Pagination } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Link } from 'react-router-dom';
@@ -34,38 +33,20 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-export default ({ boardTitle = 'Notice Board', perPage = 3 }) => {
+export default ({ boardTitle = 'Notice Board', perPage = 3, notices = {} }) => {
 	const classes = useStyles();
 	const hasJob = useGovJob();
 	const hasPerm = usePermissions();
-	const myJob = useSelector((state) => state.app.govJob);
-	const governmentJobs = useSelector((state) => state.data.data.governmentJobs);
-	const notices = useSelector((state) => state.data.data.notices);
 	const PER_PAGE = perPage;
-	const [filtered, setFiltered] = useState(Array());
 	const [pages, setPages] = useState(1);
 	const [page, setPage] = useState(1);
 
-	const isHighCommand = hasPerm('PD_HIGH_COMMAND') || hasPerm('SAFD_HIGH_COMMAND');
+	const isHighCommand = hasPerm('PD_HIGH_COMMAND') || hasPerm('SAFD_HIGH_COMMAND') || hasPerm('DOJ_JUDGE') || hasPerm('GOV_MAYOR') || hasPerm('GOV_DA') || hasPerm('GOV_CPUB') || hasPerm('DOC_HIGH_COMMAND');
 
 	useEffect(() => {
 		setPages(Math.ceil(notices.length / PER_PAGE));
 		setPage(1);
-		setFiltered(
-			filtered.filter(
-				(n) =>
-					!n.job ||
-					(typeof n.job == 'boolean' && governmentJobs.includes(myJob?.Id)) ||
-					hasJob(n.job, n.workplace) ||
-					hasPerm(true),
-			),
-		);
 	}, [notices]);
-
-	useEffect(() => {
-		setPages(Math.ceil(notices.length / PER_PAGE));
-		setPage(1);
-	}, [filtered]);
 
 	const onPagi = (e, p) => {
 		setPage(p);
@@ -85,8 +66,8 @@ export default ({ boardTitle = 'Notice Board', perPage = 3 }) => {
 				<List>
 					{notices && notices.length > 0 ? (
 						notices
+							.sort((a, b) => b.created - a.created)
 							.slice((page - 1) * PER_PAGE, page * PER_PAGE)
-							.sort((a, b) => b.time - a.time)
 							.map((notice, k) => {
 								return <Item key={`notices-${k}`} notice={notice} />;
 							})

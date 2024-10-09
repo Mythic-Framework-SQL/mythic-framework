@@ -12,12 +12,13 @@ const useStyles = makeStyles((theme) => ({
 		fontFamily: ['Share Tech Mono', 'monospace'],
 		fontSize: 14,
 		position: 'absolute',
-		top: '-4.5%',
+		top: '-0.5%',
 		right: '-4.5%',
 		background: 'rgba(0,0,0,0.5)',
 		borderRadius: 10,
 		width: 400,
 		height: 'fit-content',
+		zIndex: -5,
 	},
 	axon: {
 		width: 75,
@@ -42,7 +43,7 @@ export default () => {
 	const dispatchShowing = useSelector((state) => state.alerts.showing);
 	const cData = useSelector((state) => state.app.user);
 
-	if (!Boolean(cData) || !Boolean(job) || (job.Id != 'police' && job.Id != 'ems')) return null;
+	if (!Boolean(cData) || !Boolean(job) || (job.Id != 'police' && job.Id != 'ems' && job.Id != 'prison')) return null;
 	return (
 		<Fade in={showing && mdtHidden && !dispatchShowing}>
 			<Grid className={classes.container} container>

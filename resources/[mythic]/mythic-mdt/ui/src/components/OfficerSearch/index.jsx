@@ -8,7 +8,7 @@ import {
 	ListItemText,
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import _, { debounce } from 'lodash';
+import { debounce } from 'lodash';
 
 import Nui from '../../util/Nui';
 import { usePerson } from '../../hooks';
@@ -28,6 +28,10 @@ const useStyles = makeStyles((theme) => ({
 			color: theme.palette.primary.main,
 		},
 	},
+	item: {
+		margin: 5,
+		border: `1px solid ${theme.palette.border.divider}`
+	}
 }));
 
 export default ({
@@ -41,6 +45,7 @@ export default ({
 	onInputChange,
 	disableSelf = false,
 	job = 'police',
+	disabled = false,
 }) => {
 	const classes = useStyles();
 	const [loading, setLoading] = useState(false);
@@ -52,7 +57,7 @@ export default ({
 			debounce(async (job, v) => {
 				try {
 					let res = await (
-						await Nui.send('Search', {
+						await Nui.send('InputSearch', {
 							type: 'job',
 							job: job,
 							term: v,
@@ -75,7 +80,7 @@ export default ({
 		if (inputValue && inputValue.length > 0) {
 			setLoading(true);
 			setOptions(Array());
-	
+
 			fetch(job, inputValue);
 		} else {
 			setLoading(false);
@@ -88,6 +93,7 @@ export default ({
 			loading={loading}
 			fullWidth
 			multiple
+			disabled={disabled}
 			className={classes.editorField}
 			getOptionLabel={(option) => {
 				return formatPerson(option.First, option.Last, option.Callsign, option.SID);
@@ -110,6 +116,7 @@ export default ({
 					placeholder={placeholder}
 					label={label}
 					fullWidth
+					variant="standard"
 				/>
 			)}
 			renderTags={(value, getTagProps) =>
@@ -121,11 +128,13 @@ export default ({
 									? 'primary'
 									: 'default'
 							}
+							className={classes.item}
+							size="small"
 							variant="outlined"
 							label={formatPerson(option.First, option.Last, option.Callsign, option.SID)}
 							{...getTagProps({ index })}
 							disabled={
-								disableSelf && option.Callsign == user.Callsign
+								disabled || disableSelf && option.Callsign == user.Callsign
 							}
 						/>
 					);

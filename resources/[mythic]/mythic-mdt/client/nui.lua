@@ -2,6 +2,14 @@ RegisterNUICallback("Search", function(data, cb)
 	Callbacks:ServerCallback("MDT:Search:" .. data.type, data, cb)
 end)
 
+RegisterNUICallback("InputSearch", function(data, cb)
+	Callbacks:ServerCallback("MDT:InputSearch:" .. data.type, data, cb)
+end)
+
+RegisterNUICallback("InputSearchSID", function(data, cb)
+	Callbacks:ServerCallback("MDT:InputSearchSID", data, cb)
+end)
+
 RegisterNUICallback("View", function(data, cb)
 	Callbacks:ServerCallback("MDT:View:" .. data.type, data.id, cb)
 end)
@@ -22,6 +30,10 @@ RegisterNUICallback("SentencePlayer", function(data, cb)
 	Callbacks:ServerCallback("MDT:SentencePlayer", data, cb)
 end)
 
+RegisterNUICallback("IssueWarrant", function(data, cb)
+	Callbacks:ServerCallback("MDT:IssueWarrant", data, cb)
+end)
+
 RegisterNUICallback("ManageEmployment", function(data, cb)
 	Callbacks:ServerCallback("MDT:ManageEmployment", data, cb)
 end)
@@ -34,88 +46,53 @@ RegisterNUICallback("FireEmployee", function(data, cb)
 	Callbacks:ServerCallback("MDT:Fire", data, cb)
 end)
 
+RegisterNUICallback("SuspendEmployee", function(data, cb)
+	Callbacks:ServerCallback("MDT:Suspend", data, cb)
+end)
+
+RegisterNUICallback("UnsuspendEmployee", function(data, cb)
+	Callbacks:ServerCallback("MDT:Unsuspend", data, cb)
+end)
+
 RegisterNUICallback("CheckCallsign", function(data, cb)
 	Callbacks:ServerCallback("MDT:CheckCallsign", data, cb)
 end)
 
-RegisterNUICallback("CheckParole", function(data, cb)
-	Wait(((data.index and (data.index + 1) or 1) * 250)) -- Really Dumb Because You Can't do 2 NUI Cbs at the same time Lazy Fix
-	Callbacks:ServerCallback("MDT:CheckParole", data.SID, cb)
+RegisterNUICallback("RosterView", function(data, cb)
+	Callbacks:ServerCallback("MDT:RosterView", data, cb)
+end)
+
+RegisterNUICallback("RosterSelect", function(data, cb)
+	Callbacks:ServerCallback("MDT:RosterSelect", data, cb)
+end)
+
+RegisterNUICallback("GetProperties", function(data, cb)
+	local properties = Properties:GetProperties()
+
+	local data = {}
+	if properties then
+		for k,v in pairs(properties) do
+			table.insert(data, v)
+		end
+	end
+
+	cb(data)
+end)
+
+RegisterNUICallback("FindProperty", function(data, cb)
+	local prop = Properties:Get(data)
+	if prop ~= nil then
+		ClearGpsPlayerWaypoint()
+		SetNewWaypoint(prop.location.front.x, prop.location.front.y)
+        cb(true)
+	else
+		cb(false)
+	end
 end)
 
 RegisterNUICallback("EvidenceLocker", function(data, cb)
 	cb(true)
 	Callbacks:ServerCallback("MDT:OpenEvidenceLocker", data)
-end)
-
-RegisterNUICallback("GetMetrics", function(data, cb)
-	if data == GlobalState['MDT:Metric:CurrentDay'] then
-		cb({
-			labels = {
-				'Arrests', 'Reports', 'Warrants', 'BOLO\'s', 'Searches',
-			},
-			datasets = {
-			  {
-				label = 'Metrics',
-				data = {
-					GlobalState["MDT:Metric:Arrests"] or 0,
-					GlobalState["MDT:Metric:Reports"] or 0,
-					GlobalState["MDT:Metric:Warrants"] or 0,
-					GlobalState["MDT:Metric:BOLOs"] or 0,
-					GlobalState["MDT:Metric:Search"] or 0,
-				},
-				backgroundColor = {
-				  'rgba(255, 99, 132, 0.2)',
-				  'rgba(54, 162, 235, 0.2)',
-				  'rgba(255, 206, 86, 0.2)',
-				  'rgba(75, 192, 192, 0.2)',
-				  'rgba(153, 102, 255, 0.2)',
-				},
-				borderColor = {
-				  'rgba(255, 99, 132, 1)',
-				  'rgba(54, 162, 235, 1)',
-				  'rgba(255, 206, 86, 1)',
-				  'rgba(75, 192, 192, 1)',
-				  'rgba(153, 102, 255, 1)',
-				},
-				borderWidth = 1,
-			  },
-			},
-		})
-	else
-		Callbacks:ServerCallback('MDT:GetMetrics', data, function(metrics)
-			if metrics ~= nil then
-				cb({
-					labels = {
-						'Arrests', 'Reports', 'Warrants', 'BOLO\'s', 'Searches',
-					},
-					datasets = {
-					  {
-						label = 'Metrics',
-						data = metrics,
-						backgroundColor = {
-						  'rgba(255, 99, 132, 0.2)',
-						  'rgba(54, 162, 235, 0.2)',
-						  'rgba(255, 206, 86, 0.2)',
-						  'rgba(75, 192, 192, 0.2)',
-						  'rgba(153, 102, 255, 0.2)',
-						},
-						borderColor = {
-						  'rgba(255, 99, 132, 1)',
-						  'rgba(54, 162, 235, 1)',
-						  'rgba(255, 206, 86, 1)',
-						  'rgba(75, 192, 192, 1)',
-						  'rgba(153, 102, 255, 1)',
-						},
-						borderWidth = 1,
-					  },
-					},
-				})
-			else
-				cb(nil)
-			end
-		end)
-	end
 end)
 
 RegisterNUICallback("PrintBadge", function(data, cb)
@@ -128,4 +105,60 @@ end)
 
 RegisterNUICallback("ClearRecord", function(data, cb)
 	Callbacks:ServerCallback("MDT:ClearCriminalRecord", data, cb)
+end)
+
+RegisterNUICallback("RemovePoints", function(data, cb)
+	Callbacks:ServerCallback("MDT:RemoveLicensePoints", data, cb)
+end)
+
+RegisterNUICallback("OverturnSentence", function(data, cb)
+	Callbacks:ServerCallback("MDT:OverturnSentence", data, cb)
+end)
+
+RegisterNUICallback("ViewVehicleFleet", function(data, cb)
+	Callbacks:ServerCallback("MDT:ViewVehicleFleet", data, cb)
+end)
+
+RegisterNUICallback("SetAssignedDrivers", function(data, cb)
+	Callbacks:ServerCallback("MDT:SetAssignedDrivers", data, cb)
+end)
+
+RegisterNUICallback("TrackFleetVehicle", function(data, cb)
+	Callbacks:ServerCallback("MDT:TrackFleetVehicle", data, function(data)
+		if data then
+			DeleteWaypoint()
+			SetNewWaypoint(data.x, data.y)
+			cb(true)
+		else
+			cb(false)
+		end
+	end)
+end)
+
+RegisterNUICallback("GetHomeData", function(data, cb)
+	Callbacks:ServerCallback("MDT:GetHomeData", data, cb)
+end)
+
+RegisterNUICallback("GetLibraryDocuments", function(data, cb)
+	Callbacks:ServerCallback("MDT:GetLibraryDocuments", data, cb)
+end)
+
+RegisterNUICallback("AddLibraryDocument", function(data, cb)
+	Callbacks:ServerCallback("MDT:AddLibraryDocument", data, cb)
+end)
+
+RegisterNUICallback("RemoveLibraryDocument", function(data, cb)
+	Callbacks:ServerCallback("MDT:RemoveLibraryDocument", data, cb)
+end)
+
+RegisterNUICallback("DOCGetPrisoners", function(data, cb)
+	Callbacks:ServerCallback("MDT:DOCGetPrisoners", data, cb)
+end)
+
+RegisterNUICallback("DOCReduceSentence", function(data, cb)
+	Callbacks:ServerCallback("MDT:DOCReduceSentence", data, cb)
+end)
+
+RegisterNUICallback("DOCRequestVisitation", function(data, cb)
+	Callbacks:ServerCallback("MDT:DOCRequestVisitation", data, cb)
 end)

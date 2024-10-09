@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import {
-	Grid,
+    Grid,
     Avatar
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
@@ -89,8 +89,8 @@ export default ({ data }) => {
 
     const classes = useStyles();
 
-	return (
-		<div className={classes.container}>
+    return (
+        <div className={classes.container}>
             <div className={classes.titleContainer}>
                 <p className={classes.titleText}>San Andreas ID Card</p>
             </div>
@@ -104,10 +104,10 @@ export default ({ data }) => {
                 <Grid item xs={8} style={{ padding: '2.5%' }}>
                     <p className={classes.infoText}>Name: {data?.Name}</p>
                     <p className={classes.infoText}>State ID: {data?.SID}</p>
-                    <p className={classes.infoText}>DOB: <Moment unix format={'ll'}>{data?.DOB}</Moment></p>
+                    <p className={classes.infoText}>DOB: <Moment format={'ll'}>{data?.DOB}</Moment></p>
                     <p className={classes.infoText}>Expires: Oct 1, 2026</p>
                 </Grid>
             </Grid>
-		</div>
-	);
+        </div>
+    );
 };

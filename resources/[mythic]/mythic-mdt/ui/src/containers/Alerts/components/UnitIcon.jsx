@@ -4,7 +4,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const useStyles = makeStyles((theme) => ({}));
 
-export default ({ job, type }) => {
+export default ({ job, type, available }) => {
+	if (job !== "tow" && !available) {
+		return <FontAwesomeIcon icon={['fas', 'hourglass-half']} />;
+	};
+
 	switch (job) {
 		case 'police':
 			switch (type) {
@@ -12,6 +16,8 @@ export default ({ job, type }) => {
 					return <FontAwesomeIcon icon={['fas', 'car-side']} />;
 				case 'air1':
 					return <FontAwesomeIcon icon={['fas', 'helicopter']} />;
+				case 'heat':
+					return <FontAwesomeIcon icon={['fas', 'dumpster-fire']} />;
 				case 'motorcycle':
 					return <FontAwesomeIcon icon={['fas', 'motorcycle']} />;
 				default:
@@ -34,6 +40,8 @@ export default ({ job, type }) => {
 			}
 		case 'tow':
 			return <FontAwesomeIcon icon={['fas', 'truck-ramp']} />;
+		case 'prison':
+			return <FontAwesomeIcon icon={['fas', 'handcuffs']} />;
 		default:
 			return <FontAwesomeIcon icon={['fas', 'circle-question']} />;
 	}

@@ -1,184 +1,121 @@
 _MDT.Warrants = {
-	Search = function(self, term)
-		local p = promise.new()
-		Database.Game:find({
-			collection = "mdt_warrants",
-			query = {},
-		}, function(success, results)
-			if not success then
-				p:resolve(false)
-				return
-			end
+  Search = function(self, term, page, perPage)
+    local qry = "SELECT id, state, title, creatorSID, creatorName, creatorCallsign, expires FROM mdt_warrants "
+    local params = {}
 
-			p:resolve(results)
-		end)
+    if #term > 0 then
+      qry = qry .. "WHERE id = ? OR title LIKE ? "
+      table.insert(params, term)
+      table.insert(params, "%" .. term .. "%")
+    end
 
-		return Citizen.Await(p)
-	end,
-	View = function(self, id)
-		local p = promise.new()
-		Database.Game:findOne({
-			collection = "mdt_warrants",
-			query = {
-				_id = data,
-			},
-		}, function(success, results)
-			if not success then
-				p:resolve(false)
-				return
-			end
-			p:resolve(results[1])
-		end)
-		return Citizen.Await(p)
-	end,
-	Create = function(self, data)
-		local p = promise.new()
-		Database.Game:insertOne({
-			collection = "mdt_warrants",
-			document = data,
-		}, function(success, result, insertId)
-			if not success then
-				p:resolve(false)
-				return
-			end
-			data._id = insertId[1]
-			table.insert(_warrants, data)
-			for user, _ in pairs(_onDutyUsers) do
-				TriggerClientEvent("MDT:Client:AddData", user, "warrants", data)
-			end
-			for user, _ in pairs(_onDutyLawyers) do
-				TriggerClientEvent("MDT:Client:AddData", user, "warrants", data)
-			end
-			p:resolve(success)
-		end)
-		GlobalState["MDT:Metric:Warrants"] = GlobalState["MDT:Metric:Warrants"] + 1
-		return Citizen.Await(p)
-	end,
-	Update = function(self, id, state, updater)
-		local p = promise.new()
-		Database.Game:updateOne({
-			collection = "mdt_warrants",
-			query = {
-				_id = id,
-			},
-			update = {
-				["$set"] = {
-					state = state,
-				},
-				["$push"] = {
-					history = updater,
-				},
-			},
-		}, function(success, result)
-			if not success then
-				p:resolve(false)
-				return
-			end
+    qry = qry .. "ORDER BY state, expires LIMIT ? OFFSET ?"
+    table.insert(params, perPage + 1)                  -- Limit
+    if page > 1 then
+      table.insert(params, perPage * (page - 1))       -- Offset
+    else
+      table.insert(params, 0)                          -- Offset
+    end
 
-			for k, v in ipairs(_warrants) do
-				if v._id == id then
-					v.state = state
+    local results = MySQL.query.await(qry, params)
 
-					for user, _ in pairs(_onDutyUsers) do
-						TriggerClientEvent("MDT:Client:UpdateData", user, "warrants", id, v)
-					end
+    if #results > perPage then -- There is more results for the next pages
+      table.remove(results)
+      pageCount = page + 1
+    end
 
-					for user, _ in pairs(_onDutyLawyers) do
-						TriggerClientEvent("MDT:Client:UpdateData", user, "warrants", id, v)
-					end
-				end
-			end
+    return {
+      data = results,
+      pages = pageCount,
+    }
+  end,
+  View = function(self, id)
+    local warrant = MySQL.single.await(
+    "SELECT id, state, title, report, suspect, notes, creatorSID, creatorName, creatorCallsign, expires, issued FROM mdt_warrants WHERE id = ?",
+      {
+        id
+      })
 
-			p:resolve(true)
-		end)
+    if warrant and warrant.suspect then
+      warrant.suspectData = MySQL.single.await(
+      "SELECT SID, First, Last, charges FROM mdt_reports_people WHERE report = ? AND type = ? AND warrant = ?", {
+        warrant.report,
+        "suspect",
+        warrant.id
+      })
+    end
 
-		return Citizen.Await(p)
-	end,
-	-- Delete = function(self, id)
-	-- 	local p = promise.new()
-	-- 	Database.Game:updateOne({
-	-- 		collection = "mdt_warrants",
-	-- 		query = {
-	-- 			_id = id,
-	-- 		},
-	-- 	}, function(success, result)
-	-- 		if not success then
-	-- 			p:resolve(false)
-	-- 			return
-	-- 		end
-	-- 		cb(insertId[1])
+    return warrant
+  end,
+  Create = function(self, report, suspect, notes, author)
+    local id = MySQL.insert.await(
+    "INSERT INTO mdt_warrants (title, report, suspect, notes, creatorSID, creatorName, creatorCallsign, expires) VALUES (?, ?, ?, ?, ?, ?, ?, FROM_UNIXTIME(?))",
+      {
+        string.format("Warrant For %s %s (%s)", suspect.First, suspect.Last, suspect.SID),
+        report,
+        suspect.id,
+        notes,
+        author.SID,
+        string.format("%s %s", author.First, author.Last),
+        author.Callsign,
+        os.time() + (60 * 60 * 24 * 7)
+      })
 
-	-- 		data.doc._id = insertId[1]
-	-- 		table.insert(_warrants, data.doc)
+    if id then
+      for user, _ in pairs(_onDutyUsers) do
+        TriggerClientEvent("MDT:Client:SetData", user, "homeLastFetch", 0)
+      end
+      for user, _ in pairs(_onDutyLawyers) do
+        TriggerClientEvent("MDT:Client:SetData", user, "homeLastFetch", 0)
+      end
+    end
 
-	-- 		for user, _ in pairs(_onDutyUsers) do
-	-- 			TriggerClientEvent("MDT:Client:AddData", user, "warrants", data.doc)
-	-- 		end
-	-- 	end)
-	-- 	return Citizen.Await(p)
-	-- end,
+    return id
+  end,
+  Update = function(self, id, state)
+    local u = MySQL.query.await("UPDATE mdt_warrants SET state = ? WHERE id = ?", {
+      state,
+      id
+    })
+
+    if u and u.affectedRows > 0 then
+      if state ~= "active" then
+        MySQL.query.await("UPDATE mdt_reports_people SET warrant = NULL WHERE type = ? AND warrant = ?", {
+          "suspect",
+          id,
+        })
+      end
+
+      for user, _ in pairs(_onDutyUsers) do
+        TriggerClientEvent("MDT:Client:SetData", user, "homeLastFetch", 0)
+      end
+      for user, _ in pairs(_onDutyLawyers) do
+        TriggerClientEvent("MDT:Client:SetData", user, "homeLastFetch", 0)
+      end
+
+      return true
+    end
+
+    return false
+  end,
 }
 
 AddEventHandler("MDT:Server:RegisterCallbacks", function()
-	Callbacks:RegisterServerCallback("MDT:Search:warrant", function(source, data, cb)
-		local char = Fetch:Source(source):GetData("Character")
-		cb(MDT.Warrants:Search(data.term))
-	end)
+  Callbacks:RegisterServerCallback("MDT:Search:warrant", function(source, data, cb)
+    cb(MDT.Warrants:Search(data.term, data.page, data.perPage))
+  end)
 
-	Callbacks:RegisterServerCallback("MDT:View:warrant", function(source, data, cb)
-		if CheckMDTPermissions(source, false) then
-			cb(MDT.Warrants:View(data))
-		else
-			cb(false)
-		end
-	end)
+  Callbacks:RegisterServerCallback("MDT:View:warrant", function(source, data, cb)
+    cb(MDT.Warrants:View(data))
+  end)
 
-	Callbacks:RegisterServerCallback("MDT:Create:warrant", function(source, data, cb)
-		local char = Fetch:Source(source):GetData("Character")
+  Callbacks:RegisterServerCallback("MDT:Update:warrant", function(source, data, cb)
+    local char = Fetch:Source(source)
 
-		if char and CheckMDTPermissions(source, false) then
-			data.doc.author = {
-				SID = char:GetData("SID"),
-				First = char:GetData("First"),
-				Last = char:GetData("Last"),
-				Callsign = char:GetData("Callsign"),
-			}
-			data.doc.ID = Sequence:Get("Warrant")
-			cb(MDT.Warrants:Create(data.doc))
-		else
-			cb(false)
-		end
-	end)
-
-	Callbacks:RegisterServerCallback("MDT:Update:warrant", function(source, data, cb)
-		local char = Fetch:Source(source):GetData("Character")
-
-		if char and CheckMDTPermissions(source, false) then
-			local updater = {
-				SID = char:GetData("SID"),
-				First = char:GetData("First"),
-				Last = char:GetData("Last"),
-				Callsign = char:GetData("Callsign"),
-				Action = string.format("Updated Warrant State To: %s", data.state),
-				Date = os.time() * 1000,
-			}
-			if CheckMDTPermissions(source, false) then
-				cb(MDT.Warrants:Update(data.id, data.state, updater))
-			else
-				cb(false)
-			end
-		else
-			cb(false)
-		end
-	end)
-
-	-- Callbacks:RegisterServerCallback("MDT:Delete:warrant", function(source, data, cb)
-	-- 	local char = Fetch:Source(source):GetData("Character")
-
-	-- 	if CheckMDTPermissions(source, false) then
-	-- 		cb(MDT.Warrants:Delete(data.id))
-	-- 	else
-	-- 		cb(false)
-	-- 	end
-	-- end)
+    if char and CheckMDTPermissions(source, false) then
+      cb(MDT.Warrants:Update(data.id, data.state))
+    else
+      cb(false)
+    end
+  end)
 end)

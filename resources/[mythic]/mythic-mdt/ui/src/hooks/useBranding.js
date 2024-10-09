@@ -4,21 +4,26 @@ export default (cJob, isAttorney) => {
 			primary: 'Electronic Records System',
 			secondary: 'San Andreas Department of Justice',
 		};
-	};
+	}
 
 	switch (cJob?.Id) {
 		case 'police':
 			return {
-				primary: 'Electronic Records System',
-				secondary: cJob?.Workplace?.Name,
+				primary: cJob?.Workplace?.Name,
+				secondary: 'Electronic Records System',
+			};
+		case 'prison':
+			return {
+				primary: 'San Andreas Department of Corrections',
+				secondary: 'Electronic Records System',
 			};
 		case 'government':
-			switch(cJob?.Workplace?.Id) {
+			switch (cJob?.Workplace?.Id) {
 				case 'doj':
 					return {
-						primary: 'Electronic Records System',
-						secondary: 'San Andreas Department of Justice',
-					}
+						primary: 'San Andreas Department of Justice',
+						secondary: 'Electronic Records System',
+					};
 				default:
 					return {
 						primary: 'State of San Andreas',

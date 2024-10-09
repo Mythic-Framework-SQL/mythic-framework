@@ -2,15 +2,18 @@ export const GetDeptPalette = (workplace, theme) => {
 	switch (workplace) {
 		case 'lspd':
 			return LSPDPalette(theme);
-		case 'lscso':
-			return LSCSOPalette(theme);
+		case 'bcso':
+			return BCSOPalette(theme);
+		case 'sast':
+			return SASTPalette(theme);
+		case 'guardius':
+			return GuardiusPalette(theme);
 		case 'doj':
 		case 'dattorney':
 		case 'mayoroffice':
 			return DOJPalette(theme);
-		case 'safd':
-			return MedicalPalette(theme);
 		case 'doctors':
+		case 'safd':
 			return MedicalPalette(theme);
 		default:
 			return StandardPalette(theme);
@@ -21,33 +24,69 @@ export const LSPDPalette = (theme) => {
 	return {
 		...StandardPalette(theme),
 		primary: {
-			main: '#f9c334',
-			light: '#ecc96a',
-			dark: '#9c791b',
+			main: '#bd9239',
+			light: '#d1ae67',
+			dark: '#6d5421',
 			contrastText: theme === 'dark' ? '#ffffff' : '#26292d',
 		},
 		secondary: {
-			main: theme === 'dark' ? '#172c42' : '#ffffff',
-			light: theme === 'dark' ? '#233e5a' : '#F5F6F4',
-			dark: theme === 'dark' ? '#0d1721' : '#EBEBEB',
+			main: theme === 'dark' ? '#10121b' : '#ffffff',
+			light: theme === 'dark' ? '#202435' : '#F5F6F4',
+			dark: theme === 'dark' ? '#0b0c12' : '#EBEBEB',
 			contrastText: theme === 'dark' ? '#ffffff' : '#2e2e2e',
 		},
 	};
 };
 
-export const LSCSOPalette = (theme) => {
+export const GuardiusPalette = (theme) => {
 	return {
 		...StandardPalette(theme),
 		primary: {
-			main: '#4a93b7',
-			light: '#7ec3e9',
-			dark: '#016587',
+			main: '#bd9239',
+			light: '#d1ae67',
+			dark: '#6d5421',
 			contrastText: theme === 'dark' ? '#ffffff' : '#26292d',
 		},
 		secondary: {
-			main: theme === 'dark' ? '#2e2e2e' : '#ffffff',
-			light: theme === 'dark' ? '#121212' : '#F5F6F4',
-			dark: theme === 'dark' ? '#151515' : '#EBEBEB',
+			main: theme === 'dark' ? '#141414' : '#ffffff',
+			light: theme === 'dark' ? '#1c1c1c' : '#F5F6F4',
+			dark: theme === 'dark' ? '#0f0f0f' : '#EBEBEB',
+			contrastText: theme === 'dark' ? '#ffffff' : '#2e2e2e',
+		},
+	};
+};
+
+export const BCSOPalette = (theme) => {
+	return {
+		...StandardPalette(theme),
+		primary: {
+			main: '#b2882e',
+			light: '#d6b161',
+			dark: '#9e7829',
+			contrastText: theme === 'dark' ? '#ffffff' : '#26292d',
+		},
+		secondary: {
+			main: theme === 'dark' ? '#313023' : '#ffffff',
+			light: theme === 'dark' ? '#95926a' : '#F5F6F4',
+			dark: theme === 'dark' ? '#323123' : '#EBEBEB',
+			contrastText: theme === 'dark' ? '#ffffff' : '#2e2e2e',
+		},
+	};
+};
+
+export const SASTPalette = (theme) => {
+	return {
+		...StandardPalette(theme),
+		primary: {
+			main: '#677aa8',
+			light: '#a5b0cb',
+			dark: '#343f5a',
+			contrastText: theme === 'dark' ? '#ffffff' : '#26292d',
+		},
+		secondary: {
+			main: theme === 'dark' ? '#393939' : '#ffffff',
+			light: theme === 'dark' ? '#808080' : '#F5F6F4',
+			dark: theme === 'dark' ? '#2a2a2a' : '#EBEBEB',
 			contrastText: theme === 'dark' ? '#ffffff' : '#2e2e2e',
 		},
 	};
@@ -75,9 +114,9 @@ export const MedicalPalette = (theme) => {
 	return {
 		...StandardPalette(theme),
 		primary: {
-			main: '#395475',
-			light: '#6780a4',
-			dark: '#072c49',
+			main: '#7b9ff2',
+			light: '#9ec2ff',
+			dark: '#4259c3',
 			contrastText: theme === 'dark' ? '#ffffff' : '#26292d',
 		},
 		secondary: {
@@ -92,9 +131,9 @@ export const MedicalPalette = (theme) => {
 export const StandardPalette = (theme) => {
 	return {
 		primary: {
-			main: '#8a0000',
-			light: '#ff2100',
-			dark: '#560000',
+			main: '#E5A502',
+			light: '#E8A933',
+			dark: '#FA5800',
 			contrastText: '#ffffff',
 		},
 		secondary: {
@@ -119,7 +158,7 @@ export const StandardPalette = (theme) => {
 			dark: '#b05d1a',
 		},
 		info: {
-			main: '#247ba5',
+			main: '#4056b3',
 			light: '#247ba5',
 			dark: '#175878',
 		},
@@ -138,14 +177,8 @@ export const StandardPalette = (theme) => {
 			main: theme === 'dark' ? '#e0e0e008' : '#e0e0e008',
 			light: '#ffffff',
 			dark: '#26292d',
-			input:
-				theme === 'dark'
-					? 'rgba(255, 255, 255, 0.23)'
-					: 'rgba(0, 0, 0, 0.23)',
-			divider:
-				theme === 'dark'
-					? 'rgba(255, 255, 255, 0.12)'
-					: 'rgba(0, 0, 0, 0.12)',
+			input: theme === 'dark' ? 'rgba(255, 255, 255, 0.23)' : 'rgba(0, 0, 0, 0.23)',
+			divider: theme === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)',
 		},
 		mode: theme,
 	};
