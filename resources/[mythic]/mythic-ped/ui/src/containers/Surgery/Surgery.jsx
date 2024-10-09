@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Tab, Tabs, IconButton, ButtonGroup, Button } from '@mui/material';
+import { Tab, Tabs, IconButton, Button } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -102,7 +102,7 @@ export default (props) => {
 						}
 					/>
 					<Tab
-						label={<FontAwesomeIcon icon={['fas', 'head-side-mask']} />}
+						label={<FontAwesomeIcon icon={['fas', 'head-side']} />}
 					/>
 					<Tab
 						label={
@@ -133,7 +133,7 @@ export default (props) => {
 						}
 					/>
 					<Tab
-						label={<FontAwesomeIcon icon={['fas', 'scissors']} />}
+						label={<FontAwesomeIcon icon={['fas', 'user-hair']} />}
 					/>
 				</Tabs>
 			</div>
@@ -157,7 +157,7 @@ export default (props) => {
 				</Button>
 				<Button color="success" onClick={() => setSaving(true)}>
 					Save
-					<FontAwesomeIcon icon={['fas', 'floppy-disk']} />
+					<FontAwesomeIcon icon={['fas', 'save']} />
 				</Button>
 			</ButtonGroup>
 

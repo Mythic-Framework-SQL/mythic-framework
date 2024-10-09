@@ -6,7 +6,7 @@ Camera.currentView = "standard"
 Camera.active = false
 Camera.updateRot = false
 Camera.updateZoom = false
-Camera.radius = 1.8
+Camera.radius = 1.25
 Camera.angleX = 30.0
 Camera.angleY = 0.0
 Camera.mouseX = 0
@@ -19,7 +19,7 @@ Camera.angleYMax = 80.0
 
 Camera.Activate = function(delay)
 	if delay then
-		Wait(delay)
+		Citizen.Wait(delay)
 	end
 
 	if not DoesCamExist(Camera.entity) then
@@ -166,39 +166,7 @@ Camera.CalculatePosition = function(adjustedAngle)
 	return vector3(pedCoords.x + offsetX, pedCoords.y + offsetY, pedCoords.z + offsetZ)
 end
 
-Camera.Drag = function(x, y)
-    Camera.angleX = Camera.angleX - x * 0.1
-    Camera.angleY = Camera.angleY + y * 0.1
-
-    -- Clamp angleY to avoid camera flipping
-    if Camera.angleY > Camera.angleYMax then
-        Camera.angleY = Camera.angleYMax
-    elseif Camera.angleY < Camera.angleYMin then
-        Camera.angleY = Camera.angleYMin
-    end
-
-    -- Update camera position
-    Camera.updateZoom = true
-end
-
-Camera.Zoom = function(zoom)
-	Camera.radius = zoom == "forward" and Camera.radius + 0.05 or Camera.radius - 0.05 
-    Camera.updateZoom = true
-end
-
-RegisterNUICallback('DragCamera', function(data, cb)
-	local x = data.x
-	local y = data.y
-    Camera.Drag(x, y)
-	cb("ok")
-end)
-
-RegisterNUICallback('ZoomCamera', function(zoom, cb)
-    Camera.Zoom(zoom)
-	cb("ok")
-end)
-
-CreateThread(function()
+Citizen.CreateThread(function()
 	while true do
 		if Camera.active or FROZEN then
 			DisableFirstPersonCamThisFrame()
@@ -238,6 +206,6 @@ CreateThread(function()
 			end
 		end
 
-		Wait(0)
+		Citizen.Wait(0)
 	end
 end)

@@ -98,7 +98,7 @@ export default (props) => {
 						}
 					/>
 					<Tab
-						label={<FontAwesomeIcon icon={['fas', 'head-side-mask']} />}
+						label={<FontAwesomeIcon icon={['fas', 'head-side']} />}
 					/>
 					<Tab
 						label={
@@ -119,9 +119,9 @@ export default (props) => {
 					variant="scrollable"
 				>
 					<Tab
-						label={<FontAwesomeIcon icon={['fas', 'scissors']} />}
+						label={<FontAwesomeIcon icon={['fas', 'user-hair']} />}
 					/>
-					<Tab label={<FontAwesomeIcon icon={['fas', 'teeth-open']} />} />
+					<Tab label={<FontAwesomeIcon icon={['fas', 'lips']} />} />
 				</Tabs>
 			</div>
 			<div className={classes.panel}>
@@ -143,7 +143,7 @@ export default (props) => {
 				</Button>
 				<Button color="success" onClick={() => setSaving(true)}>
 					Save
-					<FontAwesomeIcon icon={['fas', 'floppy-disk']} />
+					<FontAwesomeIcon icon={['fas', 'save']} />
 				</Button>
 			</ButtonGroup>
 

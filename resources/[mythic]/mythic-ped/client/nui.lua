@@ -34,13 +34,6 @@ RegisterNUICallback("Cancel", function(data, cb)
 	cb(Ped.Customization:Cancel())
 end)
 
-RegisterNUICallback("SaveImport", function(data, cb)
-	if data.Label == '' then return Notification:Error("Outfit Label can't be empty.") end
-	if data.Code == '' then return Notification:Error("Outfit Code can't be empty.") end
-
-    TriggerEvent("Wardrobe:Client:ApplySharedOutfit", data.Label, data.Code)
-end)
-
 function deepcopy(orig)
 	local orig_type = type(orig)
 	local copy

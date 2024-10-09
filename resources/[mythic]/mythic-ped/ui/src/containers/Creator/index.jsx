@@ -99,7 +99,7 @@ export default (props) => {
 						}
 					/>
 					<Tab
-						label={<FontAwesomeIcon icon={['fas', 'head-side-mask']} />}
+						label={<FontAwesomeIcon icon={['fas', 'head-side']} />}
 					/>
 					<Tab
 						label={
@@ -130,14 +130,14 @@ export default (props) => {
 						}
 					/>
 					<Tab
-						label={<FontAwesomeIcon icon={['fas', 'scissors']} />}
+						label={<FontAwesomeIcon icon={['fas', 'user-hair']} />}
 					/>
 					<Tab
-						label={<FontAwesomeIcon icon={['fas', 'teeth-open']} />}
+						label={<FontAwesomeIcon icon={['fas', 'lips']} />}
 					/>
 					<Tab label={<FontAwesomeIcon icon={['fas', 'shirt']} />} />
-					<Tab label={<FontAwesomeIcon icon={['fas', 'mitten']} />} />
-					<Tab label={<FontAwesomeIcon icon={['fas', 'atom']} />} />
+					<Tab label={<FontAwesomeIcon icon={['fas', 'watch']} />} />
+					<Tab label={<FontAwesomeIcon icon={['fas', 'galaxy']} />} />
 				</Tabs>
 			</div>
 			<div className={classes.panel}>
@@ -174,7 +174,7 @@ export default (props) => {
 				onClick={() => setSaving(true)}
 			>
 				Save
-				<FontAwesomeIcon icon={['fas', 'floppy-disk']} />
+				<FontAwesomeIcon icon={['fas', 'save']} />
 			</Button>
 
 			<Dialog
