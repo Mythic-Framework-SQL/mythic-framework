@@ -6,195 +6,184 @@ _loaded = false
 
 AddEventHandler('Jobs:Shared:DependencyUpdate', RetrieveComponents)
 function RetrieveComponents()
-	Database = exports['mythic-base']:FetchComponent('Database')
-	Middleware = exports['mythic-base']:FetchComponent('Middleware')
-	Callbacks = exports['mythic-base']:FetchComponent('Callbacks')
-	Logger = exports['mythic-base']:FetchComponent('Logger')
-	Utils = exports['mythic-base']:FetchComponent('Utils')
-	Fetch = exports['mythic-base']:FetchComponent('Fetch')
-	Chat = exports['mythic-base']:FetchComponent('Chat')
-	Execute = exports['mythic-base']:FetchComponent('Execute')
-	Sequence = exports['mythic-base']:FetchComponent('Sequence')
-	Generator = exports['mythic-base']:FetchComponent('Generator')
-	Phone = exports['mythic-base']:FetchComponent('Phone')
-	Jobs = exports['mythic-base']:FetchComponent('Jobs')
+  Middleware = exports['mythic-base']:FetchComponent('Middleware')
+  Callbacks = exports['mythic-base']:FetchComponent('Callbacks')
+  Logger = exports['mythic-base']:FetchComponent('Logger')
+  Utils = exports['mythic-base']:FetchComponent('Utils')
+  Fetch = exports['mythic-base']:FetchComponent('Fetch')
+  Chat = exports['mythic-base']:FetchComponent('Chat')
+  Execute = exports['mythic-base']:FetchComponent('Execute')
+  Sequence = exports['mythic-base']:FetchComponent('Sequence')
+  Generator = exports['mythic-base']:FetchComponent('Generator')
+  Phone = exports['mythic-base']:FetchComponent('Phone')
+  Jobs = exports['mythic-base']:FetchComponent('Jobs')
 end
 
 AddEventHandler('Core:Shared:Ready', function()
-	exports['mythic-base']:RequestDependencies('Jobs', {
-		'Database',
-		'Middleware',
-		'Callbacks',
-		'Logger',
-		'Utils',
-		'Fetch',
-		'Execute',
-		'Sequence',
-		'Generator',
-		'Chat',
-		'Jobs',
-		'Phone'
-	}, function(error)
-		if #error > 0 then return; end
-		RetrieveComponents()
-		RegisterJobMiddleware()
-		RegisterJobCallbacks()
-		RegisterJobChatCommands()
+  exports['mythic-base']:RequestDependencies('Jobs', {
+    'Middleware',
+    'Callbacks',
+    'Logger',
+    'Utils',
+    'Fetch',
+    'Execute',
+    'Sequence',
+    'Generator',
+    'Chat',
+    'Jobs',
+    'Phone'
+  }, function(error)
+    if #error > 0 then return; end
+    RetrieveComponents()
+    RegisterJobMiddleware()
+    RegisterJobCallbacks()
+    RegisterJobChatCommands()
 
-		_loaded = true
+    _loaded = true
 
-		RunStartup()
+    RunStartup()
 
-		TriggerEvent('Jobs:Server:Startup')
-	end)
+    TriggerEvent('Jobs:Server:Startup')
+  end)
 end)
 
 function FindAllJobs()
-	local p = promise.new()
+  local results = MySQL.query.await('SELECT * FROM jobs', {})
 
-	Database.Game:find({
-		collection = 'jobs',
-		query = {},
-	}, function(success, results)
-		if success and #results > 0 then
-			p:resolve(results)
-		else
-			p:resolve({})
-		end
-	end)
-
-	local res = Citizen.Await(p)
-	return res
+  if results and #results > 0 then
+    return results
+  else
+    return {}
+  end
 end
 
 function RefreshAllJobData(job)
-	local jobsFetch = FindAllJobs()
-	JOB_COUNT = #jobsFetch
-	for k, v in ipairs(jobsFetch) do
-		JOB_CACHE[v.Id] = v
-	end
+  local jobsFetch = FindAllJobs()
+  JOB_COUNT = #jobsFetch
+  for k, v in ipairs(jobsFetch) do
+    JOB_CACHE[v.Id] = v
+    if v.Workplaces ~= nil then
+      JOB_CACHE[v.Id].Workplaces = json.decode(v.Workplaces or {})
+    end
 
-	TriggerEvent('Jobs:Server:UpdatedCache', job or -1)
+    if v.Grades ~= nil then
+      JOB_CACHE[v.Id].Grades = json.decode(v.Grades or {})
+    end
+  end
 
-	local govPromise = promise.new()
-	Database.Game:aggregate({
-        collection = 'jobs',
-        aggregate = {
-			{ ["$match"] = { Type = 'Government' } },
-			{ ["$project"] = { ['Type'] = 1, ['Id'] = 1, ['Name'] = 1, ['Workplaces.Grades'] = 1, ['Workplaces.Id'] = 1 } },
-            { ["$unwind"] = '$Workplaces' },
-            { ["$unwind"] = '$Workplaces.Grades' },
-        }
-    }, function(success, results)
-		if success and #results > 0 then
-			for k, v in ipairs(results) do
-				local key = string.format('JobPerms:%s:%s:%s', v.Id, v.Workplaces.Id, v.Workplaces.Grades.Id)
-				GlobalState[key] = v.Workplaces.Grades.Permissions
-			end
-			govPromise:resolve(true)
-		else
-			govPromise:resolve(false)
-		end
-    end)
+  TriggerEvent("Jobs:Server:UpdatedCache", job or -1)
 
-	local companyPromise = promise.new()
-	Database.Game:aggregate({
-        collection = 'jobs',
-        aggregate = {
-			{ ["$match"] = { Type = 'Company' } },
-			{ ["$project"] = { ['Type'] = 1, ['Id'] = 1, ['Name'] = 1, ['Grades'] = 1 } },
-            { ["$unwind"] = '$Grades' },
-        }
-    }, function(success, results)
-		if success and #results > 0 then
-			for k, v in ipairs(results) do
-				local key = string.format('JobPerms:%s:false:%s', v.Id, v.Grades.Id)
-				GlobalState[key] = v.Grades.Permissions
-			end
-			companyPromise:resolve(true)
-		else
-			companyPromise:resolve(false)
-		end
-    end)
+  local govResults = MySQL.query.await([[
+        SELECT Id, Name, Grades, Salary, SalaryTier, LastUpdated, Workplaces
+        FROM jobs
+        WHERE Type = "Government"
+    ]], {})
 
-	return Citizen.Await(promise.all({
-		govPromise,
-		companyPromise,
-	}))
+  if govResults and #govResults > 0 then
+    for _, v in ipairs(govResults) do
+      local Workplaces = json.decode(v.Workplaces)
+      for _, Workplace in ipairs(Workplaces) do
+        for _, Grade in ipairs(Workplace.Grades) do
+          local key = string.format("JobPerms:%s:%s:%s", v.Id, Workplace.Id, Grade.Id)
+          GlobalState[key] = Grade.Permissions
+        end
+      end
+    end
+  end
+
+  local companyResults = MySQL.query.await([[
+        SELECT Id, Name, Grades, Salary, SalaryTier, LastUpdated, Workplaces
+        FROM jobs
+        WHERE Type = "Company"
+    ]], {})
+
+  if companyResults and #companyResults > 0 then
+    for _, v in ipairs(companyResults) do
+      local Grades = json.decode(v.Grades)
+      for _, Grade in ipairs(Grades) do
+        local key = string.format("JobPerms:%s:false:%s", v.Id, Grade.Id)
+        GlobalState[key] = Grade.Permissions
+      end
+    end
+  end
+
+  return true
 end
 
 function RunStartup()
-    if _ranStartup then return; end
-    _ranStartup = true
+  if _ranStartup then
+    return
+  end
+  _ranStartup = true
 
-	local function replaceExistingDefaultJob(_id, document)
-		local p = promise.new()
-		Database.Game:deleteOne({
-			collection = 'jobs',
-			query = {
-				_id = _id,
-			}
-		}, function(success, deleted)
-			if success then
-				Database.Game:insertOne({
-					collection = 'jobs',
-					document = document,
-				}, function(success, inserted)
-					if not success or inserted <= 0 then
-						Logger:Error('Jobs', 'Error Inserting Job on Default Job Update')
-						p:resolve(false)
-					else
-						Wait(10000)
-						p:resolve(true)
-					end
-				end)
-			else
-				Logger:Error('Jobs', 'Error Deleting Job on Default Job Update')
-				p:resolve(false)
-			end
-		end)
-		return p
-	end
+  local function replaceExistingDefaultJob(_id, document)
+    local deleteResult = MySQL.query.await('DELETE FROM jobs WHERE Id = @Id', { ['@Id'] = _id })
 
-	local function insertDefaultJob(document)
-		local p = promise.new()
-		Database.Game:insertOne({
-			collection = 'jobs',
-			document = document,
-		}, function(success, inserted)
-			if not success or inserted <= 0 then
-				Logger:Error('Jobs', 'Error Inserting Job on Default Job Update')
-				p:resolve(false)
-			else
-				p:resolve(true)
-			end
-		end)
-		return p
-	end
+    if deleteResult > 0 then
+      local insertResult = MySQL.insert.await(
+        'INSERT INTO jobs (Id, Name, Type, Workplaces, Grades, Salary, SalaryTier, LastUpdated) VALUES (@Id, @Name, @Type, @Workplaces, @Grades, @Salary, @SalaryTier, @LastUpdated)',
+        {
+          ['@Id'] = _id,
+          ['@Name'] = document.Name,
+          ['@Type'] = document.Type,
+          ['@Workplaces'] = json.encode(document.Workplaces),
+          ['@Grades'] = json.encode(document.Grades),
+          ['@Salary'] = document.Salary,
+          ['@SalaryTier'] = document.SalaryTier,
+          ['@LastUpdated'] = document.LastUpdated
+        })
 
-	local jobsFetch = FindAllJobs()
-	local currentData = {}
-	for k, v in ipairs(jobsFetch) do
-		currentData[v.Id] = v
-	end
+      if insertResult > 0 then
+        Citizen.Wait(10000)
+        return true
+      else
+        Logger:Error("Jobs", "Error Inserting Job on Default Job Update")
+        return false
+      end
+    else
+      Logger:Error("Jobs", "Error Deleting Job on Default Job Update")
+      return false
+    end
+  end
 
-	local awaitingPromises = {}
-	for k, v in ipairs(_defaultJobData) do
-		local currentDataForJob = currentData[v.Id]
-		if currentDataForJob and currentDataForJob.LastUpdated < v.LastUpdated then
-			table.insert(awaitingPromises, replaceExistingDefaultJob(currentDataForJob._id, v))
-		elseif not currentDataForJob then
-			table.insert(awaitingPromises, insertDefaultJob(v))
-		end
-	end
+  local function insertDefaultJob(document)
+    local insertResult = MySQL.insert.await(
+      'INSERT INTO jobs (Id, Name, Type, Workplaces, Grades, LastUpdated, Salary, SalaryTier) VALUES (@Id, @Name, @Type, @Workplaces, @Grades, @LastUpdated, @Salary, @SalaryTier)',
+      {
+        ['@Id'] = document.Id,
+        ['@Name'] = document.Name,
+        ['@Type'] = document.Type,
+        ['@Workplaces'] = json.encode(document.Workplaces),
+        ['@Grades'] = json.encode(document.Grades),
+        ['@LastUpdated'] = document.LastUpdated,
+        ['@Salary'] = document.Salary,
+        ['@SalaryTier'] = document.SalaryTier
+      })
 
-	if #awaitingPromises > 0 then
-		Citizen.Await(promise.all(awaitingPromises))
-		Logger:Info('Jobs', 'Inserted/Replaced ^2' .. #awaitingPromises .. '^7 Default Jobs')
-		jobsFetch = FindAllJobs()
-	end
+    if insertResult > 0 then
+      return true
+    else
+      Logger:Error('Jobs', 'Error Inserting Job on Default Job Update')
+      return false
+    end
+  end
 
-	RefreshAllJobData()
-	Logger:Trace('Jobs', string.format('Loaded ^2%s^7 Jobs', JOB_COUNT))
-	TriggerEvent('Jobs:Server:CompleteStartup')
+  local jobsFetch = FindAllJobs()
+  local currentData = {}
+  for k, v in ipairs(jobsFetch) do
+    currentData[v.Id] = v
+  end
+
+  for k, v in ipairs(_defaultJobData) do
+    local currentDataForJob = currentData[v.Id]
+    if currentDataForJob and v.LastUpdated < v.LastUpdated then
+      replaceExistingDefaultJob(currentDataForJob._id, v)
+    elseif not currentDataForJob then
+      insertDefaultJob(v)
+    end
+  end
+
+  RefreshAllJobData()
+  Logger:Trace("Jobs", string.format("Loaded ^2%s^7 Jobs", JOB_COUNT))
+  TriggerEvent("Jobs:Server:CompleteStartup")
 end

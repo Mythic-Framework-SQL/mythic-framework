@@ -17,7 +17,7 @@ _jobSpawns = {
         }
     },
     ["blackline"] = {
-        icon = "car",
+        icon = "car-garage",
         locations = {
             {
                 label = "Spooky Mechanic",
@@ -32,7 +32,7 @@ _jobSpawns = {
         }
     },
     ["tuna"] = {
-        icon = "car",
+        icon = "car-garage",
         locations = {
             {
                 label = "Tuna Shop",
@@ -47,7 +47,7 @@ _jobSpawns = {
         }
     },
     ["hayes"] = {
-        icon = "car",
+        icon = "car-garage",
         locations = {
             {
                 label = "Hayes Autos",
@@ -92,7 +92,7 @@ _jobSpawns = {
         }
     },
     ["avast_arcade"] = {
-        icon = "gamepad",
+        icon = "person-pinball",
         locations = {
             {
                 label = "Avast Arcade",
@@ -107,7 +107,7 @@ _jobSpawns = {
         }
     },
     ["dgang"] = {
-        icon = "house",
+        icon = "house-tree",
         locations = {
             {
                 label = "2 Buen Vino Road",
@@ -137,7 +137,7 @@ _jobSpawns = {
         }
     },
     ["realestate"] = {
-        icon = "city",
+        icon = "house-building",
         locations = {
             {
                 label = "Dynasty 8 Offices",
@@ -152,7 +152,7 @@ _jobSpawns = {
         }
     },
     ["rockford_records"] = {
-        icon = "record-vinyl",
+        icon = "album-collection",
         locations = {
             {
                 label = "Rockford Records",
@@ -182,7 +182,7 @@ _jobSpawns = {
         }
     },
     ["ottos"] = {
-        icon = "car",
+        icon = "car-wrench",
         locations = {
             {
                 label = "Otto\"s Autos",
@@ -197,7 +197,7 @@ _jobSpawns = {
         }
     },
     ["dreamworks"] = {
-        icon = "car",
+        icon = "car-wrench",
         locations = {
             {
                 label = "Dreamworks",
@@ -212,7 +212,7 @@ _jobSpawns = {
         }
     },
     ["ferrari_pawn"] = {
-        icon = "coins",
+        icon = "coin",
         locations = {
             {
                 label = "Ferrari Pawn",
@@ -227,7 +227,7 @@ _jobSpawns = {
         }
     },
     ["casino"] = {
-        icon = "circle-dollar-to-slot",
+        icon = "cards",
         locations = {
             {
                 label = "Casino Inside",
@@ -252,7 +252,7 @@ _jobSpawns = {
         }
     },
     ["pdm"] = {
-        icon = "car",
+        icon = "cars",
         locations = {
             {
                 label = "PDM",
@@ -267,7 +267,7 @@ _jobSpawns = {
         }
     },
     ["unicorn"] = {
-        icon = "wine-glass",
+        icon = "unicorn",
         locations = {
             {
                 label = "Vanilla Unicorn",

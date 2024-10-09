@@ -1,22 +1,16 @@
 function FetchCharacterJobsFromDB(stateId)
-    local p = promise.new()
+    local result = MySQL.single.await('SELECT Jobs FROM characters WHERE SID = @stateId', {
+        ['@stateId'] = stateId
+    })
 
-    Database.Game:findOne({
-        collection = 'characters',
-        query = {
-            SID = stateId,
-        }
-    }, function(success, results)
-        if success and #results > 0 then
-            p:resolve(results[1].Jobs or {})
-        else
-            p:resolve(false)
-        end
-    end)
-
-    local res = Citizen.Await(p)
-    return res
+    if #result > 0 then
+        local jobs = json.decode(result[1].Jobs) or {}
+        return jobs
+    else
+        return false
+    end
 end
+
 
 function RegisterJobChatCommands()
 
