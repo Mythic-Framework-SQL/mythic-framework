@@ -1,31 +1,46 @@
 _fleetConfig = {
-    {
-        job = 'police',
-        requiredPermission = 'FLEET_MANAGEMENT',
-        jobName = 'Police',
-        bankAccount = 'police',
-        interactionPed = {
-            model = `s_f_y_cop_01`,
-            coords = vector3(447.019, -996.985, 29.690),
-            heading = 265.797,
-            scenario = 'WORLD_HUMAN_COP_IDLES',
-            range = 15.0,
+  {
+    job = 'police',
+    requiredPermission = 'FLEET_MANAGEMENT',
+    jobName = 'Police',
+    bankAccount = 'police',
+    interactionPed = {
+      model = `s_f_y_cop_01`,
+      coords = vector3(447.019, -996.985, 29.690),
+      heading = 265.797,
+      scenario = 'WORLD_HUMAN_COP_IDLES',
+      range = 15.0,
+    },
+    vehicles = {
+      {
+        vehicle = `polverus2`,
+        type = 0,
+        make = 'Dinka',
+        model = 'Verus LEO',
+        price = 50000,
+        class = 'D',
+        liveries = {
+          [0] = 'LSPD',
+          [1] = 'LSCSO',
+          --[2] = 'SAST',
+          [3] = 'Unmarked',
         },
-        vehicles = {
-            {
-                vehicle = `leo1`,
-                type = 0,
-                make = 'Ford',
-                model = 'Crown Victoria',
-                price = 85000,
-                class = 'A',
-                liveries = {
-                    [0] = 'LSPD',
-                    [1] = 'LSCSO',
-                    --[2] = 'SAST',
-                    [3] = 'Unmarked',
-                },
-                defaultProperties = json.decode([[
+        defaultProperties = {},
+      },
+      {
+        vehicle = `polstanier2`,
+        type = 0,
+        make = 'Vapid',
+        model = 'Stanier',
+        price = 85000,
+        class = 'C',
+        liveries = {
+          [0] = 'LSPD',
+          [1] = 'LSCSO',
+          --[2] = 'SAST',
+          [3] = 'Unmarked',
+        },
+        defaultProperties = json.decode([[
                     {
                         "pearlescentColor": 0,
                         "color2": {
@@ -115,38 +130,36 @@ _fleetConfig = {
                         }
                     }
                 ]])
-            },
-            {
-                vehicle = `rbexp21`,
-                type = 0,
-                make = 'Ford',
-                model = 'Explorer',
-                price = 110000,
-                class = 'A',
-                liveries = {
-                    [0] = 'LSCSO',
-                    [1] = 'LSPD',
-                    --[2] = 'SAST',
-                    [3] = 'Unmarked',
-                },
-                defaultProperties = false,
-            },
-            {
-                vehicle = `lspd3`,
-                type = 0,
-                make = 'Ford',
-                model = 'Taurus',
-                price = 95000,
-                class = 'A',
-                level = 1, -- cops that have the FLEET_VEHICLES_1 access
-                qaul = 'PD_INTERCEPTOR', -- name of the qualification
-                liveries = {
-                    [0] = 'LSPD',
-                    [1] = 'LSCSO',
-                    --[2] = 'SAST',
-                    [3] = 'Unmarked',
-                },
-                defaultProperties = json.decode([[
+      },
+      {
+        vehicle = `poltorrence2`,
+        type = 0,
+        make = 'Vapid',
+        model = 'Torrence',
+        price = 95000,
+        class = 'A',
+        liveries = {
+          [0] = 'LSCSO',
+          [1] = 'LSPD',
+          --[2] = 'SAST',
+          [3] = 'Unmarked',
+        },
+        defaultProperties = {},
+      },
+      {
+        vehicle = `polalamo2`,
+        type = 0,
+        make = 'Declasse',
+        model = 'Alamo',
+        price = 95000,
+        class = 'A',
+        liveries = {
+          [0] = 'LSPD',
+          [1] = 'LSCSO',
+          --[2] = 'SAST',
+          [3] = 'Unmarked',
+        },
+        defaultProperties = json.decode([[
                     {
                         "pearlescentColor": 0,
                         "wheelColor": 156,
@@ -247,32 +260,62 @@ _fleetConfig = {
                         }
                     }
                 ]])
-            }
-        }
-    },
-    {
-        job = 'ems',
-        workplace = 'safd',
-        requiredPermission = 'FLEET_MANAGEMENT',
-        jobName = 'EMS',
-        bankAccount = 'ems',
-        interactionPed = {
-            model = `s_m_m_paramedic_01`,
-            coords = vector3(-501.060, -339.506, 68.523),
-            heading = 356.190,
-            scenario = 'WORLD_HUMAN_COP_IDLES',
-            range = 15.0,
+      },
+      {
+        vehicle = `polbuffalo5`,
+        type = 0,
+        make = 'Bravado',
+        model = 'Buffalo STX LEO (C)',
+        price = 95000,
+        class = 'A',
+        liveries = {
+          [0] = 'LSPD',
+          [1] = 'LSCSO',
+          --[2] = 'SAST',
+          [3] = 'Unmarked',
         },
-        vehicles = {
-            {
-                vehicle = `20ramambo`,
-                make = 'Dodge',
-                model = 'Ram Ambulance',
-                price = 80000,
-                liveries = {
-                    [0] = 'Fire & Rescue',
-                },
-                defaultProperties = json.decode([[
+        defaultProperties = {}
+      },
+      {
+        vehicle = `polvstr2`,
+        type = 0,
+        make = 'Albany',
+        model = 'V-STR LEO (HC)',
+        price = 110000,
+        class = 'A',
+        liveries = {
+          [0] = 'LSPD',
+          [1] = 'LSCSO',
+          --[2] = 'SAST',
+          [3] = 'Unmarked',
+        },
+        defaultProperties = {}
+      }
+    }
+  },
+  {
+    job = 'ems',
+    workplace = 'safd',
+    requiredPermission = 'FLEET_MANAGEMENT',
+    jobName = 'EMS',
+    bankAccount = 'ems',
+    interactionPed = {
+      model = `s_m_m_paramedic_01`,
+      coords = vector3(-501.060, -339.506, 68.523),
+      heading = 356.190,
+      scenario = 'WORLD_HUMAN_COP_IDLES',
+      range = 15.0,
+    },
+    vehicles = {
+      {
+        vehicle = `20ramambo`,
+        make = 'Dodge',
+        model = 'Ram Ambulance',
+        price = 80000,
+        liveries = {
+          [0] = 'Fire & Rescue',
+        },
+        defaultProperties = json.decode([[
                     {
                         "pearlescentColor": 156,
                         "color2": {
@@ -366,7 +409,7 @@ _fleetConfig = {
                         }
                     }
                 ]])
-            },
-        }
+      },
     }
+  }
 }

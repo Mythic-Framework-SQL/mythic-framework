@@ -9,7 +9,7 @@ function CreateRentalSpots()
                     data = { rental = k },
                 },
                 {
-                    icon = 'car',
+                    icon = 'car-garage',
                     text = 'Rental Returns',
                     event = 'VehicleRentals:Client:ReturnRental',
                     data = { rental = k },
@@ -80,7 +80,7 @@ end)
 
 AddEventHandler('VehicleRentals:Client:ConfirmRental', function(data)
     local rentalSpotData = _vehicleRentals[data.rental]
-    local availableSpace = GetClosestAvailableParkingSpace(LocalPlayer.state.position, rentalSpotData.spaces)
+    local availableSpace = GetClosestAvailableParkingSpace(LocalPlayer.state.myPos, rentalSpotData.spaces)
     if availableSpace then
         Callbacks:ServerCallback('Rentals:Purchase', {
             spaceCoords = availableSpace.xyz,

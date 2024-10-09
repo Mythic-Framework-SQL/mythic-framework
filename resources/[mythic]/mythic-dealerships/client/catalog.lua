@@ -19,19 +19,19 @@ function SetupCatalogCams()
     SetCamActive(catalogCam, true)
 
     RenderScriptCams(true, false, 1, false, false)
-    Wait(250)
+    Citizen.Wait(250)
     DoScreenFadeIn(500)
 end
 
 function DestroyCatalogCams()
     DoScreenFadeOut(500)
-    Wait(250)
+    Citizen.Wait(250)
 
     RenderScriptCams(false, false, 0, false, false)
     ClearFocus()
     DestroyCam(catalogCam, false)
 
-    Wait(250)
+    Citizen.Wait(250)
     DoScreenFadeIn(500)
 end
 
@@ -96,7 +96,7 @@ function OpenCatalogMenu(catalogName)
         catalogMenuOpen = true
     end, function()
         DestroyCatalogCams()
-        Wait(250)
+        Citizen.Wait(250)
         SetCatalogVehicle(false, false)
 
         for k, v in ipairs(allSpawnedCatalogVehicles) do
@@ -108,7 +108,7 @@ function OpenCatalogMenu(catalogName)
         allSpawnedCatalogVehicles = {}
         
         Hud:Show()
-        Wait(250)
+        Citizen.Wait(250)
         catalogData = {}
         catalogMenu = nil
         catalogSubMenus = nil

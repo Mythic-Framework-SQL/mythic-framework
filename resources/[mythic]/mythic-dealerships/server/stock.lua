@@ -1,243 +1,185 @@
 DEALERSHIPS.Stock = {
-    FetchAll = function(self)
-        local p = promise.new()
-        Database.Game:find({
-            collection = 'dealer_stock',
-            query = {}
-        }, function(success, result)
-            if success then
-                p:resolve(result)
-            else
-                p:resolve(false)
-            end
-        end)
-        return Citizen.Await(p)
-    end,
-    FetchDealer = function(self, dealerId)
-        local p = promise.new()
-        Database.Game:find({
-            collection = 'dealer_stock',
-            query = {
-                dealership = dealerId,
-            }
-        }, function(success, result)
-            if success then
-                p:resolve(result)
-            else
-                p:resolve(false)
-            end
-        end)
-        return Citizen.Await(p)
-    end,
-    FetchDealerVehicle = function(self, dealerId, vehModel)
-        local p = promise.new()
-        Database.Game:findOne({
-            collection = 'dealer_stock',
-            query = {
-                dealership = dealerId,
-                vehicle = vehModel,
-            }
-        }, function(success, result)
-            if success and #result > 0 then
-                p:resolve(result[1])
-            else
-                p:resolve(false)
-            end
-        end)
-        return Citizen.Await(p)
-    end,
-    HasVehicle = function(self, dealerId, vehModel)
-        local vehicle = Dealerships.Stock:FetchDealerVehicle(dealerId, vehModel)
-        if vehicle and vehicle.quantity > 0 then
-            return vehicle.quantity
-        else
-            return false
+  FetchAll = function(self)
+    local p = promise.new()
+    MySQL.Async.fetchAll('SELECT * FROM dealer_stock', {}, function(results)
+      if results then
+        for i, result in ipairs(results) do
+          result.data = json.decode(result.data)
         end
-    end,
-    Add = function(self, dealerId, vehModel, modelType, quantity, vehData)
-        vehData = ValidateVehicleData(vehData)
-        if _dealerships[dealerId] and vehModel and vehData and quantity > 0 then
-            local isStocked = Dealerships.Stock:FetchDealerVehicle(dealerId, vehModel)
-            local p = promise.new()
-            if isStocked then -- The vehicle is already stocked
-                Database.Game:updateOne({
-                    collection = 'dealer_stock',
-                    query = {
-                        dealership = dealerId,
-                        vehicle = vehModel,
-                    },
-                    update = {
-                        ['$inc'] = {
-                            quantity = quantity,
-                        },
-                        ['$set'] = {
-                            data = vehData,
-                            lastStocked = os.time(),
-                        }
-                    }
-                }, function(success, result)
-                    if success and result > 0 then
-                        p:resolve({
-                            success = true,
-                            existed = true,
-                        })
-                    else
-                        p:resolve(false)
-                    end
-                end)
-            else
-                Database.Game:insertOne({
-                    collection = 'dealer_stock',
-                    document = {
-                        dealership = dealerId,
-                        vehicle = vehModel,
-                        modelType = modelType,
-                        data = vehData,
-                        quantity = quantity,
-                        lastStocked = os.time(),
-                    }
-                }, function(success, result)
-                    if success and result > 0 then
-                        p:resolve({
-                            success = true,
-                            existed = false,
-                        })
-                    else
-                        p:resolve(false)
-                    end
-                end)
-            end
-            return Citizen.Await(p)
+        p:resolve(results)
+      else
+        p:resolve(false)
+      end
+    end)
+    return Citizen.Await(p)
+  end,
+  FetchDealer = function(self, dealerId)
+    local p = promise.new()
+    MySQL.Async.fetchAll('SELECT * FROM dealer_stock WHERE dealership = @dealerId', {
+      ['@dealerId'] = dealerId
+    }, function(results)
+      if results then
+        for i, result in ipairs(results) do
+          result.data = json.decode(result.data)
         end
-        return false
-    end,
-    Increase = function(self, dealerId, vehModel, amount)
-        if _dealerships[dealerId] and vehModel and amount > 0 then
-            local isStocked = Dealerships.Stock:FetchDealerVehicle(dealerId, vehModel)
-            if isStocked then -- The vehicle is already stocked
-                local p = promise.new()
-                Database.Game:updateOne({
-                    collection = 'dealer_stock',
-                    query = {
-                        dealership = dealerId,
-                        vehicle = vehModel,
-                    },
-                    update = {
-                        ['$inc'] = {
-                            quantity = amount,
-                        },
-                        ['$set'] = {
-                            lastStocked = os.time(),
-                        }
-                    }
-                }, function(success, result)
-                    if success and result > 0 then
-                        p:resolve({ success = true })
-                    else
-                        p:resolve(false)
-                    end
-                end)
-                return Citizen.Await(p)
-            else
-                return false
-            end
-        end
-        return false
-    end,
-    Update = function(self, dealerId, vehModel, setting)
-        if _dealerships[dealerId] and vehModel and type(setting) == "table" then
-            local isStocked = Dealerships.Stock:FetchDealerVehicle(dealerId, vehModel)
-            if isStocked then -- The vehicle is already stocked
-                local p = promise.new()
-                Database.Game:updateOne({
-                    collection = 'dealer_stock',
-                    query = {
-                        dealership = dealerId,
-                        vehicle = vehModel,
-                    },
-                    update = {
-                        ['$set'] = setting
-                    }
-                }, function(success, result)
-                    if success and result > 0 then
-                        p:resolve({ success = true })
-                    else
-                        p:resolve(false)
-                    end
-                end)
-                return Citizen.Await(p)
-            else
-                return false
-            end
-        end
-        return false 
-    end,
-    Ensure = function(self, dealerId, vehModel, quantity, vehData)
-        if _dealerships[dealerId] and vehModel then
-            local isStocked = Dealerships.Stock:FetchDealerVehicle(dealerId, vehModel)
-            if isStocked then
-                local missingQuantity = quantity - isStocked.quantity
-                if missingQuantity >= 1 then
-                    return Dealerships.Stock:Add(dealerId, vehModel, missingQuantity, vehData)
-                end
-            else
-                return Dealerships.Stock:Add(dealerId, vehModel, quantity, vehData)
-            end
-        end
-        return false
-    end,
-    Remove = function(self, dealerId, vehModel, quantity)
-        if _dealerships[dealerId] and vehModel and quantity > 0 then
-            local isStocked = Dealerships.Stock:FetchDealerVehicle(dealerId, vehModel)
+        p:resolve(results)
+      else
+        p:resolve(false)
+      end
+    end)
+    return Citizen.Await(p)
+  end,
+  FetchDealerVehicle = function(self, dealerId, vehModel)
+    local results = MySQL.Sync.fetchAll('SELECT * FROM dealer_stock WHERE dealership = @dealerId AND vehicle = @vehModel', {
+      ['@dealerId'] = dealerId,
+      ['@vehModel'] = vehModel
+    })
 
-            if isStocked and isStocked.quantity > 0 then
-                local newQuantity = isStocked.quantity - quantity
-                if newQuantity >= 0 then
-                    local p = promise.new()
-                    Database.Game:updateOne({
-                        collection = 'dealer_stock',
-                        query = {
-                            dealership = dealerId,
-                            vehicle = vehModel,
-                        },
-                        update = {
-                            ['$set'] = {
-                                quantity = newQuantity,
-                                lastPurchase = os.time(),
-                            }
-                        }
-                    }, function(success, result)
-                        if success and result > 0 then
-                            p:resolve(newQuantity)
-                        else
-                            p:resolve(false)
-                        end
-                    end)
-                    return Citizen.Await(p)
-                end
+    if results and #results > 0 then
+      results[1].data = json.decode(results[1].data)
+      return results[1]
+    else
+      return false
+    end
+  end,
+  HasVehicle = function(self, dealerId, vehModel)
+    local vehicle = Dealerships.Stock:FetchDealerVehicle(dealerId, vehModel)
+    if vehicle and vehicle.quantity > 0 then
+      return vehicle.quantity
+    else
+      return false
+    end
+  end,
+  Add = function(self, dealerId, vehModel, modelType, quantity, vehData)
+    vehData = ValidateVehicleData(vehData)
+    if _dealerships[dealerId] and vehModel and vehData and quantity > 0 then
+      local isStocked = Dealerships.Stock:FetchDealerVehicle(dealerId, vehModel)
+      local p = promise.new()
+      if isStocked then -- The vehicle is already stocked
+        MySQL.Async.execute(
+          'UPDATE dealer_stock SET quantity = quantity + @quantity, data = @data, lastStocked = @lastStocked WHERE dealership = @dealership AND vehicle = @vehicle',
+          {
+            ['@quantity'] = quantity,
+            ['@data'] = json.encode(vehData),
+            ['@lastStocked'] = os.time(),
+            ['@dealership'] = dealerId,
+            ['@vehicle'] = vehModel
+          }, function(affectedRows)
+            if affectedRows > 0 then
+              p:resolve({
+                success = true,
+                existed = true,
+              })
+            else
+              p:resolve(false)
             end
-        end
+          end)
+      else
+        MySQL.Async.execute(
+          'INSERT INTO dealer_stock (dealership, vehicle, modelType, data, quantity, lastStocked) VALUES (@dealership, @vehicle, @modelType, @data, @quantity, @lastStocked)',
+          {
+            ['@dealership'] = dealerId,
+            ['@vehicle'] = vehModel,
+            ['@modelType'] = modelType,
+            ['@data'] = json.encode(vehData),
+            ['@quantity'] = quantity,
+            ['@lastStocked'] = os.time()
+          }, function(affectedRows)
+            if affectedRows > 0 then
+              p:resolve({
+                success = true,
+                existed = false,
+              })
+            else
+              p:resolve(false)
+            end
+          end)
+      end
+      return Citizen.Await(p)
+    end
+    return false
+  end,
+  Increase = function(self, dealerId, vehModel, amount)
+    if _dealerships[dealerId] and vehModel and amount > 0 then
+      local isStocked = Dealerships.Stock:FetchDealerVehicle(dealerId, vehModel)
+      if isStocked then -- The vehicle is already stocked
+        MySQL.Async.execute(
+          'UPDATE dealer_stock SET quantity = quantity + @amount, lastStocked = @lastStocked WHERE dealership = @dealerId AND vehicle = @vehModel', {
+            ['@amount'] = amount,
+            ['@lastStocked'] = os.time(),
+            ['@dealerId'] = dealerId,
+            ['@vehModel'] = vehModel
+          }, function(affectedRows)
+            if affectedRows > 0 then
+              return { success = true }
+            else
+              return false
+            end
+          end)
+      else
         return false
-    end,
+      end
+    end
+    return false
+  end,
+  Ensure = function(self, dealerId, vehModel, quantity, vehData)
+    if _dealerships[dealerId] and vehModel then
+      local isStocked = Dealerships.Stock:FetchDealerVehicle(dealerId, vehModel)
+      if isStocked then
+        local missingQuantity = quantity - isStocked.quantity
+        if missingQuantity >= 1 then
+          return Dealerships.Stock:Add(dealerId, vehModel, missingQuantity, vehData)
+        end
+      else
+        return Dealerships.Stock:Add(dealerId, vehModel, quantity, vehData)
+      end
+    end
+    return false
+  end,
+  Remove = function(self, dealerId, vehModel, quantity)
+    if _dealerships[dealerId] and vehModel and quantity > 0 then
+      local isStocked = Dealerships.Stock:FetchDealerVehicle(dealerId, vehModel)
+
+      if isStocked and isStocked.quantity > 0 then
+        local newQuantity = isStocked.quantity - quantity
+        if newQuantity >= 0 then
+          local updateDealerStock = MySQL.update.await(
+          'UPDATE dealer_stock SET quantity = @newQuantity, lastPurchase = @lastPurchase WHERE dealership = @dealerId AND vehicle = @vehModel', {
+            ['@newQuantity'] = newQuantity,
+            ['@lastPurchase'] = os.time(),
+            ['@dealerId'] = dealerId,
+            ['@vehModel'] = vehModel
+          })
+
+          if updateDealerStock > 0 then
+            return newQuantity
+          else
+            return false
+          end
+        end
+      end
+    end
+    return false
+  end,
 }
 
 local requiredAttributes = {
-    make = 'string',
-    model = 'string',
-    class = 'string',
-    category = 'string',
-    price = 'number'
+  make = 'string',
+  model = 'string',
+  class = 'string',
+  --category = 'string',
+  price = 'number'
 }
 
 function ValidateVehicleData(data)
-    if type(data) ~= 'table' then
-        return false
+  if type(data) ~= 'table' then
+    return false
+  end
+  for k, v in pairs(requiredAttributes) do
+    if data[k] == nil or type(data[k]) ~= v then
+      return false
     end
-    for k, v in pairs(requiredAttributes) do
-        if data[k] == nil or type(data[k]) ~= v then
-            return false
-        end
-    end
+  end
 
-    return data
+  return data
 end

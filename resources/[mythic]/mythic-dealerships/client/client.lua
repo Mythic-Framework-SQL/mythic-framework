@@ -127,9 +127,9 @@ function CreateDealerships()
         -- Targets
         if data.zones and #data.zones.employeeInteracts > 0 then
             for k, v in ipairs(data.zones.employeeInteracts) do
-                Targeting.Zones:AddBox(string.format('dealership_%s_employee_%s', dealerId, k), 'car', v.center, v.length, v.width, v.options, {
+                Targeting.Zones:AddBox(string.format('dealership_%s_employee_%s', dealerId, k), 'car-building', v.center, v.length, v.width, v.options, {
                     { 
-                        icon = 'car',
+                        icon = 'car-garage',
                         text = 'Edit Showroom',
                         event = 'Dealerships:Client:ShowroomManagement', 
                         data = { dealerId = dealerId },
@@ -194,7 +194,7 @@ function CreateDealerships()
                     --     },
                     -- },
                     { 
-                        icon = 'business-time', 
+                        icon = 'briefcase-clock', 
                         text = 'Go On Duty', 
                         event = 'Dealerships:Client:ToggleDuty', 
                         data = { dealerId = dealerId, state = true }, 
@@ -205,9 +205,9 @@ function CreateDealerships()
                             }
                         },
                     },
-                    {
-                        icon = 'business-time',
-                        text = 'Go Off Duty',
+                    { 
+                        icon = 'briefcase-clock', 
+                        text = 'Go Off Duty', 
                         event = 'Dealerships:Client:ToggleDuty',
                         data = { dealerId = dealerId, state = false }, 
                         jobPerms = {
@@ -217,10 +217,9 @@ function CreateDealerships()
                             }
                         },
                     },
-                    --[[
-                    {
-                        icon = 'tablet-screen-button',
-                        text = 'Open Tablet',
+                    { 
+                        icon = 'tablet-screen', 
+                        text = 'Open Tablet', 
                         event = 'MDT:Client:Toggle',
                         data = {}, 
                         jobPerms = {
@@ -229,7 +228,7 @@ function CreateDealerships()
                                 reqDuty = true,
                             }
                         },
-                    },]]
+                    },
                 }, 3.5)
             end
         end
